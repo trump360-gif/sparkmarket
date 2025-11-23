@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { adminApi } from '@/lib/api/admin';
 import type { Product, ProductStatus } from '@/types';
 import Image from 'next/image';
@@ -12,38 +12,84 @@ export default function AdminProductList() {
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<ProductStatus | ''>('');
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
-  const fetchProducts = useCallback(async () => {
-    setIsLoading(true);
+  const fetchProducts = useCallback(async (pageNum: number, append = false) => {
+    if (append) {
+      setIsLoadingMore(true);
+    } else {
+      setIsLoading(true);
+    }
+
     try {
       const params: any = {
-        page,
+        page: pageNum,
         limit: 20,
       };
       if (search) params.search = search;
       if (statusFilter) params.status = statusFilter;
 
       const response = await adminApi.getProducts(params);
-      setProducts(response.data);
+
+      if (append) {
+        setProducts((prev) => [...prev, ...response.data]);
+      } else {
+        setProducts(response.data);
+      }
+
       setTotal(response.total);
       setTotalPages(response.totalPages);
     } catch (error) {
       console.error('Failed to fetch products:', error);
     } finally {
       setIsLoading(false);
+      setIsLoadingMore(false);
     }
-  }, [page, search, statusFilter]);
+  }, [search, statusFilter]);
 
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    setPage(1);
+    fetchProducts(1, false);
+  }, [search, statusFilter]);
+
+  // Infinite scroll setup
+  useEffect(() => {
+    const loadMore = () => {
+      if (page < totalPages && !isLoadingMore) {
+        const nextPage = page + 1;
+        setPage(nextPage);
+        fetchProducts(nextPage, true);
+      }
+    };
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loadMoreRef.current) {
+      observerRef.current.observe(loadMoreRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [page, totalPages, isLoadingMore, fetchProducts]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setPage(1);
-    fetchProducts();
+    fetchProducts(1, false);
   };
 
   const handleDelete = async (id: string, title: string) => {
@@ -53,7 +99,8 @@ export default function AdminProductList() {
     try {
       await adminApi.deleteProduct(id, { reason });
       alert('삭제되었습니다.');
-      fetchProducts();
+      setPage(1);
+      fetchProducts(1, false);
     } catch (error) {
       alert('삭제에 실패했습니다.');
     }
@@ -167,7 +214,7 @@ export default function AdminProductList() {
                       </td>
                       <td className="px-6 py-4">
                         <Link
-                          href={`/products/${product.id}`}
+                          href={`/admin/products/${product.id}`}
                           className="text-blue-600 hover:underline max-w-xs block truncate"
                         >
                           {product.title}
@@ -197,26 +244,23 @@ export default function AdminProductList() {
             </table>
           </div>
 
-          {/* Pagination */}
-          <div className="mt-6 flex justify-center space-x-2">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              이전
-            </button>
-            <span className="px-4 py-2">
-              {page} / {totalPages}
-            </span>
-            <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
-              className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              다음
-            </button>
-          </div>
+          {/* Infinite scroll trigger */}
+          {page < totalPages && (
+            <div ref={loadMoreRef} className="mt-6 flex justify-center py-8">
+              {isLoadingMore && (
+                <div className="flex items-center space-x-2 text-gray-500">
+                  <div className="w-5 h-5 border-2 border-gray-300 border-t-blue-600 rounded-full animate-spin"></div>
+                  <span>더 불러오는 중...</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {page >= totalPages && products.length > 0 && (
+            <div className="mt-6 text-center py-8 text-gray-500">
+              모든 상품을 불러왔습니다.
+            </div>
+          )}
         </>
       )}
     </div>

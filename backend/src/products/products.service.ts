@@ -114,6 +114,12 @@ export class ProductsService {
       throw new NotFoundException('상품을 찾을 수 없습니다');
     }
 
+    // 조회수 증가 (비동기, 응답 속도에 영향 없도록)
+    this.prisma.product.update({
+      where: { id },
+      data: { view_count: { increment: 1 } },
+    }).catch(err => console.error('Failed to increment view count:', err));
+
     return product;
   }
 

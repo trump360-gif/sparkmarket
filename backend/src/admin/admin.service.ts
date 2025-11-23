@@ -35,6 +35,52 @@ export class AdminService {
       }),
     ]);
 
+    // 오늘 판매된 상품의 금액 합계
+    const soldToday = await this.prisma.product.aggregate({
+      where: {
+        status: 'SOLD',
+        updated_at: {
+          gte: today,
+        },
+      },
+      _sum: {
+        price: true,
+      },
+    });
+
+    const today_sales = soldToday._sum.price || 0;
+
+    // 최근 7일간 일별 판매 통계 (그래프용)
+    const last7Days: Array<{ date: string; sales: number; count: number }> = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      date.setHours(0, 0, 0, 0);
+
+      const nextDate = new Date(date);
+      nextDate.setDate(nextDate.getDate() + 1);
+
+      const soldOnDay = await this.prisma.product.aggregate({
+        where: {
+          status: 'SOLD',
+          updated_at: {
+            gte: date,
+            lt: nextDate,
+          },
+        },
+        _sum: {
+          price: true,
+        },
+        _count: true,
+      });
+
+      last7Days.push({
+        date: date.toISOString().split('T')[0],
+        sales: soldOnDay._sum.price || 0,
+        count: soldOnDay._count,
+      });
+    }
+
     return {
       total_users,
       total_products,
@@ -42,6 +88,8 @@ export class AdminService {
       sold_products,
       new_users_today,
       new_products_today,
+      today_sales,
+      sales_chart: last7Days,
     };
   }
 

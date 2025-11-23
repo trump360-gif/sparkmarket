@@ -39,6 +39,24 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     router.push(`/products/${product.id}/edit`);
   };
 
+  const handlePurchase = () => {
+    if (!isAuthenticated) {
+      alert('로그인이 필요합니다.');
+      router.push('/login');
+      return;
+    }
+    alert('구매하기 기능은 추후 업데이트 예정입니다.');
+  };
+
+  const handleInquiry = () => {
+    if (!isAuthenticated) {
+      alert('로그인이 필요합니다.');
+      router.push('/login');
+      return;
+    }
+    alert('채팅 기능은 추후 업데이트 예정입니다.');
+  };
+
   return (
     <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
@@ -128,9 +146,9 @@ export default function ProductDetail({ product }: ProductDetailProps) {
           </div>
 
           {/* 액션 버튼 */}
-          <div className="flex space-x-3">
+          <div className="space-y-3">
             {isOwner ? (
-              <>
+              <div className="flex space-x-3">
                 <button
                   onClick={handleEdit}
                   className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 transition-colors"
@@ -144,18 +162,28 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 >
                   {isDeleting ? '삭제 중...' : '삭제'}
                 </button>
-              </>
+              </div>
             ) : (
-              <button
-                disabled={product.status === 'SOLD'}
-                className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-              >
-                {product.status === 'SOLD' ? '판매완료' : '구매하기'}
-              </button>
+              <>
+                <button
+                  onClick={handlePurchase}
+                  disabled={product.status === 'SOLD'}
+                  className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                >
+                  {product.status === 'SOLD' ? '판매완료' : '구매하기'}
+                </button>
+                <button
+                  onClick={handleInquiry}
+                  disabled={product.status === 'SOLD'}
+                  className="w-full bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                >
+                  문의하기
+                </button>
+              </>
             )}
             <button
               onClick={() => router.back()}
-              className="px-6 py-3 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              className="w-full px-6 py-3 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
             >
               목록
             </button>

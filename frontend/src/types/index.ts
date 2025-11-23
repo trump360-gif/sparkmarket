@@ -58,6 +58,8 @@ export interface Product {
   seller_id: string;
   seller?: User;
   images: ProductImage[];
+  view_count: number;
+  chat_count: number;
   created_at: string;
   updated_at: string;
 }
@@ -151,6 +153,12 @@ export interface AdminDashboardStats {
   sold_products: number;
   new_users_today: number;
   new_products_today: number;
+  today_sales: number;
+  sales_chart: {
+    date: string;
+    sales: number;
+    count: number;
+  }[];
 }
 
 export interface AdminProductQueryParams extends PaginationParams {

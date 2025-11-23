@@ -39,7 +39,18 @@ export default function ProductCard({ product }: ProductCardProps) {
       <div className="p-4">
         <h3 className="font-semibold text-lg mb-1 line-clamp-1">{product.title}</h3>
         <p className="text-xl font-bold text-blue-600 mb-2">{formattedPrice}원</p>
-        <p className="text-sm text-gray-500 line-clamp-1">{product.category}</p>
+        <p className="text-sm text-gray-500 line-clamp-1 mb-2">{product.category}</p>
+
+        <div className="flex items-center space-x-3 text-xs text-gray-500">
+          <div className="flex items-center space-x-1">
+            <span>👁️</span>
+            <span>{product.view_count || 0}</span>
+          </div>
+          <div className="flex items-center space-x-1">
+            <span>💬</span>
+            <span>{product.chat_count || 0}</span>
+          </div>
+        </div>
       </div>
     </Link>
   );

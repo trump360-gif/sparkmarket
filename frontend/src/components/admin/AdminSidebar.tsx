@@ -13,7 +13,7 @@ export default function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-72 bg-gradient-to-b from-gray-900 to-gray-800 min-h-screen shadow-xl">
+    <aside className="w-72 bg-gradient-to-b from-gray-900 to-gray-800 h-screen sticky top-0 shadow-xl overflow-y-auto">
       <div className="p-6">
         <div className="mb-8 pb-6 border-b border-gray-700">
           <div className="flex items-center space-x-3 mb-2">
