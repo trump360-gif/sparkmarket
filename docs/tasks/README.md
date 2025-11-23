@@ -1,16 +1,24 @@
 # 개발 태스크 관리
 
-## Phase 1: 프로젝트 초기 세팅 (Week 1)
+## Phase 1: 프로젝트 초기 세팅 (Week 1) ✅ 완료
 
 - [x] GitHub 레포지토리 생성
 - [x] 프로젝트 폴더 구조 생성
 - [x] PRD/TRD 문서 작성
-- [ ] Next.js 14 프로젝트 생성
-- [ ] NestJS 프로젝트 생성
-- [ ] Prisma 설정 및 schema.prisma 작성
-- [ ] 환경변수 파일 템플릿 생성
-- [ ] PostgreSQL (Podman) 설정
-- [ ] GitHub 커밋 및 푸시
+- [x] Next.js 14 프로젝트 생성
+- [x] NestJS 프로젝트 생성
+- [x] Prisma 설정 및 schema.prisma 작성
+  - [x] User 모델 (role, status)
+  - [x] Product 모델
+  - [x] ProductImage 모델 (정규화)
+  - [x] 채팅 관련 모델 제외
+- [x] 환경변수 파일 템플릿 생성
+- [x] PostgreSQL (Podman) 설정
+  - [x] 컨테이너 생성 (포트 5433)
+  - [x] sparkmarket 데이터베이스 생성
+- [x] Prisma 마이그레이션 실행
+- [x] 시드 데이터 생성 (관리자 + 테스트 유저)
+- [x] GitHub 커밋 및 푸시
 
 ## Phase 2: 인증 시스템 (Week 1-2)
 
@@ -122,6 +130,13 @@
 
 ## 현재 진행 상황
 
-**Phase**: 1 - 프로젝트 초기 세팅
-**진행률**: 40%
-**다음 작업**: Next.js 및 NestJS 프로젝트 생성
+**Phase**: 2 - 인증 시스템 구현
+**진행률**: Phase 1 완료 (100%), Phase 2 시작 (0%)
+**다음 작업**: JWT 인증 모듈 및 회원가입/로그인 API 구현
+
+### 최근 업데이트 (2025-11-23)
+- ✅ Phase 1 완료: 프로젝트 초기 세팅
+- ✅ 데이터베이스 설정 완료 (PostgreSQL + Prisma)
+- ✅ Prisma 버전 5.22.0으로 다운그레이드 (호환성 문제 해결)
+- ✅ 관리자 및 테스트 계정 시드 완료
+- 🔄 다음: 인증 시스템 구현 시작

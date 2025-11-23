@@ -297,3 +297,67 @@ NEXT_PUBLIC_API_URL="http://localhost:3001"
 npx prisma migrate deploy
 npx prisma db seed
 ```
+
+---
+
+## 10. 현재 구현 상태 (2025-11-23)
+
+### ✅ 완료된 작업
+
+#### 프로젝트 초기 세팅
+- [x] GitHub 레포지토리 생성 및 초기 커밋
+- [x] Next.js 14.2.0 프로젝트 생성 (App Router)
+- [x] NestJS 11.0 프로젝트 생성
+- [x] 프로젝트 문서 구조 (PRD/TRD/tasks)
+
+#### 데이터베이스
+- [x] PostgreSQL 16 컨테이너 (Podman, 포트 5433)
+- [x] Prisma ORM 5.22.0 설정
+- [x] 데이터베이스 스키마 작성
+  - User 모델 (role: USER/ADMIN, status: ACTIVE/BANNED)
+  - Product 모델
+  - ProductImage 모델 (정규화)
+- [x] 초기 마이그레이션 실행
+- [x] 시드 데이터 생성
+  - 관리자: admin@sparkmarket.com / admin123456
+  - 테스트 유저: test@sparkmarket.com / user123456
+
+#### 의존성
+```json
+{
+  "prisma": "5.22.0",
+  "@prisma/client": "5.22.0",
+  "bcrypt": "6.0.0",
+  "dotenv": "17.2.3",
+  "tsx": "4.20.6"
+}
+```
+
+### 🔄 진행 중
+
+#### Phase 2: 인증 시스템 (예정)
+- [ ] @nestjs/jwt, @nestjs/passport 설치
+- [ ] JWT 인증 모듈 구현
+- [ ] 회원가입/로그인/토큰갱신 API
+- [ ] AuthGuard, AdminGuard 구현
+
+### 📝 주요 변경사항
+
+#### Prisma 버전 다운그레이드
+- **이유**: Prisma 7.0의 Breaking Changes로 인한 호환성 문제
+- **변경**: 7.0.0 → 5.22.0
+- **영향**:
+  - `prisma.config.ts` 제거
+  - `schema.prisma`에 `url = env("DATABASE_URL")` 복원
+  - PrismaClient 초기화 방식 변경
+
+#### 데이터베이스 연결
+- **호스트**: localhost:5433
+- **데이터베이스**: sparkmarket
+- **유저**: postgres / postgres
+
+### 🔗 관련 링크
+
+- GitHub: https://github.com/trump360-gif/sparkmarket
+- 로컬 백엔드: http://localhost:3001 (예정)
+- 로컬 프론트엔드: http://localhost:3000 (예정)
