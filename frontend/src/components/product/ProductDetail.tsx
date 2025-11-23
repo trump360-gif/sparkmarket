@@ -39,13 +39,23 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     router.push(`/products/${product.id}/edit`);
   };
 
-  const handlePurchase = () => {
+  const handlePurchase = async () => {
     if (!isAuthenticated) {
       alert('로그인이 필요합니다.');
       router.push('/login');
       return;
     }
-    alert('구매하기 기능은 추후 업데이트 예정입니다.');
+
+    if (!confirm('정말 구매하시겠습니까?')) return;
+
+    try {
+      await productsApi.purchaseProduct(product.id);
+      alert('구매가 완료되었습니다!');
+      router.refresh();
+    } catch (error: any) {
+      const message = error.response?.data?.message || '구매에 실패했습니다.';
+      alert(message);
+    }
   };
 
   const handleInquiry = () => {

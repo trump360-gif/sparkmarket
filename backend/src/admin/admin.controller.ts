@@ -59,4 +59,10 @@ export class AdminController {
   ) {
     return this.adminService.updateUserStatus(id, updateStatusDto.status);
   }
+
+  // 유저 상세 정보
+  @Get('users/:id')
+  getUserDetail(@Param('id') id: string) {
+    return this.adminService.getUserDetail(id);
+  }
 }

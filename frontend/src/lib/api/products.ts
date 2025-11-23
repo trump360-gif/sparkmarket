@@ -34,4 +34,9 @@ export const productsApi = {
     const response = await apiClient.delete<{ success: boolean }>(`/products/${id}`);
     return response.data;
   },
+
+  purchaseProduct: async (id: string): Promise<Product> => {
+    const response = await apiClient.patch<Product>(`/products/${id}/purchase`);
+    return response.data;
+  },
 };

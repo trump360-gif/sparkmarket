@@ -271,4 +271,54 @@ export class AdminService {
 
     return products;
   }
+
+  // 유저 상세 정보 조회
+  async getUserDetail(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        email: true,
+        nickname: true,
+        role: true,
+        status: true,
+        avatar_url: true,
+        created_at: true,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('유저를 찾을 수 없습니다');
+    }
+
+    // 상품 통계 집계
+    const [total_products, active_products, sold_products] = await Promise.all([
+      this.prisma.product.count({ where: { seller_id: userId } }),
+      this.prisma.product.count({ where: { seller_id: userId, status: 'FOR_SALE' } }),
+      this.prisma.product.count({ where: { seller_id: userId, status: 'SOLD' } }),
+    ]);
+
+    // 최근 상품 5개
+    const recent_products = await this.prisma.product.findMany({
+      where: { seller_id: userId },
+      take: 5,
+      orderBy: { created_at: 'desc' },
+      include: {
+        images: {
+          where: { is_primary: true },
+          take: 1,
+        },
+      },
+    });
+
+    return {
+      ...user,
+      product_stats: {
+        total_products,
+        active_products,
+        sold_products,
+      },
+      recent_products,
+    };
+  }
 }

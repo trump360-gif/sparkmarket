@@ -179,3 +179,12 @@ export interface UpdateUserStatusRequest {
 export interface DeleteProductRequest {
   reason?: string;
 }
+
+export interface UserDetail extends User {
+  product_stats: {
+    total_products: number;
+    active_products: number;
+    sold_products: number;
+  };
+  recent_products: Product[];
+}

@@ -63,7 +63,7 @@ export class ImagesService {
         expiresIn: 3600, // 1시간
       });
 
-      const publicUrl = `https://pub-${this.configService.get('R2_ACCOUNT_ID')}.r2.dev/${key}`;
+      const publicUrl = `${this.configService.get('R2_PUBLIC_URL')}/${key}`;
 
       return {
         presignedUrl,

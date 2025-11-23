@@ -5,6 +5,7 @@ import type {
   AdminUserQueryParams,
   Product,
   User,
+  UserDetail,
   PaginatedResponse,
   UpdateUserStatusRequest,
   DeleteProductRequest,
@@ -39,6 +40,11 @@ export const adminApi = {
 
   updateUserStatus: async (id: string, data: UpdateUserStatusRequest): Promise<{ success: boolean; user: User }> => {
     const response = await apiClient.patch<{ success: boolean; user: User }>(`/admin/users/${id}/status`, data);
+    return response.data;
+  },
+
+  getUserDetail: async (id: string): Promise<UserDetail> => {
+    const response = await apiClient.get<UserDetail>(`/admin/users/${id}`);
     return response.data;
   },
 };

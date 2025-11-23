@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { adminApi } from '@/lib/api/admin';
 import type { AdminDashboardStats } from '@/types';
 
@@ -49,36 +50,42 @@ export default function Dashboard() {
       value: stats.total_users.toLocaleString(),
       icon: '👥',
       color: 'bg-blue-500',
+      href: '/admin/users',
     },
     {
       label: '전체 상품',
       value: stats.total_products.toLocaleString(),
       icon: '📦',
       color: 'bg-green-500',
+      href: '/admin/products',
     },
     {
       label: '판매중 상품',
       value: stats.active_products.toLocaleString(),
       icon: '🛒',
       color: 'bg-yellow-500',
+      href: '/admin/products?status=FOR_SALE',
     },
     {
       label: '판매완료',
       value: stats.sold_products.toLocaleString(),
       icon: '✅',
       color: 'bg-purple-500',
+      href: '/admin/products?status=SOLD',
     },
     {
       label: '오늘 가입',
       value: stats.new_users_today.toLocaleString(),
       icon: '🆕',
       color: 'bg-pink-500',
+      href: '/admin/users',
     },
     {
       label: '오늘 등록',
       value: stats.new_products_today.toLocaleString(),
       icon: '📝',
       color: 'bg-indigo-500',
+      href: '/admin/products',
     },
   ];
 
@@ -107,9 +114,10 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         {statCards.map((card) => (
-          <div
+          <Link
             key={card.label}
-            className="bg-white rounded-lg shadow-md p-6 border-l-4"
+            href={card.href}
+            className="bg-white rounded-lg shadow-md p-6 border-l-4 hover:shadow-xl transition-shadow cursor-pointer"
             style={{ borderColor: card.color.replace('bg-', '') }}
           >
             <div className="flex items-center justify-between">
@@ -121,7 +129,7 @@ export default function Dashboard() {
                 {card.icon}
               </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
 

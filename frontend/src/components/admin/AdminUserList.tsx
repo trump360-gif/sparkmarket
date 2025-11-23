@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import Link from 'next/link';
 import { adminApi } from '@/lib/api/admin';
 import type { User, UserStatus } from '@/types';
 
@@ -154,12 +155,17 @@ export default function AdminUserList() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {users.map((user) => (
-                  <tr key={user.id}>
+                  <tr key={user.id} className="hover:bg-gray-50 cursor-pointer transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">{user.email}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{user.nickname}</div>
+                      <Link
+                        href={`/admin/users/${user.id}`}
+                        className="text-sm font-medium text-blue-600 hover:underline"
+                      >
+                        {user.nickname}
+                      </Link>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">{getRoleBadge(user.role)}</td>
                     <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(user.status)}</td>

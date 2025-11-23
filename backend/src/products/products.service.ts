@@ -155,6 +155,42 @@ export class ProductsService {
     return updatedProduct;
   }
 
+  async purchase(id: string, userId: string) {
+    const product = await this.prisma.product.findUnique({
+      where: { id },
+    });
+
+    if (!product) {
+      throw new NotFoundException('상품을 찾을 수 없습니다');
+    }
+
+    if (product.status !== 'FOR_SALE') {
+      throw new ForbiddenException('판매중인 상품이 아닙니다');
+    }
+
+    if (product.seller_id === userId) {
+      throw new ForbiddenException('본인의 상품은 구매할 수 없습니다');
+    }
+
+    const updatedProduct = await this.prisma.product.update({
+      where: { id },
+      data: { status: 'SOLD' },
+      include: {
+        seller: {
+          select: {
+            id: true,
+            email: true,
+            nickname: true,
+            avatar_url: true,
+          },
+        },
+        images: true,
+      },
+    });
+
+    return updatedProduct;
+  }
+
   async remove(id: string, userId: string, userRole: string) {
     const product = await this.prisma.product.findUnique({
       where: { id },

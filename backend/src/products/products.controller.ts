@@ -52,6 +52,12 @@ export class ProductsController {
     return this.productsService.update(id, req.user.id, updateProductDto);
   }
 
+  @Patch(':id/purchase')
+  @UseGuards(JwtAuthGuard)
+  purchase(@Param('id') id: string, @Request() req) {
+    return this.productsService.purchase(id, req.user.id);
+  }
+
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   remove(@Param('id') id: string, @Request() req) {
