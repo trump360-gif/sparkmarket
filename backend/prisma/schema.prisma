@@ -1,0 +1,87 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ========================================
+// User
+// ========================================
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password_hash String
+  nickname      String    @unique
+  avatar_url    String?
+
+  // 역할 (일반 유저 / 관리자)
+  role          String    @default("USER") // USER | ADMIN
+
+  // 계정 상태
+  status        String    @default("ACTIVE") // ACTIVE | BANNED
+
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  products      Product[]
+
+  @@index([email])
+  @@index([role, status])
+  @@map("users")
+}
+
+// ========================================
+// Product
+// ========================================
+model Product {
+  id              String    @id @default(cuid())
+  seller_id       String
+  seller          User      @relation(fields: [seller_id], references: [id], onDelete: Cascade)
+
+  title           String    @db.VarChar(100)
+  description     String    @db.Text
+  price           Int
+  category        String
+
+  status          String    @default("FOR_SALE") // FOR_SALE | SOLD | DELETED
+
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+
+  images          ProductImage[]
+
+  @@index([seller_id, created_at(sort: Desc)])
+  @@index([status, created_at(sort: Desc)])
+  @@index([category, created_at(sort: Desc)])
+  @@fulltext([title])
+  @@map("products")
+}
+
+// ========================================
+// ProductImage
+// ========================================
+model ProductImage {
+  id         String   @id @default(cuid())
+  product_id String
+  product    Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  url        String
+  key        String   // R2 storage key
+  width      Int
+  height     Int
+  size       Int      // bytes
+  format     String   // webp, jpg, png
+  order      Int      @default(0)
+  is_primary Boolean  @default(false)
+
+  created_at DateTime @default(now())
+
+  @@index([product_id, order])
+  @@map("product_images")
+}
