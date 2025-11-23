@@ -30,10 +30,10 @@
 - [x] AuthGuard 구현
 - [x] AdminGuard 구현
 
-### Frontend (대기)
-- [ ] 회원가입 페이지 (Next.js)
-- [ ] 로그인 페이지 (Next.js)
-- [ ] 인증 상태 관리 (Zustand)
+### Frontend ✅
+- [x] 회원가입 페이지 (Next.js)
+- [x] 로그인 페이지 (Next.js)
+- [x] 인증 상태 관리 (Zustand)
 
 ## Phase 3: 상품 CRUD (Week 2-3) ✅ Backend 완료
 
@@ -45,18 +45,18 @@
 - [x] 상품 삭제 API
 - [x] 이미지 Presigned URL 발급 API
 
-### Frontend
-- [ ] 상품 등록 페이지
-  - [ ] 폼 UI (제목, 가격, 카테고리, 설명)
-  - [ ] 이미지 업로드 (드래그앤드롭)
-  - [ ] Presigned URL로 R2 업로드
-- [ ] 상품 목록 페이지
-  - [ ] 그리드 레이아웃
-  - [ ] 무한 스크롤
-- [ ] 상품 상세 모달
-  - [ ] Parallel Routes 구현
-  - [ ] 이미지 슬라이더
-- [ ] 상품 수정 페이지
+### Frontend ✅
+- [x] 상품 등록 페이지
+  - [x] 폼 UI (제목, 가격, 카테고리, 설명)
+  - [x] 이미지 업로드
+  - [x] Presigned URL로 R2 업로드
+- [x] 상품 목록 페이지
+  - [x] 그리드 레이아웃 (3열)
+  - [x] 무한 스크롤
+- [x] 상품 상세 페이지
+  - [x] Dynamic Routes 구현
+  - [x] 이미지 표시
+- [x] 상품 수정 페이지
 - [ ] 내 상품 관리 페이지
 
 ## Phase 4: 검색 및 필터 (Week 3-4) ✅ Backend 완료
@@ -79,20 +79,20 @@
 - [x] 상품 관리 API (목록, 삭제)
 - [x] 유저 관리 API (목록, 상태 변경)
 
-### Frontend
-- [ ] 관리자 로그인
-- [ ] 관리자 레이아웃 (사이드바)
-- [ ] 대시보드 페이지
-  - [ ] 통계 카드
-  - [ ] 최근 상품 테이블
-- [ ] 상품 관리 페이지
-  - [ ] 상품 테이블
-  - [ ] 검색/필터
-  - [ ] 삭제 기능
-- [ ] 유저 관리 페이지
-  - [ ] 유저 테이블
-  - [ ] 검색/필터
-  - [ ] 차단/해제 기능
+### Frontend ✅
+- [x] 관리자 로그인
+- [x] 관리자 레이아웃 (사이드바)
+- [x] 대시보드 페이지
+  - [x] 통계 카드
+  - [x] 요약 정보
+- [x] 상품 관리 페이지
+  - [x] 상품 테이블
+  - [x] 검색/필터
+  - [x] 삭제 기능
+- [x] 유저 관리 페이지
+  - [x] 유저 테이블
+  - [x] 검색/필터
+  - [x] 차단/해제 기능
 
 ## Phase 6: UI/UX 개선 (Week 5-6)
 
@@ -131,35 +131,44 @@
 
 ---
 
+## Phase 5.5: 프론트엔드 재구성 ✅ 완료
+
+### Frontend 설정 재구성 ✅
+- [x] autoprefixer 설치
+- [x] postcss 설정 수정 (tailwindcss + autoprefixer)
+- [x] Tailwind CSS 설정 완전 재작성
+  - [x] content 경로 최적화 (./app, ./src)
+  - [x] primary 컬러 팔레트 추가
+  - [x] maxWidth 확장
+- [x] globals.css Tailwind layers로 재작성
+- [x] 레이아웃 중앙 정렬 수정
+- [x] Navbar 디자인 개선 (파란색 그라데이션)
+- [x] ProductList 3열 그리드 레이아웃
+
 ## 현재 진행 상황
 
-**Phase**: 6 - 프론트엔드 개발 시작 준비
-**진행률**: Phase 1-5 Backend 완료 (100%), Frontend (0%)
-**다음 작업**: Next.js 프론트엔드 개발 시작
+**Phase**: 5.5 완료, Phase 6 준비
+**진행률**: Phase 1-5 Backend 완료 (100%), Frontend 기본 구현 (80%), 재구성 (100%)
+**다음 작업**: Phase 6 - 검색/필터, 찜하기, 마이페이지, 토스트 등 추가 기능
 
 ### 최근 업데이트 (2025-11-23)
 - ✅ Phase 1 완료: 프로젝트 초기 세팅
 - ✅ 데이터베이스 설정 완료 (PostgreSQL + Prisma)
 - ✅ Prisma 버전 5.22.0으로 다운그레이드 (호환성 문제 해결)
 - ✅ 관리자 및 테스트 계정 시드 완료
-- ✅ Phase 2 Backend 완료: JWT 인증 시스템 구현
-  - JWT 인증 모듈 (Passport Strategy)
-  - 회원가입/로그인/토큰 갱신 API
-  - AuthGuard 및 AdminGuard
-  - ValidationPipe, CORS, API prefix 설정
-  - API 테스트 완료
-- ✅ Phase 3 Backend 완료: 상품 CRUD 및 이미지 업로드
-  - Product 모듈 (service, controller, DTOs)
-  - 상품 등록/조회/수정/삭제 API
-  - 페이지네이션 및 필터링 (카테고리, 상태, 검색)
-  - Images 모듈 (Cloudflare R2 Presigned URL)
-  - ProductImage 추가/삭제 API
-  - API 테스트 완료
-- ✅ Phase 4 Backend 완료: 검색/필터 (Phase 3에 포함)
-- ✅ Phase 5 Backend 완료: 관리자 페이지 API
-  - Admin 모듈 (service, controller, DTOs)
-  - 대시보드 통계 API (유저/상품/거래 통계)
-  - 상품 관리 API (목록, 검색, 삭제)
-  - 유저 관리 API (목록, 검색, 상태 변경)
-  - API 테스트 완료
-- 🔄 다음: 프론트엔드 개발 (Phase 2-5 Frontend)
+- ✅ Phase 2 완료: JWT 인증 시스템
+  - Backend: JWT 인증 모듈, 회원가입/로그인/토큰 갱신 API
+  - Frontend: 로그인/회원가입 페이지, Zustand 인증 상태 관리
+- ✅ Phase 3 완료: 상품 CRUD 및 이미지 업로드
+  - Backend: Product 모듈, 이미지 Presigned URL API
+  - Frontend: 상품 등록/목록/상세/수정 페이지, 무한 스크롤, 3열 그리드
+- ✅ Phase 4 완료: 검색/필터 (Phase 3에 포함)
+- ✅ Phase 5 완료: 관리자 페이지
+  - Backend: Admin 모듈, 대시보드 통계/상품 관리/유저 관리 API
+  - Frontend: 관리자 레이아웃, 대시보드, 상품/유저 관리 페이지
+- ✅ Phase 5.5 완료: 프론트엔드 재구성
+  - Tailwind CSS 설정 완전 재작성
+  - autoprefixer 추가, postcss 설정 수정
+  - globals.css 최적화
+  - 레이아웃 중앙 정렬 및 디자인 개선
+- 🔄 다음: Phase 6 - 검색바, 찜하기, 마이페이지, 토스트 알림, 로딩 스켈레톤

@@ -17,11 +17,12 @@ sparkmarket/
 ## 기술 스택
 
 ### Frontend
-- Next.js 14 (App Router)
-- TypeScript 5.3
-- Tailwind CSS 3.4
-- Radix UI
-- Zustand
+- Next.js 14.2.0 (App Router)
+- TypeScript 5
+- Tailwind CSS 3.4 + Autoprefixer
+- React Hook Form + Zod
+- Zustand 5.0 (인증 상태 관리)
+- Axios 1.13
 
 ### Backend
 - NestJS 10
@@ -35,13 +36,22 @@ sparkmarket/
 - Database: Supabase / Railway
 - Image Storage: Cloudflare R2
 
-## 핵심 기능 (채팅 제외)
+## 핵심 기능
 
-- ✅ 회원가입/로그인 (JWT)
-- ✅ 상품 CRUD (이미지 업로드)
-- ✅ 상품 목록/검색 (Full-text Search)
-- ✅ 상품 상세 (모달)
-- ✅ 관리자 페이지 (상품/유저 관리, 통계)
+### 구현 완료 ✅
+- ✅ **인증 시스템**: JWT 기반 회원가입/로그인, 토큰 갱신
+- ✅ **상품 관리**: 등록/수정/삭제, 이미지 업로드 (Cloudflare R2)
+- ✅ **상품 목록**: 무한 스크롤, 3열 그리드 레이아웃
+- ✅ **상품 검색**: 제목/설명 기반 검색, 카테고리/가격 필터
+- ✅ **관리자 페이지**: 대시보드 통계, 상품/유저 관리, 차단 기능
+
+### 다음 Phase (Phase 6)
+- [ ] 검색바 UI
+- [ ] 찜하기 / 관심상품
+- [ ] 마이페이지 (내 상품 관리)
+- [ ] 판매자 프로필 페이지
+- [ ] 토스트 알림
+- [ ] 로딩 스켈레톤
 
 ## 개발 시작
 

@@ -44,10 +44,18 @@ export default function LoginForm() {
     }
   };
 
-  const handleQuickLogin = (email: string, password: string) => {
-    setValue('email', email);
-    setValue('password', password);
-    handleSubmit(onSubmit)();
+  const handleQuickLogin = async (email: string, password: string) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      await login({ email, password });
+      router.push('/');
+    } catch (err: any) {
+      setError(err.response?.data?.message || '로그인에 실패했습니다.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

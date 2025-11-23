@@ -4,7 +4,7 @@ import axios from 'axios';
 
 export const uploadApi = {
   getPresignedUrl: async (data: PresignedUrlRequest): Promise<PresignedUrlResponse> => {
-    const response = await apiClient.post<PresignedUrlResponse>('/api/upload/presigned-url', data);
+    const response = await apiClient.post<PresignedUrlResponse>('/images/presigned-url', data);
     return response.data;
   },
 

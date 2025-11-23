@@ -7,41 +7,41 @@ export class AdminService {
 
   // 대시보드 통계
   async getDashboardStats() {
-    const [totalUsers, totalProducts, totalSoldProducts, activeUsers] = await Promise.all([
+    const [total_users, total_products, sold_products, active_products] = await Promise.all([
       this.prisma.user.count(),
       this.prisma.product.count(),
       this.prisma.product.count({ where: { status: 'SOLD' } }),
-      this.prisma.user.count({ where: { status: 'ACTIVE' } }),
+      this.prisma.product.count({ where: { status: 'FOR_SALE' } }),
     ]);
 
-    // 최근 7일간 등록된 상품 수
-    const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    // 오늘 자정부터 현재까지
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-    const recentProducts = await this.prisma.product.count({
-      where: {
-        created_at: {
-          gte: sevenDaysAgo,
+    const [new_products_today, new_users_today] = await Promise.all([
+      this.prisma.product.count({
+        where: {
+          created_at: {
+            gte: today,
+          },
         },
-      },
-    });
-
-    // 최근 7일간 가입한 유저 수
-    const recentUsers = await this.prisma.user.count({
-      where: {
-        created_at: {
-          gte: sevenDaysAgo,
+      }),
+      this.prisma.user.count({
+        where: {
+          created_at: {
+            gte: today,
+          },
         },
-      },
-    });
+      }),
+    ]);
 
     return {
-      totalUsers,
-      totalProducts,
-      totalSoldProducts,
-      activeUsers,
-      recentProducts,
-      recentUsers,
+      total_users,
+      total_products,
+      active_products,
+      sold_products,
+      new_users_today,
+      new_products_today,
     };
   }
 
