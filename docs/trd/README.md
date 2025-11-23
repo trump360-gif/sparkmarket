@@ -66,6 +66,8 @@
 
 - **users**: 사용자 정보 (role, status)
 - **products**: 상품 정보
+  - **view_count**: 조회수 (자동 증가)
+  - **chat_count**: 채팅 문의 수
 - **product_images**: 상품 이미지 (정규화)
 
 ## 4. API 명세
@@ -155,14 +157,17 @@ Response: {
 GET /api/admin/dashboard
 Headers: { Authorization: Bearer <admin_token> }
 Response: {
-  stats: {
-    total_users,
-    total_products,
-    active_products,
-    sold_products,
-    new_users_today,
-    new_products_today
-  }
+  total_users,
+  total_products,
+  active_products,
+  sold_products,
+  new_users_today,
+  new_products_today,
+  today_sales,
+  sales_chart: [
+    { date: "2025-11-23", sales: 1500000, count: 5 },
+    ...
+  ]
 }
 ```
 
@@ -415,6 +420,25 @@ npx prisma db seed
 - **호스트**: localhost:5433
 - **데이터베이스**: sparkmarket
 - **유저**: postgres / postgres
+
+### 📝 주요 변경사항 (Phase 5.6)
+
+#### 상품 조회수/채팅 수 트래킹
+- **Database**: Product 모델에 `view_count`, `chat_count` 필드 추가
+- **Backend**: 상품 조회 시 view_count 자동 증가 (비동기 처리)
+- **Frontend**: ProductCard에 조회수/채팅 수 표시 (👁️ 💬)
+
+#### 관리자 대시보드 고도화
+- **Backend**: `today_sales` (오늘 거래 금액), `sales_chart` (최근 7일 판매 통계) API 추가
+- **Frontend**: 오늘 거래 금액 카드, 최근 7일 판매 추이 그래프
+
+#### 관리자 상품 대시보드
+- **Route**: `/admin/products/[id]` 동적 라우트 추가
+- **Features**: 상품 상세 정보, 조회수/채팅 수 통계, 판매자 정보, 삭제 기능
+
+#### 상품 상세 페이지 개선
+- **구매하기 버튼**: 로그인 체크 + 추후 업데이트 안내
+- **문의하기 버튼**: 로그인 체크 + 채팅 기능 추후 업데이트 안내
 
 ### 🎯 다음 단계
 
