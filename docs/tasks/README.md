@@ -35,15 +35,15 @@
 - [ ] 로그인 페이지 (Next.js)
 - [ ] 인증 상태 관리 (Zustand)
 
-## Phase 3: 상품 CRUD (Week 2-3)
+## Phase 3: 상품 CRUD (Week 2-3) ✅ Backend 완료
 
-### Backend
-- [ ] 상품 등록 API
-- [ ] 상품 목록 조회 API (페이지네이션)
-- [ ] 상품 상세 조회 API
-- [ ] 상품 수정 API
-- [ ] 상품 삭제 API
-- [ ] 이미지 Presigned URL 발급 API
+### Backend ✅
+- [x] 상품 등록 API
+- [x] 상품 목록 조회 API (페이지네이션)
+- [x] 상품 상세 조회 API
+- [x] 상품 수정 API
+- [x] 상품 삭제 API
+- [x] 이미지 Presigned URL 발급 API
 
 ### Frontend
 - [ ] 상품 등록 페이지
@@ -133,9 +133,9 @@
 
 ## 현재 진행 상황
 
-**Phase**: 3 - 상품 CRUD 구현 준비
-**진행률**: Phase 1 완료 (100%), Phase 2 Backend 완료 (100%)
-**다음 작업**: 상품 모듈 및 CRUD API 구현
+**Phase**: 4 - 검색 및 필터 구현 준비
+**진행률**: Phase 1-3 Backend 완료 (100%)
+**다음 작업**: 검색/필터 API 구현 또는 프론트엔드 개발 시작
 
 ### 최근 업데이트 (2025-11-23)
 - ✅ Phase 1 완료: 프로젝트 초기 세팅
@@ -148,4 +148,11 @@
   - AuthGuard 및 AdminGuard
   - ValidationPipe, CORS, API prefix 설정
   - API 테스트 완료
-- 🔄 다음: Phase 3 상품 CRUD 구현
+- ✅ Phase 3 Backend 완료: 상품 CRUD 및 이미지 업로드
+  - Product 모듈 (service, controller, DTOs)
+  - 상품 등록/조회/수정/삭제 API
+  - 페이지네이션 및 필터링 (카테고리, 상태, 검색)
+  - Images 모듈 (Cloudflare R2 Presigned URL)
+  - ProductImage 추가/삭제 API
+  - API 테스트 완료
+- 🔄 다음: Phase 4 검색/필터 또는 프론트엔드 개발
