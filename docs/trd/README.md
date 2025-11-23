@@ -236,6 +236,68 @@ Headers: { Authorization: Bearer <admin_token> }
 Response: { data: [...], meta: { total, page, limit, totalPages } }
 ```
 
+### 4.5 찜하기 API (Phase 6.2)
+
+#### 찜하기 추가/취소 (토글)
+```
+POST /api/favorites/toggle/:productId
+Headers: { Authorization: Bearer <token> }
+Response: { isFavorited: boolean }
+```
+
+#### 찜한 상품 목록
+```
+GET /api/favorites?page=1&limit=20
+Headers: { Authorization: Bearer <token> }
+Response: { data: [...], meta: { total, page, limit, totalPages } }
+```
+
+#### 상품 찜 여부 확인
+```
+GET /api/favorites/check/:productId
+Headers: { Authorization: Bearer <token> }
+Response: { isFavorited: boolean }
+```
+
+### 4.6 가격 제안 API (Phase 6.2)
+
+#### 가격 제안 생성
+```
+POST /api/products/:id/offers
+Headers: { Authorization: Bearer <token> }
+Body: { offered_price: number, message?: string }
+Response: { offer }
+```
+
+#### 받은 가격 제안 목록 (판매자)
+```
+GET /api/offers/received?page=1&limit=20
+Headers: { Authorization: Bearer <token> }
+Response: { data: [...], meta: { total, page, limit, totalPages } }
+```
+
+#### 보낸 가격 제안 목록 (구매자)
+```
+GET /api/offers/sent?page=1&limit=20
+Headers: { Authorization: Bearer <token> }
+Response: { data: [...], meta: { total, page, limit, totalPages } }
+```
+
+#### 가격 제안 수락/거절
+```
+PATCH /api/offers/:id/status
+Headers: { Authorization: Bearer <token> }
+Body: { status: 'ACCEPTED' | 'REJECTED' }
+Response: { offer }
+```
+
+#### 가격 제안 취소
+```
+DELETE /api/offers/:id
+Headers: { Authorization: Bearer <token> }
+Response: { success: true }
+```
+
 ## 5. 보안
 
 ### 5.1 인증/인가
