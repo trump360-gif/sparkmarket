@@ -59,12 +59,12 @@
 - [ ] 상품 수정 페이지
 - [ ] 내 상품 관리 페이지
 
-## Phase 4: 검색 및 필터 (Week 3-4)
+## Phase 4: 검색 및 필터 (Week 3-4) ✅ Backend 완료
 
-### Backend
-- [ ] PostgreSQL Full-text Search 설정
-- [ ] 검색 API (제목 기반)
-- [ ] 필터링 API (카테고리, 가격 범위)
+### Backend ✅ (Phase 3에 포함 완료)
+- [x] PostgreSQL Full-text Search 설정 (ILIKE 사용)
+- [x] 검색 API (제목 기반)
+- [x] 필터링 API (카테고리, 가격 범위)
 
 ### Frontend
 - [ ] 검색 바 UI
@@ -72,12 +72,12 @@
 - [ ] 가격 범위 필터
 - [ ] 검색 결과 페이지
 
-## Phase 5: 관리자 페이지 (Week 4-5)
+## Phase 5: 관리자 페이지 (Week 4-5) ✅ Backend 완료
 
-### Backend
-- [ ] 대시보드 통계 API
-- [ ] 상품 관리 API (목록, 삭제)
-- [ ] 유저 관리 API (목록, 상태 변경)
+### Backend ✅
+- [x] 대시보드 통계 API
+- [x] 상품 관리 API (목록, 삭제)
+- [x] 유저 관리 API (목록, 상태 변경)
 
 ### Frontend
 - [ ] 관리자 로그인
@@ -133,9 +133,9 @@
 
 ## 현재 진행 상황
 
-**Phase**: 4 - 검색 및 필터 구현 준비
-**진행률**: Phase 1-3 Backend 완료 (100%)
-**다음 작업**: 검색/필터 API 구현 또는 프론트엔드 개발 시작
+**Phase**: 6 - 프론트엔드 개발 시작 준비
+**진행률**: Phase 1-5 Backend 완료 (100%), Frontend (0%)
+**다음 작업**: Next.js 프론트엔드 개발 시작
 
 ### 최근 업데이트 (2025-11-23)
 - ✅ Phase 1 완료: 프로젝트 초기 세팅
@@ -155,4 +155,11 @@
   - Images 모듈 (Cloudflare R2 Presigned URL)
   - ProductImage 추가/삭제 API
   - API 테스트 완료
-- 🔄 다음: Phase 4 검색/필터 또는 프론트엔드 개발
+- ✅ Phase 4 Backend 완료: 검색/필터 (Phase 3에 포함)
+- ✅ Phase 5 Backend 완료: 관리자 페이지 API
+  - Admin 모듈 (service, controller, DTOs)
+  - 대시보드 통계 API (유저/상품/거래 통계)
+  - 상품 관리 API (목록, 검색, 삭제)
+  - 유저 관리 API (목록, 검색, 상태 변경)
+  - API 테스트 완료
+- 🔄 다음: 프론트엔드 개발 (Phase 2-5 Frontend)
