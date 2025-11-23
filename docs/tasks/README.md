@@ -20,14 +20,17 @@
 - [x] 시드 데이터 생성 (관리자 + 테스트 유저)
 - [x] GitHub 커밋 및 푸시
 
-## Phase 2: 인증 시스템 (Week 1-2)
+## Phase 2: 인증 시스템 (Week 1-2) ✅ Backend 완료
 
-- [ ] JWT 인증 모듈 구현 (NestJS)
-- [ ] 회원가입 API
-- [ ] 로그인 API
-- [ ] 토큰 갱신 API
-- [ ] AuthGuard 구현
-- [ ] AdminGuard 구현
+### Backend ✅
+- [x] JWT 인증 모듈 구현 (NestJS)
+- [x] 회원가입 API
+- [x] 로그인 API
+- [x] 토큰 갱신 API
+- [x] AuthGuard 구현
+- [x] AdminGuard 구현
+
+### Frontend (대기)
 - [ ] 회원가입 페이지 (Next.js)
 - [ ] 로그인 페이지 (Next.js)
 - [ ] 인증 상태 관리 (Zustand)
@@ -130,13 +133,19 @@
 
 ## 현재 진행 상황
 
-**Phase**: 2 - 인증 시스템 구현
-**진행률**: Phase 1 완료 (100%), Phase 2 시작 (0%)
-**다음 작업**: JWT 인증 모듈 및 회원가입/로그인 API 구현
+**Phase**: 3 - 상품 CRUD 구현 준비
+**진행률**: Phase 1 완료 (100%), Phase 2 Backend 완료 (100%)
+**다음 작업**: 상품 모듈 및 CRUD API 구현
 
 ### 최근 업데이트 (2025-11-23)
 - ✅ Phase 1 완료: 프로젝트 초기 세팅
 - ✅ 데이터베이스 설정 완료 (PostgreSQL + Prisma)
 - ✅ Prisma 버전 5.22.0으로 다운그레이드 (호환성 문제 해결)
 - ✅ 관리자 및 테스트 계정 시드 완료
-- 🔄 다음: 인증 시스템 구현 시작
+- ✅ Phase 2 Backend 완료: JWT 인증 시스템 구현
+  - JWT 인증 모듈 (Passport Strategy)
+  - 회원가입/로그인/토큰 갱신 API
+  - AuthGuard 및 AdminGuard
+  - ValidationPipe, CORS, API prefix 설정
+  - API 테스트 완료
+- 🔄 다음: Phase 3 상품 CRUD 구현
