@@ -49,7 +49,7 @@ export default function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
 
     try {
       await priceOffersApi.acceptOffer(offer.id);
-      toast.success('제안을 수락했습니다. 상품 가격이 변경되었습니다.');
+      toast.success('제안을 수락했습니다. 구매자에게 특별 가격으로 구매할 권한이 부여되었습니다.');
       onUpdate?.();
     } catch (error: any) {
       const message = error.response?.data?.message || '수락에 실패했습니다.';

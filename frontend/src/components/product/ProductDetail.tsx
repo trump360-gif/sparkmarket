@@ -1,14 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth';
 import { productsApi } from '@/lib/api/products';
+import { priceOffersApi } from '@/lib/api/priceOffers';
 import FavoriteButton from '@/components/ui/FavoriteButton';
 import PriceOfferModal from '@/components/product/PriceOfferModal';
-import type { Product } from '@/types';
+import type { Product, PriceOffer } from '@/types';
 
 interface ProductDetailProps {
   product: Product;
@@ -20,9 +21,31 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
+  const [acceptedOffer, setAcceptedOffer] = useState<PriceOffer | null>(null);
 
   const formattedPrice = new Intl.NumberFormat('ko-KR').format(product.price);
   const isOwner = isAuthenticated && user?.id === product.seller_id;
+
+  // 수락된 제안 확인
+  useEffect(() => {
+    const checkAcceptedOffer = async () => {
+      if (!isAuthenticated || isOwner) return;
+
+      try {
+        const offers = await priceOffersApi.getSentOffers({ limit: 100 });
+        const accepted = offers.data.find(
+          (offer) => offer.product_id === product.id && offer.status === 'ACCEPTED'
+        );
+        if (accepted) {
+          setAcceptedOffer(accepted);
+        }
+      } catch (error) {
+        console.error('Failed to check accepted offers:', error);
+      }
+    };
+
+    checkAcceptedOffer();
+  }, [isAuthenticated, isOwner, product.id]);
 
   const handleDelete = async () => {
     if (!confirm('정말 삭제하시겠습니까?')) return;
@@ -137,7 +160,34 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 <FavoriteButton productId={product.id} size="lg" />
               )}
             </div>
-            <p className="text-4xl font-bold text-blue-600 mb-6">{formattedPrice}원</p>
+
+            {/* 가격 표시 - 수락된 제안이 있으면 특별 가격 표시 */}
+            {acceptedOffer ? (
+              <div className="mb-6">
+                <div className="bg-green-50 border-2 border-green-500 rounded-lg p-4 mb-3">
+                  <div className="flex items-center mb-2">
+                    <svg className="w-6 h-6 text-green-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <span className="text-green-800 font-bold">특별 가격 제안 수락됨!</span>
+                  </div>
+                  <div className="flex items-baseline space-x-3">
+                    <span className="text-gray-500 line-through text-xl">{formattedPrice}원</span>
+                    <span className="text-3xl font-bold text-green-600">
+                      {new Intl.NumberFormat('ko-KR').format(acceptedOffer.offered_price)}원
+                    </span>
+                    <span className="text-sm text-green-700 font-medium">
+                      ({new Intl.NumberFormat('ko-KR').format(product.price - acceptedOffer.offered_price)}원 할인)
+                    </span>
+                  </div>
+                  <p className="text-sm text-green-700 mt-2">
+                    이 특별 가격으로 구매하실 수 있습니다!
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-4xl font-bold text-blue-600 mb-6">{formattedPrice}원</p>
+            )}
 
             <div className="border-t border-b py-4 mb-6">
               <div className="flex justify-between mb-2">

@@ -7,10 +7,12 @@ import { productsApi } from '@/lib/api/products';
 import { favoritesApi } from '@/lib/api/favorites';
 import { priceOffersApi } from '@/lib/api/priceOffers';
 import ProductCard from '@/components/product/ProductCard';
+import OfferCard from '@/components/offer/OfferCard';
 import { Skeleton } from '@/components/ui/Skeleton';
 import type { Product, PriceOffer } from '@/types';
 
 type TabType = 'myProducts' | 'favorites' | 'offers';
+type OfferSubTabType = 'sent' | 'received';
 
 export default function MyPage() {
   const router = useRouter();
@@ -21,6 +23,8 @@ export default function MyPage() {
   const [sentOffers, setSentOffers] = useState<PriceOffer[]>([]);
   const [receivedOffers, setReceivedOffers] = useState<PriceOffer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [offerCounts, setOfferCounts] = useState({ sent: 0, received: 0 });
+  const [offerSubTab, setOfferSubTab] = useState<OfferSubTabType>('received');
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
@@ -31,8 +35,24 @@ export default function MyPage() {
   useEffect(() => {
     if (isAuthenticated) {
       fetchData();
+      fetchOfferCounts();
     }
   }, [isAuthenticated, activeTab]);
+
+  const fetchOfferCounts = async () => {
+    try {
+      const [sent, received] = await Promise.all([
+        priceOffersApi.getSentOffers({ limit: 1 }),
+        priceOffersApi.getReceivedOffers({ limit: 1 }),
+      ]);
+      setOfferCounts({
+        sent: sent.total || 0,
+        received: received.total || 0,
+      });
+    } catch (error) {
+      console.error('Failed to fetch offer counts:', error);
+    }
+  };
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -71,7 +91,7 @@ export default function MyPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-gray-50 pt-16">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* 프로필 헤더 */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
@@ -113,13 +133,16 @@ export default function MyPage() {
             </button>
             <button
               onClick={() => setActiveTab('offers')}
-              className={`flex-1 px-6 py-4 font-medium text-center transition-colors ${
+              className={`flex-1 px-6 py-4 font-medium text-center transition-colors relative ${
                 activeTab === 'offers'
                   ? 'text-blue-600 border-b-2 border-blue-600'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              가격 제안 ({sentOffers.length + receivedOffers.length})
+              가격 제안 ({offerCounts.sent + offerCounts.received})
+              {offerCounts.received > 0 && (
+                <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
+              )}
             </button>
           </div>
         </div>
@@ -188,33 +211,86 @@ export default function MyPage() {
             )}
 
             {activeTab === 'offers' && (
-              <div className="space-y-6">
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    가격 제안 요약
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center p-4 bg-blue-50 rounded-lg">
-                      <p className="text-sm text-gray-600">보낸 제안</p>
-                      <p className="text-2xl font-bold text-blue-600">
-                        {sentOffers.length}
-                      </p>
-                    </div>
-                    <div className="text-center p-4 bg-green-50 rounded-lg">
-                      <p className="text-sm text-gray-600">받은 제안</p>
-                      <p className="text-2xl font-bold text-green-600">
-                        {receivedOffers.length}
-                      </p>
-                    </div>
+              <>
+                {/* 보낸/받은 제안 서브탭 */}
+                <div className="bg-white rounded-lg shadow-sm mb-6">
+                  <div className="flex border-b border-gray-200">
+                    <button
+                      onClick={() => setOfferSubTab('received')}
+                      className={`flex-1 px-6 py-3 font-medium text-center transition-colors ${
+                        offerSubTab === 'received'
+                          ? 'text-blue-600 border-b-2 border-blue-600'
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                    >
+                      받은 제안 ({offerCounts.received})
+                    </button>
+                    <button
+                      onClick={() => setOfferSubTab('sent')}
+                      className={`flex-1 px-6 py-3 font-medium text-center transition-colors ${
+                        offerSubTab === 'sent'
+                          ? 'text-blue-600 border-b-2 border-blue-600'
+                          : 'text-gray-600 hover:text-gray-900'
+                      }`}
+                    >
+                      보낸 제안 ({offerCounts.sent})
+                    </button>
                   </div>
-                  <button
-                    onClick={() => router.push('/offers')}
-                    className="mt-4 w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                  >
-                    전체 제안 보기
-                  </button>
                 </div>
-              </div>
+
+                {/* 제안 목록 */}
+                {offerSubTab === 'received' ? (
+                  receivedOffers.length === 0 ? (
+                    <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+                      <p className="text-gray-500 text-lg mb-2">
+                        받은 가격 제안이 없습니다.
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        판매중인 상품에 제안이 들어오면 여기에 표시됩니다.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {receivedOffers.map((offer) => (
+                        <OfferCard
+                          key={offer.id}
+                          offer={offer}
+                          type="received"
+                          onUpdate={fetchData}
+                        />
+                      ))}
+                    </div>
+                  )
+                ) : (
+                  sentOffers.length === 0 ? (
+                    <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+                      <p className="text-gray-500 text-lg mb-2">
+                        보낸 가격 제안이 없습니다.
+                      </p>
+                      <p className="text-gray-400 text-sm mb-6">
+                        관심있는 상품에 가격을 제안해보세요!
+                      </p>
+                      <button
+                        onClick={() => router.push('/products')}
+                        className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                      >
+                        상품 둘러보기
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {sentOffers.map((offer) => (
+                        <OfferCard
+                          key={offer.id}
+                          offer={offer}
+                          type="sent"
+                          onUpdate={fetchData}
+                        />
+                      ))}
+                    </div>
+                  )
+                )}
+              </>
             )}
           </>
         )}

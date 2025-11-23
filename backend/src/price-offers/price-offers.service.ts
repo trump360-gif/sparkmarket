@@ -108,7 +108,7 @@ export class PriceOffersService {
       throw new BadRequestException('만료된 제안입니다.');
     }
 
-    // 제안 수락
+    // 제안 수락 (상품 가격은 그대로 유지, 제안만 수락 상태로 변경)
     const updatedOffer = await this.prisma.priceOffer.update({
       where: { id: offerId },
       data: { status: 'ACCEPTED' },
@@ -123,10 +123,14 @@ export class PriceOffersService {
       },
     });
 
-    // 상품 가격 업데이트 (제안 가격으로)
-    await this.prisma.product.update({
-      where: { id: offer.product_id },
-      data: { price: offer.offered_price },
+    // 같은 상품에 대한 다른 대기중인 제안들을 거절 처리
+    await this.prisma.priceOffer.updateMany({
+      where: {
+        product_id: offer.product_id,
+        id: { not: offerId },
+        status: 'PENDING',
+      },
+      data: { status: 'REJECTED' },
     });
 
     return updatedOffer;

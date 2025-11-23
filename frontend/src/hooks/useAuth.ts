@@ -1,11 +1,18 @@
 import { useAuthStore } from '@/store/authStore';
 import { authApi } from '@/lib/api/auth';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import type { LoginRequest, RegisterRequest } from '@/types';
 
 export const useAuth = () => {
   const router = useRouter();
   const { user, isAuthenticated, isAdmin, setAuth, clearAuth, logout } = useAuthStore();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // zustand persist hydration 완료 대기
+    setIsLoading(false);
+  }, []);
 
   const login = async (data: LoginRequest) => {
     try {
@@ -36,6 +43,7 @@ export const useAuth = () => {
     user,
     isAuthenticated,
     isAdmin,
+    isLoading,
     login,
     register,
     logout: signOut,

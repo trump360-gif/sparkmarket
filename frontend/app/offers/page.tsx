@@ -31,8 +31,23 @@ export default function OffersPage() {
   useEffect(() => {
     if (isAuthenticated) {
       fetchOffers();
+      // 초기 로드 시 양쪽 카운트 모두 가져오기
+      fetchAllCounts();
     }
   }, [isAuthenticated, activeTab, sentPage, receivedPage]);
+
+  const fetchAllCounts = async () => {
+    try {
+      const [sent, received] = await Promise.all([
+        priceOffersApi.getSentOffers({ limit: 1 }),
+        priceOffersApi.getReceivedOffers({ limit: 1 }),
+      ]);
+      setSentTotal(sent.total || 0);
+      setReceivedTotal(received.total || 0);
+    } catch (error) {
+      console.error('Failed to fetch counts:', error);
+    }
+  };
 
   const fetchOffers = async () => {
     setIsLoading(true);

@@ -51,6 +51,11 @@ export const useAuthStore = create<AuthState>()(
         });
       },
       logout: () => {
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          localStorage.removeItem('user');
+        }
         authApi.logout();
         set({
           user: null,

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { priceOffersApi } from '@/lib/api/priceOffers';
 
 export default function Navbar() {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
@@ -11,11 +12,30 @@ export default function Navbar() {
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [hasNewOffers, setHasNewOffers] = useState(false);
 
   useEffect(() => {
     const query = searchParams.get('search') || '';
     setSearchQuery(query);
   }, [searchParams]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      checkNewOffers();
+      // 30초마다 새로운 제안 확인
+      const interval = setInterval(checkNewOffers, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [isAuthenticated]);
+
+  const checkNewOffers = async () => {
+    try {
+      const response = await priceOffersApi.getReceivedOffers({ limit: 1 });
+      setHasNewOffers((response.total || 0) > 0);
+    } catch (error) {
+      console.error('Failed to check new offers:', error);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -102,7 +122,7 @@ export default function Navbar() {
               <>
                 <Link
                   href="/mypage"
-                  className="hidden sm:flex items-center px-3 py-1.5 bg-white/10 rounded-full hover:bg-white/20 transition-all cursor-pointer"
+                  className="hidden sm:flex items-center px-3 py-1.5 bg-white/10 rounded-full hover:bg-white/20 transition-all cursor-pointer relative"
                 >
                   <div className="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center text-white font-medium text-sm mr-2">
                     {user?.nickname?.charAt(0) || 'U'}
@@ -110,6 +130,9 @@ export default function Navbar() {
                   <span className="text-sm font-medium text-white">
                     {user?.nickname}
                   </span>
+                  {hasNewOffers && (
+                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-blue-600"></span>
+                  )}
                 </Link>
                 {isAdmin && (
                   <Link
