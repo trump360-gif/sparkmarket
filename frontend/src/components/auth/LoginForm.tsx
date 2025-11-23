@@ -24,6 +24,7 @@ export default function LoginForm() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -41,6 +42,12 @@ export default function LoginForm() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleQuickLogin = (email: string, password: string) => {
+    setValue('email', email);
+    setValue('password', password);
+    handleSubmit(onSubmit)();
   };
 
   return (
@@ -95,6 +102,28 @@ export default function LoginForm() {
             {isLoading ? '로그인 중...' : '로그인'}
           </button>
         </form>
+
+        <div className="mt-4 pt-4 border-t">
+          <p className="text-sm text-gray-600 mb-2">빠른 로그인 (테스트용)</p>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => handleQuickLogin('test@sparkmarket.com', 'user123456')}
+              disabled={isLoading}
+              className="px-3 py-2 bg-green-100 text-green-700 rounded-md hover:bg-green-200 disabled:opacity-50 text-sm font-medium transition-colors"
+            >
+              일반 유저
+            </button>
+            <button
+              type="button"
+              onClick={() => handleQuickLogin('admin@sparkmarket.com', 'admin123456')}
+              disabled={isLoading}
+              className="px-3 py-2 bg-purple-100 text-purple-700 rounded-md hover:bg-purple-200 disabled:opacity-50 text-sm font-medium transition-colors"
+            >
+              관리자
+            </button>
+          </div>
+        </div>
 
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600">

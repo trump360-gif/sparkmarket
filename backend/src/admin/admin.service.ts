@@ -10,7 +10,7 @@ export class AdminService {
     const [totalUsers, totalProducts, totalSoldProducts, activeUsers] = await Promise.all([
       this.prisma.user.count(),
       this.prisma.product.count(),
-      this.prisma.product.count({ where: { status: 'SOLD_OUT' } }),
+      this.prisma.product.count({ where: { status: 'SOLD' } }),
       this.prisma.user.count({ where: { status: 'ACTIVE' } }),
     ]);
 

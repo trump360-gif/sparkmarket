@@ -1,18 +1,39 @@
+'use client';
+
+import { useEffect, useState } from 'react';
 import { productsApi } from '@/lib/api/products';
 import ProductList from '@/components/product/ProductList';
+import type { Product } from '@/types';
 
-export default async function Home() {
-  let initialProducts = [];
-  let initialTotal = 0;
-  let initialPage = 1;
+export default function Home() {
+  const [initialProducts, setInitialProducts] = useState<Product[]>([]);
+  const [initialTotal, setInitialTotal] = useState(0);
+  const [initialPage, setInitialPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
 
-  try {
-    const response = await productsApi.getProducts({ page: 1, limit: 20 });
-    initialProducts = response.data;
-    initialTotal = response.total;
-    initialPage = response.page;
-  } catch (error) {
-    console.error('Failed to fetch initial products:', error);
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await productsApi.getProducts({ page: 1, limit: 20 });
+        setInitialProducts(response.data);
+        setInitialTotal(response.total);
+        setInitialPage(response.page);
+      } catch (error) {
+        console.error('Failed to fetch initial products:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <main className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-gray-500">로딩 중...</p>
+      </main>
+    );
   }
 
   return (

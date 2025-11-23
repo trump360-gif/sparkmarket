@@ -19,7 +19,7 @@ export class UpdateProductDto {
   @IsOptional()
   category?: string;
 
-  @IsEnum(['FOR_SALE', 'RESERVED', 'SOLD_OUT'])
+  @IsEnum(['FOR_SALE', 'SOLD', 'DELETED'])
   @IsOptional()
   status?: string;
 }

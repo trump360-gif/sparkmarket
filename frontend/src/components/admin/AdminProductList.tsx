@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { adminApi } from '@/lib/api/admin';
 import type { Product, ProductStatus } from '@/types';
 import Image from 'next/image';
@@ -15,7 +15,7 @@ export default function AdminProductList() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<ProductStatus | ''>('');
 
-  const fetchProducts = async () => {
+  const fetchProducts = useCallback(async () => {
     setIsLoading(true);
     try {
       const params: any = {
@@ -34,11 +34,11 @@ export default function AdminProductList() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [page, search, statusFilter]);
 
   useEffect(() => {
     fetchProducts();
-  }, [page, statusFilter]);
+  }, [fetchProducts]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

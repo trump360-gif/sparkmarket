@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { productsApi } from '@/lib/api/products';
 import type { Product, ProductQueryParams } from '@/types';
 import ProductCard from './ProductCard';
@@ -22,7 +22,7 @@ export default function ProductList({
   const [isLoading, setIsLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
 
-  const loadMore = async () => {
+  const loadMore = useCallback(async () => {
     if (isLoading || !hasMore) return;
 
     setIsLoading(true);
@@ -42,7 +42,7 @@ export default function ProductList({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [page, hasMore, isLoading]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -56,7 +56,7 @@ export default function ProductList({
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [page, hasMore, isLoading]);
+  }, [loadMore]);
 
   if (products.length === 0) {
     return (
