@@ -238,13 +238,80 @@ async function main() {
     },
   ];
 
+  // Image URLs by category (using Unsplash Source - lightweight and free)
+  const imagesByCategoryandIndex: Record<string, string[]> = {
+    ELECTRONICS: [
+      'https://images.unsplash.com/photo-1611532736579-6b16e2b50449?w=600&h=600&fit=crop', // iPhone
+      'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600&h=600&fit=crop', // MacBook
+      'https://images.unsplash.com/photo-1606841837239-c5a1a4a07af7?w=600&h=600&fit=crop', // AirPods
+      'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=600&h=600&fit=crop', // Tablet
+      'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=600&h=600&fit=crop', // Headphones
+    ],
+    FASHION: [
+      'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=600&h=600&fit=crop', // Sneakers
+      'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600&h=600&fit=crop', // Jacket
+      'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600&h=600&fit=crop', // Backpack
+    ],
+    HOME: [
+      'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=600&h=600&fit=crop', // TV
+      'https://images.unsplash.com/photo-1558317374-067fb5f30001?w=600&h=600&fit=crop', // Vacuum
+      'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600&h=600&fit=crop', // Mattress
+      'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=600&h=600&fit=crop', // Desk
+    ],
+    BOOKS: [
+      'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=600&h=600&fit=crop', // Book
+      'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=600&h=600&fit=crop', // Books
+      'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=600&h=600&fit=crop', // Study books
+    ],
+    SPORTS: [
+      'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=600&h=600&fit=crop', // Tennis
+      'https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=600&h=600&fit=crop', // Yoga
+      'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=600&h=600&fit=crop', // Camping
+    ],
+    OTHER: [
+      'https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?w=600&h=600&fit=crop', // PS5
+      'https://images.unsplash.com/photo-1578303512597-81e6cc155b3e?w=600&h=600&fit=crop', // Nintendo Switch
+    ],
+  };
+
+  let categoryCounters: Record<string, number> = {
+    ELECTRONICS: 0,
+    FASHION: 0,
+    HOME: 0,
+    BOOKS: 0,
+    SPORTS: 0,
+    OTHER: 0,
+  };
+
   for (const productData of products) {
-    await prisma.product.create({
+    const product = await prisma.product.create({
       data: productData,
     });
+
+    // Add product image
+    const category = productData.category;
+    const imageUrl = imagesByCategoryandIndex[category][categoryCounters[category]];
+
+    if (imageUrl) {
+      await prisma.productImage.create({
+        data: {
+          product_id: product.id,
+          url: imageUrl,
+          key: `seed/${category.toLowerCase()}/${categoryCounters[category]}.jpg`,
+          width: 600,
+          height: 600,
+          size: 50000, // ~50KB
+          format: 'jpg',
+          order: 0,
+          is_primary: true,
+        },
+      });
+    }
+
+    categoryCounters[category]++;
   }
 
-  console.log(`✅ Created ${products.length} products`);
+  console.log(`✅ Created ${products.length} products with images`);
 
   // Get final counts
   const userCount = await prisma.user.count();
