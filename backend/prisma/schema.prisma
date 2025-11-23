@@ -59,7 +59,7 @@ model Product {
   @@index([seller_id, created_at(sort: Desc)])
   @@index([status, created_at(sort: Desc)])
   @@index([category, created_at(sort: Desc)])
-  @@fulltext([title])
+  @@index([title])
   @@map("products")
 }
 
