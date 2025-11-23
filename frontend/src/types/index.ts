@@ -232,3 +232,32 @@ export interface CommissionStatistics {
   };
   recentTransactions: Transaction[];
 }
+
+// Price Offer Types
+export enum PriceOfferStatus {
+  PENDING = 'PENDING',
+  ACCEPTED = 'ACCEPTED',
+  REJECTED = 'REJECTED',
+  EXPIRED = 'EXPIRED',
+}
+
+export interface PriceOffer {
+  id: string;
+  product_id: string;
+  product?: Product;
+  buyer_id: string;
+  buyer?: User;
+  seller_id: string;
+  seller?: User;
+  offered_price: number;
+  message?: string;
+  status: PriceOfferStatus;
+  created_at: string;
+  updated_at: string;
+  expires_at: string;
+}
+
+export interface CreatePriceOfferRequest {
+  offered_price: number;
+  message?: string;
+}

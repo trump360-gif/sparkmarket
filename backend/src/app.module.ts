@@ -8,6 +8,8 @@ import { ProductsModule } from './products/products.module';
 import { ImagesModule } from './images/images.module';
 import { AdminModule } from './admin/admin.module';
 import { CommissionModule } from './commission/commission.module';
+import { FavoritesModule } from './favorites/favorites.module';
+import { PriceOffersModule } from './price-offers/price-offers.module';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { CommissionModule } from './commission/commission.module';
     ImagesModule,
     AdminModule,
     CommissionModule,
+    FavoritesModule,
+    PriceOffersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

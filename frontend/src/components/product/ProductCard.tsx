@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import FavoriteButton from '@/components/ui/FavoriteButton';
 import type { Product } from '@/types';
 
 interface ProductCardProps {
@@ -34,6 +35,11 @@ export default function ProductCard({ product }: ProductCardProps) {
             <span className="text-white text-2xl font-bold">판매완료</span>
           </div>
         )}
+
+        {/* 찜하기 버튼 */}
+        <div className="absolute top-2 right-2">
+          <FavoriteButton productId={product.id} size="sm" />
+        </div>
       </div>
 
       <div className="p-4">

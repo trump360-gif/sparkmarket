@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { adminApi } from '@/lib/api/admin';
+import { DashboardCardSkeleton, Skeleton } from '@/components/ui/Skeleton';
 import type { UserDetail, UserStatus } from '@/types';
 import Link from 'next/link';
 
@@ -41,20 +43,29 @@ export default function AdminUserDashboard({ userId }: AdminUserDashboardProps) 
 
     try {
       await adminApi.updateUserStatus(userId, { status: newStatus as UserStatus, reason });
-      alert(`${action}되었습니다.`);
+      toast.success(`${action}되었습니다.`);
 
       // Refresh user data
       const updatedData = await adminApi.getUserDetail(userId);
       setUser(updatedData);
     } catch (error) {
-      alert(`${action}에 실패했습니다.`);
+      toast.error(`${action}에 실패했습니다.`);
     }
   };
 
   if (isLoading) {
     return (
-      <div className="p-8 flex items-center justify-center">
-        <p className="text-gray-500">로딩 중...</p>
+      <div className="p-8">
+        <Skeleton className="h-10 w-64 mb-6" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <DashboardCardSkeleton />
+          <DashboardCardSkeleton />
+          <DashboardCardSkeleton />
+        </div>
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <Skeleton className="h-8 w-40 mb-6" />
+          <Skeleton className="h-64 w-full" />
+        </div>
       </div>
     );
   }

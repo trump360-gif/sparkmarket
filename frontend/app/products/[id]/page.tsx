@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { productsApi } from '@/lib/api/products';
 import ProductDetail from '@/components/product/ProductDetail';
+import { ProductDetailSkeleton } from '@/components/ui/Skeleton';
 import type { Product } from '@/types';
 
 export default function ProductPage() {
@@ -31,8 +32,10 @@ export default function ProductPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-500">로딩 중...</p>
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <ProductDetailSkeleton />
+        </div>
       </div>
     );
   }

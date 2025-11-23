@@ -1,9 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { productsApi } from '@/lib/api/products';
 import { adminApi } from '@/lib/api/admin';
+import { DashboardCardSkeleton, Skeleton } from '@/components/ui/Skeleton';
 import type { Product } from '@/types';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -40,17 +42,26 @@ export default function AdminProductDashboard({ productId }: AdminProductDashboa
 
     try {
       await adminApi.deleteProduct(productId, { reason });
-      alert('삭제되었습니다.');
+      toast.success('삭제되었습니다.');
       router.push('/admin/products');
     } catch (error) {
-      alert('삭제에 실패했습니다.');
+      toast.error('삭제에 실패했습니다.');
     }
   };
 
   if (isLoading) {
     return (
-      <div className="p-8 flex items-center justify-center">
-        <p className="text-gray-500">로딩 중...</p>
+      <div className="p-8">
+        <Skeleton className="h-10 w-64 mb-6" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <DashboardCardSkeleton />
+          <DashboardCardSkeleton />
+          <DashboardCardSkeleton />
+        </div>
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <Skeleton className="h-8 w-40 mb-6" />
+          <Skeleton className="h-96 w-full" />
+        </div>
       </div>
     );
   }

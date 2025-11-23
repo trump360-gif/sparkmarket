@@ -3,6 +3,7 @@
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { toast } from 'sonner';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 
 export default function AdminLayout({
@@ -15,10 +16,10 @@ export default function AdminLayout({
 
   useEffect(() => {
     if (!isAuthenticated) {
-      alert('로그인이 필요합니다.');
+      toast.error('로그인이 필요합니다.');
       router.push('/login');
     } else if (!isAdmin) {
-      alert('관리자 권한이 필요합니다.');
+      toast.error('관리자 권한이 필요합니다.');
       router.push('/');
     }
   }, [isAuthenticated, isAdmin, router]);

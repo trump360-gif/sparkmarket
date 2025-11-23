@@ -96,34 +96,56 @@
 
 ## Phase 6: UI/UX 개선 및 추가 기능 (Week 5-6)
 
-### Phase 6.1: UI/UX 기본 개선
-- [ ] Toast 알림 시스템 (sonner 라이브러리)
-- [ ] 로딩 스켈레톤 (주요 페이지)
-- [ ] Next.js Image 최적화
+### Phase 6.1: UI/UX 기본 개선 ✅ 완료
+- [x] Toast 알림 시스템 (sonner 라이브러리)
+- [x] 로딩 스켈레톤 (주요 페이지)
+- [x] Next.js Image 최적화
 - [ ] 에러 바운더리
 
 ### Phase 6.2: 핵심 거래 기능
-- [ ] 찜하기 (좋아요) 기능
-  - [ ] Backend: Favorite 모델 및 API
-  - [ ] Frontend: 하트 버튼, 찜 목록 페이지
-- [ ] 가격 제안 (네고) 기능
-  - [ ] Backend: PriceOffer 모델 및 API
-  - [ ] Frontend: 가격 제안 모달, 제안 관리
-- [ ] 마이페이지
-  - [ ] 내 정보 보기/수정
-  - [ ] 내가 등록한 상품 목록
-  - [ ] 내가 구매한 상품 목록
-  - [ ] 찜한 상품 목록
-  - [ ] 받은/보낸 가격 제안 목록
+- [x] 6.2-A: 찜하기 (좋아요) 기능 ✅ 완료
+  - [x] Backend: Favorite 모델 및 API
+  - [x] Frontend: 하트 버튼, 찜 목록 페이지
+- [x] 6.2-B: 가격 제안 (네고) 기능 ✅ 완료
+  - [x] Backend: PriceOffer 모델 및 API (72시간 만료)
+  - [x] Frontend: 가격 제안 모달, 제안 관리 페이지
+  - [x] 제안 수락 시 상품 가격 자동 변경
+  - [x] 보낸/받은 제안 탭 구현
+- [x] 6.2-C: 마이페이지 ✅ 완료
+  - [x] 프로필 헤더 (아바타 + 닉네임 + 이메일)
+  - [x] 탭 UI (내 상품 / 찜 목록 / 가격 제안)
+  - [x] 내가 등록한 상품 목록
+  - [x] 찜한 상품 목록
+  - [x] 가격 제안 요약 (보낸/받은 제안 수)
+  - [x] Navbar 프로필 클릭 시 마이페이지 이동
 
-### Phase 6.3: 검색 개선
-- [ ] 검색바 UI 개선 (Navbar 통합)
-- [ ] 검색 필터 강화
+### Phase 6.3: 검색 개선 ✅ 완료
+- [x] 검색바 UI 개선 (Navbar 통합)
+  - [x] Navbar 중앙에 검색바 추가
+  - [x] 검색어 입력 및 초기화 기능
+  - [x] URL 쿼리 파라미터 기반 검색
+- [x] 검색 필터 강화
+  - [x] SearchFilters 컴포넌트 생성
+  - [x] 카테고리 필터 (6개 카테고리)
+  - [x] 가격 범위 필터 (최소/최대)
+  - [x] 상태 필터 (전체/판매중/판매완료)
+  - [x] 필터 적용/초기화 기능
+  - [x] 메인 페이지에 필터 통합
 
-### Phase 6.4: 추가 개선 (선택사항)
-- [ ] 반응형 디자인 (모바일 최적화)
-- [ ] 빈 상태 UI (Empty State)
-- [ ] 확인 모달 컴포넌트
+### Phase 6.4: 추가 개선 ✅ 완료
+- [x] 확인 모달 컴포넌트
+  - [x] ConfirmModal 컴포넌트 생성
+  - [x] 커스터마이징 가능한 제목/메시지/버튼
+  - [x] Backdrop 클릭 닫기 지원
+- [x] 빈 상태 UI (Empty State)
+  - [x] EmptyState 컴포넌트 생성
+  - [x] 아이콘 프리셋 제공 (Box, Heart, Currency, Search, Inbox)
+  - [x] 액션 버튼 지원
+- [x] 반응형 디자인 (모바일 최적화)
+  - [x] Navbar 모바일 메뉴 추가
+  - [x] 모바일 검색바 구현
+  - [x] 햄버거 메뉴 토글
+  - [x] Grid 레이아웃 자동 반응형 (기존 완료)
 
 ## Phase 7: 배포 및 테스트 (Week 6-7)
 
@@ -236,9 +258,10 @@
 
 ## 현재 진행 상황
 
-**Phase**: 5.8 완료, Phase 6 준비
-**진행률**: Phase 1-5.8 Backend 완료 (100%), Frontend 기본 구현 (95%)
-**다음 작업**: Phase 6 - 검색/필터, 찜하기, 마이페이지, 토스트 등 추가 기능
+**Phase**: Phase 6 완료, Phase 7 준비
+**진행률**: Phase 1-6 완료 (100%)
+**완료**: 전체 Phase 6 완료 (UI/UX 개선 + 핵심 거래 기능 + 검색 + 추가 개선사항)
+**다음 작업**: Phase 7 - 배포 및 테스트
 
 ### 최근 업데이트 (2025-11-23)
 - ✅ Phase 1 완료: 프로젝트 초기 세팅
@@ -275,4 +298,38 @@
   - Backend: Commission 모듈, 수수료율 설정/통계 API, 구매 시 수수료 자동 계산
   - Frontend: 관리자 수수료 관리 페이지, 통계 대시보드, 거래 내역 목록
   - Migration: 기존 판매 완료 상품 거래 내역 백필 스크립트 실행 완료
-- 🔄 다음: Phase 6 - 검색바, 찜하기, 마이페이지, 토스트 알림, 로딩 스켈레톤
+- ✅ Phase 6.1 완료: UI/UX 기본 개선
+  - Toast 알림 시스템 (Sonner 라이브러리)
+  - 로딩 스켈레톤 (Skeleton 컴포넌트)
+  - Next.js Image 최적화
+- ✅ Phase 6.2-A 완료: 찜하기 기능
+  - Database: Favorite 모델 추가
+  - Backend: 찜하기 토글/확인/목록 API
+  - Frontend: FavoriteButton 컴포넌트, 찜 목록 페이지 (/favorites)
+  - ProductCard/ProductDetail에 찜 버튼 통합
+- ✅ Phase 6.2-B 완료: 가격 제안 (네고) 기능
+  - Database: PriceOffer 모델 (PENDING/ACCEPTED/REJECTED/EXPIRED)
+  - Backend: 가격 제안 생성/수락/거절 API, 72시간 만료 시스템
+  - Frontend: PriceOfferModal, OfferCard 컴포넌트
+  - 제안 관리 페이지 (/offers) - 보낸/받은 제안 탭
+  - 제안 수락 시 상품 가격 자동 변경 로직
+- ✅ Phase 6.2-C 완료: 마이페이지
+  - Frontend: /mypage 페이지 생성
+  - 프로필 헤더 (그라데이션 아바타 + 사용자 정보)
+  - 3개 탭: 내 상품 / 찜 목록 / 가격 제안 요약
+  - 내 상품 목록 (seller_id 필터링)
+  - 찜 목록 (favorites API 연동)
+  - 가격 제안 요약 카드 (보낸/받은 제안 수)
+  - Navbar 프로필 영역을 마이페이지 링크로 변경
+- ✅ Phase 6.3 완료: 검색 개선
+  - Frontend: Navbar에 검색바 추가 (중앙 배치)
+  - 검색어 입력 및 X 버튼으로 초기화
+  - SearchFilters 컴포넌트 (접기/펼치기 가능)
+  - 카테고리, 가격 범위, 상태 필터
+  - URL 쿼리 파라미터 기반 검색/필터
+  - 메인 페이지에서 검색 결과 표시
+- ✅ Phase 6.4 완료: 추가 개선사항
+  - Frontend: ConfirmModal 컴포넌트 (재사용 가능한 확인 모달)
+  - Frontend: EmptyState 컴포넌트 (일관된 빈 상태 UI)
+  - Frontend: Navbar 모바일 메뉴 (햄버거 메뉴 + 모바일 검색바)
+  - 반응형 디자인 완성

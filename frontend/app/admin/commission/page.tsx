@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { commissionApi } from '@/lib/api/commission';
+import { DashboardCardSkeleton, Skeleton } from '@/components/ui/Skeleton';
 import type { CommissionStatistics, CommissionSettings } from '@/types';
 
 export default function AdminCommissionPage() {
@@ -38,7 +40,7 @@ export default function AdminCommissionPage() {
     const rate = parseFloat(newRate);
 
     if (isNaN(rate) || rate < 0 || rate > 100) {
-      alert('수수료율은 0~100 사이의 숫자여야 합니다.');
+      toast.error('수수료율은 0~100 사이의 숫자여야 합니다.');
       return;
     }
 
@@ -50,10 +52,10 @@ export default function AdminCommissionPage() {
       setIsUpdating(true);
       const updated = await commissionApi.updateRate({ commission_rate: rate });
       setSettings(updated);
-      alert('수수료율이 성공적으로 변경되었습니다.');
+      toast.success('수수료율이 성공적으로 변경되었습니다.');
       await fetchData();
     } catch (err: any) {
-      alert(err.response?.data?.message || '수수료율 변경에 실패했습니다.');
+      toast.error(err.response?.data?.message || '수수료율 변경에 실패했습니다.');
     } finally {
       setIsUpdating(false);
     }
@@ -61,8 +63,16 @@ export default function AdminCommissionPage() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-lg">로딩 중...</div>
+      <div className="container mx-auto px-4 py-8">
+        <Skeleton className="h-10 w-48 mb-8" />
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+          <Skeleton className="h-8 w-40 mb-4" />
+          <Skeleton className="h-12 w-full" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <DashboardCardSkeleton />
+          <DashboardCardSkeleton />
+        </div>
       </div>
     );
   }

@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { toast } from 'sonner';
 import { adminApi } from '@/lib/api/admin';
+import { TableSkeleton } from '@/components/ui/Skeleton';
 import type { Product, ProductStatus } from '@/types';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -102,11 +104,11 @@ export default function AdminProductList({ initialStatus = '' }: AdminProductLis
 
     try {
       await adminApi.deleteProduct(id, { reason });
-      alert('삭제되었습니다.');
+      toast.success('삭제되었습니다.');
       setPage(1);
       fetchProducts(1, false);
     } catch (error) {
-      alert('삭제에 실패했습니다.');
+      toast.error('삭제에 실패했습니다.');
     }
   };
 
@@ -214,9 +216,7 @@ export default function AdminProductList({ initialStatus = '' }: AdminProductLis
       </div>
 
       {isLoading ? (
-        <div className="text-center py-12">
-          <p className="text-gray-500">로딩 중...</p>
-        </div>
+        <TableSkeleton rows={10} cols={8} />
       ) : (
         <>
           <div className="bg-white rounded-lg shadow overflow-hidden">

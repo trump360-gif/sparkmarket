@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { toast } from 'sonner';
 import Link from 'next/link';
 import { adminApi } from '@/lib/api/admin';
+import { TableSkeleton } from '@/components/ui/Skeleton';
 import type { User, UserStatus } from '@/types';
 
 export default function AdminUserList() {
@@ -60,10 +62,10 @@ export default function AdminUserList() {
         status: newStatus,
         reason: reason || undefined,
       });
-      alert(`${action}되었습니다.`);
+      toast.success(`${action}되었습니다.`);
       fetchUsers();
     } catch (error) {
-      alert(`${action}에 실패했습니다.`);
+      toast.error(`${action}에 실패했습니다.`);
     }
   };
 
@@ -136,9 +138,7 @@ export default function AdminUserList() {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-12">
-          <p className="text-gray-500">로딩 중...</p>
-        </div>
+        <TableSkeleton rows={10} cols={6} />
       ) : (
         <>
           <div className="bg-white rounded-lg shadow overflow-hidden">

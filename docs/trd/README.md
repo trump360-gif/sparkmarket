@@ -71,6 +71,13 @@
 - **product_images**: 상품 이미지 (정규화)
 - **commission_settings**: 수수료율 설정 (is_active로 이력 관리)
 - **transactions**: 거래 내역 (수수료 자동 계산 및 기록)
+- **favorites**: 찜하기 정보 (user_id + product_id 복합 유니크)
+- **price_offers**: 가격 제안 내역
+  - **buyer_id**: 제안한 구매자
+  - **seller_id**: 판매자
+  - **offered_price**: 제안 가격
+  - **status**: PENDING/ACCEPTED/REJECTED/EXPIRED
+  - **expires_at**: 72시간 자동 만료
 
 ## 4. API 명세
 
@@ -263,39 +270,64 @@ Response: { isFavorited: boolean }
 
 #### 가격 제안 생성
 ```
-POST /api/products/:id/offers
+POST /api/price-offers/products/:productId
 Headers: { Authorization: Bearer <token> }
 Body: { offered_price: number, message?: string }
 Response: { offer }
+Validation:
+  - offered_price < product.price (제안 가격은 판매가보다 낮아야 함)
+  - 본인 상품에는 제안 불가
+  - 판매중(FOR_SALE) 상품만 가능
+  - expires_at: 72시간 후 자동 설정
 ```
 
 #### 받은 가격 제안 목록 (판매자)
 ```
-GET /api/offers/received?page=1&limit=20
+GET /api/price-offers/received?page=1&limit=20
 Headers: { Authorization: Bearer <token> }
 Response: { data: [...], meta: { total, page, limit, totalPages } }
+Include: buyer 정보, product 정보 (이미지 포함)
 ```
 
 #### 보낸 가격 제안 목록 (구매자)
 ```
-GET /api/offers/sent?page=1&limit=20
+GET /api/price-offers/sent?page=1&limit=20
 Headers: { Authorization: Bearer <token> }
 Response: { data: [...], meta: { total, page, limit, totalPages } }
+Include: seller 정보, product 정보 (이미지 포함)
 ```
 
-#### 가격 제안 수락/거절
+#### 상품별 가격 제안 목록
 ```
-PATCH /api/offers/:id/status
+GET /api/price-offers/products/:productId?page=1&limit=20
 Headers: { Authorization: Bearer <token> }
-Body: { status: 'ACCEPTED' | 'REJECTED' }
+Response: { data: [...], meta: { total, page, limit, totalPages } }
+Note: 본인이 판매자인 상품만 조회 가능
+```
+
+#### 가격 제안 수락
+```
+PATCH /api/price-offers/:offerId/accept
+Headers: { Authorization: Bearer <token> }
 Response: { offer }
+Effect:
+  - offer.status → ACCEPTED
+  - product.price → offer.offered_price (상품 가격 자동 변경)
+Validation:
+  - 본인이 판매자인 제안만 수락 가능
+  - PENDING 상태만 수락 가능
+  - 만료되지 않은 제안만 가능
 ```
 
-#### 가격 제안 취소
+#### 가격 제안 거절
 ```
-DELETE /api/offers/:id
+PATCH /api/price-offers/:offerId/reject
 Headers: { Authorization: Bearer <token> }
-Response: { success: true }
+Response: { offer }
+Effect: offer.status → REJECTED
+Validation:
+  - 본인이 판매자인 제안만 거절 가능
+  - PENDING 상태만 거절 가능
 ```
 
 ## 5. 보안
@@ -451,6 +483,7 @@ npx prisma db seed
   - axios (API 클라이언트)
   - zustand (상태 관리)
   - react-hook-form + zod (폼 검증)
+  - sonner (Toast 알림)
 
 ##### 인증 시스템
 - [x] 로그인/회원가입 페이지
@@ -471,10 +504,24 @@ npx prisma db seed
 - [x] 상품 관리 (검색, 필터, 삭제)
 - [x] 유저 관리 (검색, 차단/활성화)
 
+##### 사용자 기능 (Phase 6.2)
+- [x] 찜하기 기능 (하트 아이콘 토글)
+- [x] 찜 목록 페이지
+- [x] 가격 제안 모달 (실시간 할인액 계산)
+- [x] 가격 제안 관리 페이지 (보낸/받은 제안)
+- [x] 마이페이지 (내 상품/찜 목록/가격 제안 요약)
+
 ##### 공통 컴포넌트
-- [x] Navbar (로그인 상태별 메뉴)
+- [x] Navbar (로그인 상태별 메뉴, 찜/제안 링크, 마이페이지)
 - [x] ProductCard, ProductList
 - [x] ProductForm (등록/수정)
+- [x] FavoriteButton (찜하기 토글)
+- [x] PriceOfferModal (가격 제안 폼)
+- [x] OfferCard (제안 카드 + 수락/거절)
+- [x] Skeleton (로딩 UI)
+- [x] ConfirmModal (확인 다이얼로그)
+- [x] EmptyState (빈 상태 UI)
+- [x] SearchFilters (검색 필터 패널)
 
 ### 📦 의존성
 
@@ -584,6 +631,122 @@ npx prisma db seed
   - 전체/월별 통계 대시보드 (거래 수, 총 매출, 총 수수료, 판매자 수령액)
   - 최근 거래 내역 테이블
 - **Migration**: 기존 판매 완료 상품 거래 내역 백필 (4건 처리 완료)
+
+### 📝 주요 변경사항 (Phase 6.2)
+
+#### 찜하기 기능 (Phase 6.2-A)
+- **Database**: Favorite 모델 추가
+  - user_id, product_id 복합 유니크 제약
+  - 인덱스: user_id + created_at (DESC), product_id
+- **Backend**: Favorites 모듈 구현
+  - POST `/favorites/toggle/:productId` - 찜하기 추가/취소 토글
+  - GET `/favorites/check/:productId` - 찜 여부 확인
+  - GET `/favorites` - 찜한 상품 목록 (페이지네이션)
+- **Frontend**:
+  - FavoriteButton 컴포넌트 (하트 아이콘 + 애니메이션)
+  - 찜 목록 페이지 (/favorites)
+  - ProductDetail에 찜하기 버튼 통합
+
+#### 가격 제안 기능 (Phase 6.2-B)
+- **Database**: PriceOffer 모델 추가
+  - buyer_id, seller_id, product_id, offered_price, message
+  - status: PENDING/ACCEPTED/REJECTED/EXPIRED
+  - expires_at: 72시간 자동 만료
+  - 인덱스: product_id, buyer_id, seller_id + status
+- **Backend**: PriceOffers 모듈 구현
+  - POST `/price-offers/products/:productId` - 가격 제안 생성
+  - GET `/price-offers/received` - 받은 제안 목록
+  - GET `/price-offers/sent` - 보낸 제안 목록
+  - GET `/price-offers/products/:productId` - 상품별 제안 목록
+  - PATCH `/price-offers/:offerId/accept` - 제안 수락 (상품 가격 자동 변경)
+  - PATCH `/price-offers/:offerId/reject` - 제안 거절
+- **Frontend**:
+  - PriceOfferModal 컴포넌트 (실시간 할인액 표시)
+  - OfferCard 컴포넌트 (수락/거절 버튼)
+  - 가격 제안 관리 페이지 (/offers)
+  - Navbar에 "💰 가격 제안" 링크 추가
+
+#### 마이페이지 (Phase 6.2-C)
+- **Frontend**: /mypage 구현
+  - 프로필 헤더 (그라데이션 아바타)
+  - 3개 탭: 내 상품, 찜 목록, 가격 제안
+  - 내 상품: seller_id 필터링
+  - 찜 목록: Favorites API 연동
+  - 가격 제안: 보낸/받은 제안 요약 + 상세 페이지 링크
+  - 빈 상태 UI (Empty State) + CTA 버튼
+- **Navbar**: 프로필 영역 클릭 시 마이페이지 이동
+
+### 📝 주요 변경사항 (Phase 6.3)
+
+#### 검색 개선
+- **Navbar.tsx 업데이트**:
+  - `useSearchParams` 훅으로 URL 쿼리 파라미터 읽기
+  - `searchQuery` 상태를 URL과 동기화 (useEffect)
+  - 중앙 검색바 추가 (flex-1 max-w-xl)
+  - X 버튼으로 검색어 클리어 기능
+  - 모바일 반응형 (md:block/hidden)
+
+- **SearchFilters.tsx 생성**:
+  - 카테고리 필터: 6개 카테고리 셀렉트박스
+  - 가격 범위: minPrice, maxPrice 입력 (숫자 타입)
+  - 상태 필터: 전체/판매중/판매완료 셀렉트박스
+  - 접을 수 있는 패널 (showFilters 토글)
+  - 활성 필터 배지 표시
+  - 초기화/적용 버튼
+  - URL 쿼리 파라미터로 필터 적용
+
+- **page.tsx 업데이트**:
+  - `useSearchParams` 훅으로 쿼리 읽기
+  - `search`, `category`, `minPrice`, `maxPrice`, `status` 파라미터 추출
+  - API 호출 시 필터 파라미터 전달
+  - 동적 타이틀: 검색어 있으면 "검색 결과" 표시
+  - 필터 적용 여부 표시
+
+### 📝 주요 변경사항 (Phase 6.4)
+
+#### 추가 개선사항
+
+**1. ConfirmModal.tsx 생성**:
+- 재사용 가능한 확인 다이얼로그 컴포넌트
+- Props:
+  - `isOpen`, `onClose`, `onConfirm` (필수)
+  - `title`, `message` (필수)
+  - `confirmText`, `cancelText` (선택, 기본값: "확인", "취소")
+  - `confirmButtonClass` (선택, 기본값: 빨간색 스타일)
+- Features:
+  - Fixed 오버레이 + 중앙 모달 (z-50)
+  - 백드롭 클릭 시 닫기
+  - Body 스크롤 방지 (useEffect로 overflow 제어)
+  - 경고 아이콘 (빨간 원 배경)
+  - 반응형 버튼 레이아웃 (모바일: 세로, 데스크톱: 가로)
+- 사용처: 상품 삭제, 구매 확인, 제안 거절 등
+
+**2. EmptyState.tsx 생성**:
+- 재사용 가능한 빈 상태 UI 컴포넌트
+- Props:
+  - `icon` (선택, ReactNode)
+  - `title` (필수)
+  - `description` (선택)
+  - `action` (선택, {label, onClick})
+- EmptyIcons 프리셋 5종:
+  - `Box`: 일반 빈 목록 (상품 없음)
+  - `Heart`: 찜 목록 비어있음
+  - `Currency`: 가격 제안 없음
+  - `Search`: 검색 결과 없음
+  - `Inbox`: 메시지/알림 없음
+- 사용처: 찜 목록, 가격 제안, 내 상품, 검색 결과 등
+
+**3. Navbar.tsx 모바일 반응형**:
+- 햄버거 메뉴 버튼 (`sm:hidden` 표시)
+- `isMobileMenuOpen` 상태로 메뉴 토글
+- 아이콘 전환: 햄버거(☰) ↔ X 아이콘
+- 모바일 드롭다운 메뉴:
+  - 모바일 검색바 포함
+  - 모든 네비게이션 링크 (홈, 찜 목록, 가격 제안)
+  - 마이페이지, 판매하기, 관리자(조건부)
+  - 로그아웃 버튼
+- 링크 클릭 시 자동으로 메뉴 닫기
+- Desktop 버튼들은 `hidden sm:block`으로 숨김
 
 ### 🎯 다음 단계
 

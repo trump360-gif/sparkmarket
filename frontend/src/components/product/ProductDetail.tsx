@@ -1,10 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth';
 import { productsApi } from '@/lib/api/products';
+import FavoriteButton from '@/components/ui/FavoriteButton';
+import PriceOfferModal from '@/components/product/PriceOfferModal';
 import type { Product } from '@/types';
 
 interface ProductDetailProps {
@@ -16,6 +19,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   const { user, isAuthenticated } = useAuth();
   const [selectedImage, setSelectedImage] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
 
   const formattedPrice = new Intl.NumberFormat('ko-KR').format(product.price);
   const isOwner = isAuthenticated && user?.id === product.seller_id;
@@ -26,10 +30,10 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     setIsDeleting(true);
     try {
       await productsApi.deleteProduct(product.id);
-      alert('상품이 삭제되었습니다.');
+      toast.success('상품이 삭제되었습니다.');
       router.push('/');
     } catch (error) {
-      alert('삭제에 실패했습니다.');
+      toast.error('삭제에 실패했습니다.');
     } finally {
       setIsDeleting(false);
     }
@@ -41,7 +45,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
   const handlePurchase = async () => {
     if (!isAuthenticated) {
-      alert('로그인이 필요합니다.');
+      toast.error('로그인이 필요합니다.');
       router.push('/login');
       return;
     }
@@ -50,21 +54,21 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
     try {
       await productsApi.purchaseProduct(product.id);
-      alert('구매가 완료되었습니다!');
+      toast.success('구매가 완료되었습니다!');
       router.refresh();
     } catch (error: any) {
       const message = error.response?.data?.message || '구매에 실패했습니다.';
-      alert(message);
+      toast.error(message);
     }
   };
 
   const handleInquiry = () => {
     if (!isAuthenticated) {
-      alert('로그인이 필요합니다.');
+      toast.error('로그인이 필요합니다.');
       router.push('/login');
       return;
     }
-    alert('채팅 기능은 추후 업데이트 예정입니다.');
+    toast.info('채팅 기능은 추후 업데이트 예정입니다.');
   };
 
   return (
@@ -175,12 +179,24 @@ export default function ProductDetail({ product }: ProductDetailProps) {
               </div>
             ) : (
               <>
+                <div className="flex space-x-3">
+                  <button
+                    onClick={handlePurchase}
+                    disabled={product.status === 'SOLD'}
+                    className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {product.status === 'SOLD' ? '판매완료' : '구매하기'}
+                  </button>
+                  <div className="flex items-center">
+                    <FavoriteButton productId={product.id} size="lg" />
+                  </div>
+                </div>
                 <button
-                  onClick={handlePurchase}
+                  onClick={() => setIsOfferModalOpen(true)}
                   disabled={product.status === 'SOLD'}
-                  className="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                  className="w-full bg-purple-600 text-white py-3 px-4 rounded-md hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                 >
-                  {product.status === 'SOLD' ? '판매완료' : '구매하기'}
+                  가격 제안하기
                 </button>
                 <button
                   onClick={handleInquiry}
@@ -200,6 +216,13 @@ export default function ProductDetail({ product }: ProductDetailProps) {
           </div>
         </div>
       </div>
+
+      {/* 가격 제안 모달 */}
+      <PriceOfferModal
+        product={product}
+        isOpen={isOfferModalOpen}
+        onClose={() => setIsOfferModalOpen(false)}
+      />
     </div>
   );
 }
