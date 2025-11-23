@@ -131,7 +131,12 @@ export default function ProductDetail({ product }: ProductDetailProps) {
               </span>
             </div>
 
-            <h1 className="text-3xl font-bold mb-4">{product.title}</h1>
+            <div className="flex items-center justify-between mb-4">
+              <h1 className="text-3xl font-bold">{product.title}</h1>
+              {!isOwner && (
+                <FavoriteButton productId={product.id} size="lg" />
+              )}
+            </div>
             <p className="text-4xl font-bold text-blue-600 mb-6">{formattedPrice}원</p>
 
             <div className="border-t border-b py-4 mb-6">
@@ -179,40 +184,29 @@ export default function ProductDetail({ product }: ProductDetailProps) {
               </div>
             ) : (
               <>
-                <div className="flex space-x-3">
-                  <button
-                    onClick={handlePurchase}
-                    disabled={product.status === 'SOLD'}
-                    className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-                  >
-                    {product.status === 'SOLD' ? '판매완료' : '구매하기'}
-                  </button>
-                  <div className="flex items-center">
-                    <FavoriteButton productId={product.id} size="lg" />
-                  </div>
-                </div>
+                <button
+                  onClick={handlePurchase}
+                  disabled={product.status === 'SOLD'}
+                  className="w-full bg-blue-600 text-white py-2.5 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                >
+                  {product.status === 'SOLD' ? '판매완료' : '구매하기'}
+                </button>
                 <button
                   onClick={() => setIsOfferModalOpen(true)}
                   disabled={product.status === 'SOLD'}
-                  className="w-full bg-purple-600 text-white py-3 px-4 rounded-md hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                  className="w-full bg-purple-600 text-white py-2.5 px-4 rounded-md hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                 >
                   가격 제안하기
                 </button>
                 <button
                   onClick={handleInquiry}
                   disabled={product.status === 'SOLD'}
-                  className="w-full bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                  className="w-full bg-green-600 text-white py-2.5 px-4 rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
                 >
                   문의하기
                 </button>
               </>
             )}
-            <button
-              onClick={() => router.back()}
-              className="w-full px-6 py-3 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-            >
-              목록
-            </button>
           </div>
         </div>
       </div>

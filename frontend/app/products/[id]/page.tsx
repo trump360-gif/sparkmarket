@@ -32,7 +32,7 @@ export default function ProductPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-gray-50 py-8 pt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ProductDetailSkeleton />
         </div>
@@ -42,7 +42,7 @@ export default function ProductPage() {
 
   if (error || !product) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center pt-16">
         <div className="text-center">
           <p className="text-gray-500 mb-4">상품을 찾을 수 없습니다.</p>
           <button
@@ -57,8 +57,27 @@ export default function ProductPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-8 pt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <button
+          onClick={() => router.back()}
+          className="mb-4 flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+        >
+          <svg
+            className="w-5 h-5 mr-1"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+          목록으로 돌아가기
+        </button>
         <ProductDetail product={product} />
       </div>
     </div>

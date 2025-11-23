@@ -28,7 +28,7 @@ export default function EditProductPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center pt-16">
         <p className="text-gray-500">로딩 중...</p>
       </div>
     );
@@ -36,14 +36,14 @@ export default function EditProductPage() {
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center pt-16">
         <p className="text-gray-500">상품을 찾을 수 없습니다.</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-8 pt-16">
       <div className="max-w-4xl mx-auto px-4">
         <ProductForm initialData={product} isEdit />
       </div>

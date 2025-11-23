@@ -70,7 +70,7 @@ export default function OffersPage() {
   const totalPages = Math.ceil(currentTotal / 20);
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-gray-50 pt-16">
       <div className="max-w-5xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-6">가격 제안 관리</h1>
 

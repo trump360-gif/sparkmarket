@@ -122,6 +122,41 @@ export default function PriceOfferModal({
                 원
               </span>
             </div>
+
+            {/* 금액 조정 버튼 */}
+            <div className="mt-3 flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const newPrice = Math.max(0, (parseInt(offeredPrice) || product.price) - 1000);
+                  setOfferedPrice(newPrice.toString());
+                }}
+                className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+              >
+                -1,000원
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const newPrice = Math.max(0, (parseInt(offeredPrice) || product.price) - 10000);
+                  setOfferedPrice(newPrice.toString());
+                }}
+                className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+              >
+                -10,000원
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const newPrice = Math.max(0, (parseInt(offeredPrice) || product.price) - 100000);
+                  setOfferedPrice(newPrice.toString());
+                }}
+                className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+              >
+                -100,000원
+              </button>
+            </div>
+
             {offeredPrice && parseInt(offeredPrice) > 0 && (
               <p className="mt-2 text-sm text-gray-500">
                 {product.price - parseInt(offeredPrice) > 0

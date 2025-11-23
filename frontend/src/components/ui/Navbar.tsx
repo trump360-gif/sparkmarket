@@ -32,7 +32,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg sticky top-0 z-50">
+    <nav className="bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg fixed top-0 left-0 right-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center space-x-4">
@@ -43,16 +43,6 @@ export default function Navbar() {
               </span>
             </Link>
 
-            {isAuthenticated && (
-              <div className="hidden lg:flex items-center space-x-1">
-                <Link
-                  href="/"
-                  className="px-3 py-2 text-white/80 hover:text-white hover:bg-white/10 rounded-md transition-all"
-                >
-                  홈
-                </Link>
-              </div>
-            )}
           </div>
 
           {/* 검색바 */}
@@ -120,12 +110,6 @@ export default function Navbar() {
                   <span className="text-sm font-medium text-white">
                     {user?.nickname}
                   </span>
-                </Link>
-                <Link
-                  href="/products/new"
-                  className="hidden sm:block px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-all font-medium shadow-sm hover:shadow"
-                >
-                  + 판매하기
                 </Link>
                 {isAdmin && (
                   <Link
@@ -220,20 +204,6 @@ export default function Navbar() {
                 className="block px-4 py-3 text-white hover:bg-white/10 rounded-lg transition-all"
               >
                 마이페이지
-              </Link>
-              <Link
-                href="/"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block px-4 py-3 text-white hover:bg-white/10 rounded-lg transition-all"
-              >
-                홈
-              </Link>
-              <Link
-                href="/products/new"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block px-4 py-3 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-all font-medium text-center"
-              >
-                + 판매하기
               </Link>
               {isAdmin && (
                 <Link

@@ -2,14 +2,17 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { productsApi } from '@/lib/api/products';
 import ProductList from '@/components/product/ProductList';
 import SearchFilters from '@/components/product/SearchFilters';
 import { ProductListSkeleton } from '@/components/ui/Skeleton';
+import { useAuth } from '@/hooks/useAuth';
 import type { Product } from '@/types';
 
 export default function Home() {
   const searchParams = useSearchParams();
+  const { isAuthenticated } = useAuth();
   const [initialProducts, setInitialProducts] = useState<Product[]>([]);
   const [initialTotal, setInitialTotal] = useState(0);
   const [initialPage, setInitialPage] = useState(1);
@@ -69,16 +72,26 @@ export default function Home() {
     searchParams.get('status');
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-gray-50 pt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {searchQuery ? `"${searchQuery}" 검색 결과` : '전체 상품'}
-          </h1>
-          <p className="text-gray-600">
-            총 {initialTotal}개의 상품
-            {hasActiveFilters && ' (필터 적용됨)'}
-          </p>
+        <div className="mb-6 flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              {searchQuery ? `"${searchQuery}" 검색 결과` : '전체 상품'}
+            </h1>
+            <p className="text-gray-600">
+              총 {initialTotal}개의 상품
+              {hasActiveFilters && ' (필터 적용됨)'}
+            </p>
+          </div>
+          {isAuthenticated && (
+            <Link
+              href="/products/new"
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-medium shadow-md hover:shadow-lg whitespace-nowrap"
+            >
+              + 판매하기
+            </Link>
+          )}
         </div>
 
         <SearchFilters />
