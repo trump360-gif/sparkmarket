@@ -20,7 +20,7 @@ export default function AdminProductDashboard({ productId }: AdminProductDashboa
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const data = await productsApi.getProductById(productId);
+        const data = await productsApi.getProduct(productId);
         setProduct(data);
       } catch (error) {
         console.error('Failed to fetch product:', error);
