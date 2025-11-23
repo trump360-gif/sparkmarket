@@ -1,0 +1,33 @@
+import { apiClient } from '../axios';
+import type { PresignedUrlRequest, PresignedUrlResponse } from '@/types';
+import axios from 'axios';
+
+export const uploadApi = {
+  getPresignedUrl: async (data: PresignedUrlRequest): Promise<PresignedUrlResponse> => {
+    const response = await apiClient.post<PresignedUrlResponse>('/api/upload/presigned-url', data);
+    return response.data;
+  },
+
+  uploadToR2: async (uploadUrl: string, file: File): Promise<void> => {
+    await axios.put(uploadUrl, file, {
+      headers: {
+        'Content-Type': file.type,
+      },
+    });
+  },
+
+  uploadImage: async (file: File): Promise<PresignedUrlResponse> => {
+    // 1. Get presigned URL
+    const presignedData = await uploadApi.getPresignedUrl({
+      filename: file.name,
+      contentType: file.type,
+      size: file.size,
+    });
+
+    // 2. Upload to R2
+    await uploadApi.uploadToR2(presignedData.uploadUrl, file);
+
+    // 3. Return image metadata
+    return presignedData;
+  },
+};
