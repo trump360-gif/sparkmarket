@@ -7,6 +7,7 @@ const menuItems = [
   { href: '/admin', label: '대시보드', icon: '📊', description: '통계 및 현황' },
   { href: '/admin/products', label: '상품 관리', icon: '📦', description: '상품 목록 관리' },
   { href: '/admin/users', label: '유저 관리', icon: '👥', description: '회원 관리' },
+  { href: '/admin/commission', label: '수수료 관리', icon: '💰', description: '수수료 설정 및 통계' },
 ];
 
 export default function AdminSidebar() {

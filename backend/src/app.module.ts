@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { ProductsModule } from './products/products.module';
 import { ImagesModule } from './images/images.module';
 import { AdminModule } from './admin/admin.module';
+import { CommissionModule } from './commission/commission.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { AdminModule } from './admin/admin.module';
     ProductsModule,
     ImagesModule,
     AdminModule,
+    CommissionModule,
   ],
   controllers: [AppController],
   providers: [AppService],

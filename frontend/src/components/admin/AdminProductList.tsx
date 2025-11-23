@@ -6,7 +6,11 @@ import type { Product, ProductStatus } from '@/types';
 import Image from 'next/image';
 import Link from 'next/link';
 
-export default function AdminProductList() {
+interface AdminProductListProps {
+  initialStatus?: ProductStatus | '';
+}
+
+export default function AdminProductList({ initialStatus = '' }: AdminProductListProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
@@ -14,7 +18,7 @@ export default function AdminProductList() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<ProductStatus | ''>('');
+  const [statusFilter, setStatusFilter] = useState<ProductStatus | ''>(initialStatus);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
@@ -135,36 +139,75 @@ export default function AdminProductList() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-4">상품 관리</h1>
 
-        <div className="flex space-x-4 mb-4">
-          <form onSubmit={handleSearch} className="flex-1 flex space-x-2">
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="상품 제목으로 검색..."
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <button
-              type="submit"
-              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-            >
-              검색
-            </button>
-          </form>
+        <form onSubmit={handleSearch} className="flex space-x-2 mb-4">
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="상품 제목으로 검색..."
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <button
+            type="submit"
+            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            검색
+          </button>
+        </form>
 
-          <select
-            value={statusFilter}
-            onChange={(e) => {
-              setStatusFilter(e.target.value as ProductStatus | '');
+        <div className="flex space-x-2 mb-4">
+          <button
+            onClick={() => {
+              setStatusFilter('');
               setPage(1);
             }}
-            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={`px-4 py-2 rounded-md font-medium transition-colors ${
+              statusFilter === ''
+                ? 'bg-gray-900 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
           >
-            <option value="">전체 상태</option>
-            <option value="FOR_SALE">판매중</option>
-            <option value="SOLD">판매완료</option>
-            <option value="DELETED">삭제됨</option>
-          </select>
+            전체 상태
+          </button>
+          <button
+            onClick={() => {
+              setStatusFilter('FOR_SALE');
+              setPage(1);
+            }}
+            className={`px-4 py-2 rounded-md font-medium transition-colors ${
+              statusFilter === 'FOR_SALE'
+                ? 'bg-green-600 text-white'
+                : 'bg-green-100 text-green-700 hover:bg-green-200'
+            }`}
+          >
+            판매중
+          </button>
+          <button
+            onClick={() => {
+              setStatusFilter('SOLD');
+              setPage(1);
+            }}
+            className={`px-4 py-2 rounded-md font-medium transition-colors ${
+              statusFilter === 'SOLD'
+                ? 'bg-blue-600 text-white'
+                : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+            }`}
+          >
+            판매완료
+          </button>
+          <button
+            onClick={() => {
+              setStatusFilter('DELETED');
+              setPage(1);
+            }}
+            className={`px-4 py-2 rounded-md font-medium transition-colors ${
+              statusFilter === 'DELETED'
+                ? 'bg-red-600 text-white'
+                : 'bg-red-100 text-red-700 hover:bg-red-200'
+            }`}
+          >
+            삭제됨
+          </button>
         </div>
 
         <p className="text-gray-600">총 {total}개의 상품</p>

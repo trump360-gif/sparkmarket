@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,7 +13,7 @@ import type { Product } from '@/types';
 const productSchema = z.object({
   title: z.string().min(2, '제목은 최소 2자 이상이어야 합니다').max(100, '제목은 100자 이하여야 합니다'),
   description: z.string().min(10, '설명은 최소 10자 이상이어야 합니다'),
-  price: z.number().min(0, '가격은 0원 이상이어야 합니다'),
+  price: z.number().min(0, '가격은 0원 이상이어야 합니다').max(2147483647, '가격은 2,147,483,647원 이하여야 합니다'),
   category: z.nativeEnum(ProductCategory),
 });
 
@@ -23,6 +23,8 @@ interface ProductFormProps {
   initialData?: Product;
   isEdit?: boolean;
 }
+
+const STORAGE_KEY = 'product_form_draft';
 
 export default function ProductForm({ initialData, isEdit = false }: ProductFormProps) {
   const router = useRouter();
@@ -38,6 +40,8 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
     register,
     handleSubmit,
     formState: { errors },
+    watch,
+    setValue,
   } = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
     defaultValues: initialData ? {
@@ -47,6 +51,35 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
       category: initialData.category,
     } : undefined,
   });
+
+  // localStorage에서 임시 저장 데이터 복원 (편집 모드가 아닐 때만)
+  useEffect(() => {
+    if (!isEdit && !initialData) {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          if (data.title) setValue('title', data.title);
+          if (data.description) setValue('description', data.description);
+          if (data.price !== undefined) setValue('price', data.price);
+          if (data.category) setValue('category', data.category);
+        } catch (e) {
+          console.error('Failed to restore draft:', e);
+        }
+      }
+    }
+  }, [isEdit, initialData, setValue]);
+
+  // 폼 데이터 자동 저장 (편집 모드가 아닐 때만)
+  useEffect(() => {
+    if (isEdit || initialData) return;
+
+    const subscription = watch((data) => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    });
+
+    return () => subscription.unsubscribe();
+  }, [watch, isEdit, initialData]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -84,7 +117,7 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
           images.map(async (file, index) => {
             const result = await uploadApi.uploadImage(file);
             return {
-              url: result.imageUrl,
+              url: result.publicUrl,
               key: result.key,
               order: index,
               is_primary: index === 0,
@@ -107,6 +140,8 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
           ...productData,
           images: uploadedImages,
         });
+        // 등록 성공 시 임시 저장 데이터 삭제
+        localStorage.removeItem(STORAGE_KEY);
         router.push(`/products/${newProduct.id}`);
       }
     } catch (err: any) {

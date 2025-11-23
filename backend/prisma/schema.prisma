@@ -76,10 +76,10 @@ model ProductImage {
 
   url        String
   key        String   // R2 storage key
-  width      Int
-  height     Int
-  size       Int      // bytes
-  format     String   // webp, jpg, png
+  width      Int?
+  height     Int?
+  size       Int?      // bytes
+  format     String?   // webp, jpg, png
   order      Int      @default(0)
   is_primary Boolean  @default(false)
 
@@ -87,4 +87,43 @@ model ProductImage {
 
   @@index([product_id, order])
   @@map("product_images")
+}
+
+// ========================================
+// CommissionSettings
+// ========================================
+model CommissionSettings {
+  id              String   @id @default(cuid())
+  commission_rate Float    @default(5.0) // 수수료율 (퍼센트)
+  is_active       Boolean  @default(true)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  @@map("commission_settings")
+}
+
+// ========================================
+// Transaction
+// ========================================
+model Transaction {
+  id              String   @id @default(cuid())
+  product_id      String
+  seller_id       String
+  buyer_id        String
+
+  product_price   Int      // 상품 가격
+  commission_rate Float    // 적용된 수수료율
+  commission_amount Int    // 수수료 금액
+  seller_amount   Int      // 판매자가 받는 금액
+
+  status          String   @default("COMPLETED") // COMPLETED | CANCELLED | REFUNDED
+
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  @@index([seller_id, created_at(sort: Desc)])
+  @@index([buyer_id, created_at(sort: Desc)])
+  @@index([created_at(sort: Desc)])
+  @@index([status, created_at(sort: Desc)])
+  @@map("transactions")
 }

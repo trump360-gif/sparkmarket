@@ -1,15 +1,19 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { CommissionService } from '../commission/commission.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { QueryProductDto } from './dto/query-product.dto';
 
 @Injectable()
 export class ProductsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private commissionService: CommissionService,
+  ) {}
 
   async create(userId: string, createProductDto: CreateProductDto) {
-    const { title, description, price, category } = createProductDto;
+    const { title, description, price, category, images } = createProductDto;
 
     const product = await this.prisma.product.create({
       data: {
@@ -19,6 +23,16 @@ export class ProductsService {
         price,
         category,
         status: 'FOR_SALE',
+        images: images
+          ? {
+              create: images.map((img) => ({
+                url: img.url,
+                key: img.key,
+                order: img.order,
+                is_primary: img.is_primary,
+              })),
+            }
+          : undefined,
       },
       include: {
         seller: {
@@ -172,21 +186,42 @@ export class ProductsService {
       throw new ForbiddenException('본인의 상품은 구매할 수 없습니다');
     }
 
-    const updatedProduct = await this.prisma.product.update({
-      where: { id },
-      data: { status: 'SOLD' },
-      include: {
-        seller: {
-          select: {
-            id: true,
-            email: true,
-            nickname: true,
-            avatar_url: true,
+    // 현재 수수료율 조회
+    const commissionSettings = await this.commissionService.getCurrentRate();
+    const commissionRate = commissionSettings.commission_rate;
+    const commissionAmount = Math.floor((product.price * commissionRate) / 100);
+    const sellerAmount = product.price - commissionAmount;
+
+    // 트랜잭션으로 상품 상태 변경 및 거래 기록 생성
+    const [updatedProduct, transaction] = await this.prisma.$transaction([
+      this.prisma.product.update({
+        where: { id },
+        data: { status: 'SOLD' },
+        include: {
+          seller: {
+            select: {
+              id: true,
+              email: true,
+              nickname: true,
+              avatar_url: true,
+            },
           },
+          images: true,
         },
-        images: true,
-      },
-    });
+      }),
+      this.prisma.transaction.create({
+        data: {
+          product_id: id,
+          seller_id: product.seller_id,
+          buyer_id: userId,
+          product_price: product.price,
+          commission_rate: commissionRate,
+          commission_amount: commissionAmount,
+          seller_amount: sellerAmount,
+          status: 'COMPLETED',
+        },
+      }),
+    ]);
 
     return updatedProduct;
   }

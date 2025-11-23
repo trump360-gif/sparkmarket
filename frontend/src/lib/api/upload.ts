@@ -21,11 +21,11 @@ export const uploadApi = {
     const presignedData = await uploadApi.getPresignedUrl({
       filename: file.name,
       contentType: file.type,
-      size: file.size,
+      fileSize: file.size,
     });
 
     // 2. Upload to R2
-    await uploadApi.uploadToR2(presignedData.uploadUrl, file);
+    await uploadApi.uploadToR2(presignedData.presignedUrl, file);
 
     // 3. Return image metadata
     return presignedData;

@@ -136,13 +136,14 @@ export interface ProductQueryParams extends PaginationParams {
 export interface PresignedUrlRequest {
   filename: string;
   contentType: string;
-  size: number;
+  fileSize: number;
 }
 
 export interface PresignedUrlResponse {
-  uploadUrl: string;
-  imageUrl: string;
+  presignedUrl: string;
+  publicUrl: string;
   key: string;
+  expiresIn: number;
 }
 
 // Admin Types
@@ -187,4 +188,47 @@ export interface UserDetail extends User {
     sold_products: number;
   };
   recent_products: Product[];
+}
+
+// Commission Types
+export interface CommissionSettings {
+  id: string;
+  commission_rate: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UpdateCommissionRateRequest {
+  commission_rate: number;
+}
+
+export interface Transaction {
+  id: string;
+  product_id: string;
+  seller_id: string;
+  buyer_id: string;
+  product_price: number;
+  commission_rate: number;
+  commission_amount: number;
+  seller_amount: number;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CommissionStatistics {
+  total: {
+    transactions: number;
+    totalSales: number;
+    totalCommission: number;
+    totalSellerAmount: number;
+  };
+  monthly: {
+    transactions: number;
+    totalSales: number;
+    totalCommission: number;
+    totalSellerAmount: number;
+  };
+  recentTransactions: Transaction[];
 }

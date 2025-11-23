@@ -69,6 +69,8 @@
   - **view_count**: 조회수 (자동 증가)
   - **chat_count**: 채팅 문의 수
 - **product_images**: 상품 이미지 (정규화)
+- **commission_settings**: 수수료율 설정 (is_active로 이력 관리)
+- **transactions**: 거래 내역 (수수료 자동 계산 및 기록)
 
 ## 4. API 명세
 
@@ -199,6 +201,39 @@ PATCH /api/admin/users/:id/status
 Headers: { Authorization: Bearer <admin_token> }
 Body: { status: "BANNED", reason: "악성 유저" }
 Response: { success: true, user }
+```
+
+#### 수수료 관리 - 현재 수수료율 조회
+```
+GET /api/admin/commission/rate
+Headers: { Authorization: Bearer <admin_token> }
+Response: { id, commission_rate, is_active, created_at, updated_at }
+```
+
+#### 수수료 관리 - 수수료율 변경
+```
+PUT /api/admin/commission/rate
+Headers: { Authorization: Bearer <admin_token> }
+Body: { commission_rate: 5.0 }
+Response: { id, commission_rate, is_active, created_at, updated_at }
+```
+
+#### 수수료 관리 - 통계 조회
+```
+GET /api/admin/commission/statistics
+Headers: { Authorization: Bearer <admin_token> }
+Response: {
+  total: { transactions, totalSales, totalCommission, totalSellerAmount },
+  monthly: { transactions, totalSales, totalCommission, totalSellerAmount },
+  recentTransactions: [...]
+}
+```
+
+#### 수수료 관리 - 거래 내역 조회
+```
+GET /api/admin/commission/transactions?page=1&limit=20
+Headers: { Authorization: Bearer <admin_token> }
+Response: { data: [...], meta: { total, page, limit, totalPages } }
 ```
 
 ## 5. 보안
@@ -444,7 +479,8 @@ npx prisma db seed
 
 #### 구매 기능
 - **Backend**: PATCH `/products/:id/purchase` API 추가
-- **로직**: 로그인 체크 → 본인 상품 체크 → 상태를 FOR_SALE → SOLD로 자동 변경
+- **로직**: 로그인 체크 → 본인 상품 체크 → 상태를 FOR_SALE → SOLD로 자동 변경 → Transaction 기록 생성
+- **수수료 계산**: 현재 설정된 수수료율에 따라 수수료 금액과 판매자 수령액 자동 계산
 - **Frontend**: ProductDetail 구매하기 버튼 실제 작동
 
 #### Cloudflare R2 이미지 업로드 연동
@@ -469,6 +505,23 @@ npx prisma db seed
   - 전체 상품 → `/admin/products`
   - 판매중/판매완료 → 필터링된 상품 목록
 - AdminUserList에서 유저 클릭 시 상세 페이지 이동
+
+### 📝 주요 변경사항 (Phase 5.8)
+
+#### 수수료 관리 시스템
+- **Database**: CommissionSettings, Transaction 모델 추가
+  - CommissionSettings: 수수료율 설정 및 변경 이력 관리 (is_active)
+  - Transaction: 거래별 수수료 상세 기록 (product_price, commission_rate, commission_amount, seller_amount)
+- **Backend**: Commission 모듈 구현
+  - GET `/admin/commission/rate` - 현재 수수료율 조회
+  - PUT `/admin/commission/rate` - 수수료율 변경
+  - GET `/admin/commission/statistics` - 전체/월별 통계
+  - GET `/admin/commission/transactions` - 거래 내역 페이지네이션
+- **Frontend**: 관리자 수수료 관리 페이지
+  - 수수료율 설정 폼
+  - 전체/월별 통계 대시보드 (거래 수, 총 매출, 총 수수료, 판매자 수령액)
+  - 최근 거래 내역 테이블
+- **Migration**: 기존 판매 완료 상품 거래 내역 백필 (4건 처리 완료)
 
 ### 🎯 다음 단계
 
