@@ -440,6 +440,36 @@ npx prisma db seed
 - **구매하기 버튼**: 로그인 체크 + 추후 업데이트 안내
 - **문의하기 버튼**: 로그인 체크 + 채팅 기능 추후 업데이트 안내
 
+### 📝 주요 변경사항 (Phase 5.7)
+
+#### 구매 기능
+- **Backend**: PATCH `/products/:id/purchase` API 추가
+- **로직**: 로그인 체크 → 본인 상품 체크 → 상태를 FOR_SALE → SOLD로 자동 변경
+- **Frontend**: ProductDetail 구매하기 버튼 실제 작동
+
+#### Cloudflare R2 이미지 업로드 연동
+- **Backend**: Community 프로젝트의 R2 설정 적용
+- **환경변수**: R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME, R2_PUBLIC_URL
+- **상태**: ✅ 설정 완료, 이미지 업로드 기능 활성화
+
+#### 관리자 유저 대시보드
+- **Backend**: GET `/admin/users/:id` API 추가
+  - 유저 기본 정보 + 상품 통계 (전체/판매중/판매완료)
+  - 최근 등록 상품 5개 포함
+- **Frontend**: AdminUserDashboard 컴포넌트 생성
+  - 유저 통계 카드 (3개)
+  - 유저 정보 섹션
+  - 최근 등록 상품 목록
+  - 유저 상태 변경 기능 (활성화/차단)
+- **Route**: `/admin/users/[id]` 동적 라우트 추가
+
+#### 관리자 대시보드 네비게이션
+- 대시보드 통계 카드 클릭 시 관련 페이지로 이동
+  - 전체 유저 → `/admin/users`
+  - 전체 상품 → `/admin/products`
+  - 판매중/판매완료 → 필터링된 상품 목록
+- AdminUserList에서 유저 클릭 시 상세 페이지 이동
+
 ### 🎯 다음 단계
 
 - [ ] Cloudflare R2 설정 (이미지 업로드 테스트)
