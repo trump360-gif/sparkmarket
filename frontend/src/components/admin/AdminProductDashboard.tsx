@@ -24,8 +24,11 @@ export default function AdminProductDashboard({ productId }: AdminProductDashboa
       try {
         const data = await productsApi.getProduct(productId);
         setProduct(data);
-      } catch (error) {
-        console.error('Failed to fetch product:', error);
+      } catch (error: any) {
+        // 401 에러는 조용히 무시
+        if (error?.response?.status !== 401) {
+          console.error('Failed to fetch product:', error);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -44,8 +47,11 @@ export default function AdminProductDashboard({ productId }: AdminProductDashboa
       await adminApi.deleteProduct(productId, { reason });
       toast.success('삭제되었습니다.');
       router.push('/admin/products');
-    } catch (error) {
-      toast.error('삭제에 실패했습니다.');
+    } catch (error: any) {
+      // 401 에러는 조용히 무시
+      if (error?.response?.status !== 401) {
+        toast.error('삭제에 실패했습니다.');
+      }
     }
   };
 

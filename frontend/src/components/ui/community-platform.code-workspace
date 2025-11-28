@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "../../../../../community-platform"
+		},
+		{
+			"path": "../../../.."
+		},
+		{
+			"path": "../../../../../BoardAssist"
+		}
+	],
+	"settings": {
+		"claudeCode.useTerminal": true
+	}
+}

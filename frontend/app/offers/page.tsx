@@ -44,8 +44,11 @@ export default function OffersPage() {
       ]);
       setSentTotal(sent.total || 0);
       setReceivedTotal(received.total || 0);
-    } catch (error) {
-      console.error('Failed to fetch counts:', error);
+    } catch (error: any) {
+      // 401 에러는 조용히 무시
+      if (error?.response?.status !== 401) {
+        console.error('Failed to fetch counts:', error);
+      }
     }
   };
 
@@ -67,8 +70,11 @@ export default function OffersPage() {
         setReceivedOffers(response.data);
         setReceivedTotal(response.total);
       }
-    } catch (error) {
-      console.error('Failed to fetch offers:', error);
+    } catch (error: any) {
+      // 401 에러는 조용히 무시
+      if (error?.response?.status !== 401) {
+        console.error('Failed to fetch offers:', error);
+      }
     } finally {
       setIsLoading(false);
     }

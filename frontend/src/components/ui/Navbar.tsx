@@ -1,10 +1,13 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '@/hooks/useAuth';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { priceOffersApi } from '@/lib/api/priceOffers';
+import { Button } from '@/components/ui/Button';
+import { Search, Menu, X, Zap, User } from 'lucide-react';
+import NotificationDropdown from '@/components/notification/NotificationDropdown';
 
 export default function Navbar() {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
@@ -12,7 +15,7 @@ export default function Navbar() {
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [hasNewOffers, setHasNewOffers] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     const query = searchParams.get('search') || '';
@@ -20,22 +23,12 @@ export default function Navbar() {
   }, [searchParams]);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      checkNewOffers();
-      // 30초마다 새로운 제안 확인
-      const interval = setInterval(checkNewOffers, 30000);
-      return () => clearInterval(interval);
-    }
-  }, [isAuthenticated]);
-
-  const checkNewOffers = async () => {
-    try {
-      const response = await priceOffersApi.getReceivedOffers({ limit: 1 });
-      setHasNewOffers((response.total || 0) > 0);
-    } catch (error) {
-      console.error('Failed to check new offers:', error);
-    }
-  };
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -52,139 +45,125 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-gradient-to-r from-blue-600 to-blue-700 shadow-lg fixed top-0 left-0 right-0 z-50">
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
+        ? 'bg-white/80 backdrop-blur-lg border-b border-slate-200/50 shadow-sm'
+        : 'bg-transparent'
+        }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center space-x-4">
-            <Link href="/" className="flex items-center space-x-2">
-              <div className="text-2xl">⚡</div>
-              <span className="text-2xl font-bold text-white whitespace-nowrap">
-                스파크마켓
+          <div className="flex items-center space-x-8">
+            <Link href="/" className="flex items-center space-x-2 group">
+              <div className="relative">
+                <div className="absolute inset-0 bg-primary-500 blur-lg opacity-50 group-hover:opacity-75 transition-opacity rounded-full"></div>
+                <div className="relative bg-gradient-to-br from-primary-500 to-primary-600 text-white p-1.5 rounded-lg shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <Zap className="w-5 h-5 fill-current" />
+                </div>
+              </div>
+              <span className={`text-xl font-bold tracking-tight transition-colors ${isScrolled ? 'text-slate-900' : 'text-slate-900'
+                }`}>
+                Spark<span className="text-primary-600">Market</span>
               </span>
             </Link>
-
           </div>
 
           {/* 검색바 */}
-          <div className="flex-1 max-w-xl mx-4 hidden md:block">
+          <div className="flex-1 max-w-xl mx-8 hidden md:block">
             <form onSubmit={handleSearch}>
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="상품을 검색해보세요..."
-                  className="w-full px-4 py-2 pl-10 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/30 focus:bg-white/20 transition-all"
-                />
-                <svg
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/60"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              <div className="relative group">
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-lg opacity-20 group-hover:opacity-40 transition duration-300 blur"></div>
+                <div className="relative flex items-center bg-white rounded-lg border border-slate-200 shadow-sm focus-within:ring-2 focus-within:ring-primary-500/20 focus-within:border-primary-500 transition-all">
+                  <Search className="absolute left-3 w-5 h-5 text-slate-400" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="어떤 상품을 찾으시나요?"
+                    className="w-full pl-10 pr-4 py-2.5 bg-transparent border-none focus:ring-0 text-slate-900 placeholder-slate-400 text-sm"
                   />
-                </svg>
-                {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSearchQuery('');
-                      router.push('/');
-                    }}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-white/60 hover:text-white transition-colors"
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery('');
+                        router.push('/');
+                      }}
+                      className="absolute right-3 p-1 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-                  </button>
-                )}
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
               </div>
             </form>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3">
             {isAuthenticated ? (
               <>
-                <Link
-                  href="/mypage"
-                  className="hidden sm:flex items-center px-3 py-1.5 bg-white/10 rounded-full hover:bg-white/20 transition-all cursor-pointer relative"
-                >
-                  <div className="w-7 h-7 bg-white/20 rounded-full flex items-center justify-center text-white font-medium text-sm mr-2">
-                    {user?.nickname?.charAt(0) || 'U'}
-                  </div>
-                  <span className="text-sm font-medium text-white">
-                    {user?.nickname}
-                  </span>
-                  {hasNewOffers && (
-                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-blue-600"></span>
-                  )}
+                {/* 알림 드롭다운 */}
+                <NotificationDropdown className="hidden sm:block" />
+
+                <Link href="/mypage">
+                  <Button variant="ghost" size="sm" className="relative hidden sm:flex items-center gap-2">
+                    {user?.avatar_url ? (
+                      <Image
+                        src={user.avatar_url}
+                        alt={user.nickname || '프로필'}
+                        width={32}
+                        height={32}
+                        className="w-8 h-8 rounded-full object-cover ring-2 ring-white shadow-sm"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 bg-primary-100 text-primary-700 rounded-full flex items-center justify-center font-bold text-sm ring-2 ring-white shadow-sm">
+                        {user?.nickname?.charAt(0) || <User className="w-4 h-4" />}
+                      </div>
+                    )}
+                    <span className="font-medium text-slate-700">마이페이지</span>
+                  </Button>
                 </Link>
+
                 {isAdmin && (
-                  <Link
-                    href="/admin"
-                    className="hidden sm:block px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all font-medium shadow-sm"
-                  >
-                    ⚙️ 관리자
+                  <Link href="/admin">
+                    <Button variant="secondary" size="sm" className="hidden sm:flex">
+                      관리자
+                    </Button>
                   </Link>
                 )}
-                <button
+
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={handleLogout}
-                  className="hidden sm:block px-4 py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all"
+                  className="hidden sm:flex text-slate-600"
                 >
                   로그아웃
-                </button>
-                {/* 모바일 메뉴 버튼 */}
-                <button
-                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  className="sm:hidden p-2 text-white hover:bg-white/10 rounded-lg transition-all"
-                >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+                </Button>
+
+                {/* 모바일: 알림 + 메뉴 버튼 */}
+                <div className="flex items-center gap-1 sm:hidden">
+                  <NotificationDropdown />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d={
-                        isMobileMenuOpen
-                          ? 'M6 18L18 6M6 6l12 12'
-                          : 'M4 6h16M4 12h16M4 18h16'
-                      }
-                    />
-                  </svg>
-                </button>
+                    {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                  </Button>
+                </div>
               </>
             ) : (
               <>
-                <Link
-                  href="/login"
-                  className="px-4 py-2 text-white/90 hover:text-white hover:bg-white/10 rounded-lg transition-all"
-                >
-                  로그인
+                <Link href="/login">
+                  <Button variant="ghost" className="text-slate-600 hover:text-primary-600">
+                    로그인
+                  </Button>
                 </Link>
-                <Link
-                  href="/register"
-                  className="hidden sm:block px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-all font-medium shadow-sm"
-                >
-                  회원가입
+                <Link href="/register">
+                  <Button className="shadow-lg shadow-primary-500/20">
+                    회원가입
+                  </Button>
                 </Link>
               </>
             )}
@@ -192,60 +171,80 @@ export default function Navbar() {
         </div>
 
         {/* 모바일 메뉴 */}
-        {isMobileMenuOpen && isAuthenticated && (
-          <div className="sm:hidden border-t border-white/10">
-            <div className="px-4 py-3 space-y-2">
+        {isMobileMenuOpen && (
+          <div className="sm:hidden border-t border-slate-200 bg-white/95 backdrop-blur-lg absolute left-0 right-0 shadow-lg animate-slide-up">
+            <div className="px-4 py-3 space-y-3">
               {/* 모바일 검색바 */}
-              <form onSubmit={handleSearch} className="mb-3">
+              <form onSubmit={handleSearch} className="mb-4">
                 <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="상품을 검색해보세요..."
-                    className="w-full px-4 py-2 pl-10 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-white/30"
+                    placeholder="상품 검색..."
+                    className="w-full pl-10 pr-4 py-2 bg-slate-100 border-none rounded-lg text-slate-900 focus:ring-2 focus:ring-primary-500"
                   />
-                  <svg
-                    className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/60"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
                 </div>
               </form>
 
-              <Link
-                href="/mypage"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block px-4 py-3 text-white hover:bg-white/10 rounded-lg transition-all"
-              >
-                마이페이지
-              </Link>
-              {isAdmin && (
-                <Link
-                  href="/admin"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="block px-4 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all font-medium text-center"
-                >
-                  ⚙️ 관리자
-                </Link>
+              {isAuthenticated ? (
+                <>
+                  <div className="flex items-center px-2 py-2 mb-2 bg-primary-50 rounded-lg">
+                    {user?.avatar_url ? (
+                      <Image
+                        src={user.avatar_url}
+                        alt={user.nickname || '프로필'}
+                        width={32}
+                        height={32}
+                        className="w-8 h-8 rounded-full object-cover mr-3"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 bg-primary-100 text-primary-700 rounded-full flex items-center justify-center font-bold text-sm mr-3">
+                        {user?.nickname?.charAt(0) || 'U'}
+                      </div>
+                    )}
+                    <div>
+                      <p className="font-medium text-slate-900">{user?.nickname}</p>
+                      <p className="text-xs text-slate-500">{user?.email}</p>
+                    </div>
+                  </div>
+                  <Link
+                    href="/mypage"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block px-4 py-2 text-slate-700 hover:bg-slate-50 rounded-lg"
+                  >
+                    마이페이지
+                  </Link>
+                  {isAdmin && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="block px-4 py-2 text-primary-600 hover:bg-primary-50 rounded-lg font-medium"
+                    >
+                      관리자 페이지
+                    </Link>
+                  )}
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg"
+                  >
+                    로그아웃
+                  </button>
+                </>
+              ) : (
+                <div className="grid grid-cols-2 gap-3">
+                  <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button variant="outline" className="w-full">로그인</Button>
+                  </Link>
+                  <Link href="/register" onClick={() => setIsMobileMenuOpen(false)}>
+                    <Button className="w-full">회원가입</Button>
+                  </Link>
+                </div>
               )}
-              <button
-                onClick={() => {
-                  handleLogout();
-                  setIsMobileMenuOpen(false);
-                }}
-                className="w-full px-4 py-3 text-white hover:bg-white/10 rounded-lg transition-all text-left"
-              >
-                로그아웃
-              </button>
             </div>
           </div>
         )}

@@ -4,6 +4,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { priceOffersApi } from '@/lib/api/priceOffers';
+import { Button } from '@/components/ui/Button';
+import { Clock, Check, X, MessageSquare, User, ShoppingCart } from 'lucide-react';
 import type { PriceOffer } from '@/types';
 
 interface OfferCardProps {
@@ -22,10 +24,10 @@ export default function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
 
   const getStatusBadge = (status: string) => {
     const styles = {
-      PENDING: 'bg-yellow-100 text-yellow-800',
-      ACCEPTED: 'bg-green-100 text-green-800',
-      REJECTED: 'bg-red-100 text-red-800',
-      EXPIRED: 'bg-gray-100 text-gray-800',
+      PENDING: 'bg-amber-50 text-amber-700 border border-amber-200',
+      ACCEPTED: 'bg-green-50 text-green-700 border border-green-200',
+      REJECTED: 'bg-red-50 text-red-700 border border-red-200',
+      EXPIRED: 'bg-slate-50 text-slate-600 border border-slate-200',
     };
 
     const labels = {
@@ -37,7 +39,7 @@ export default function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
 
     return (
       <span
-        className={`px-3 py-1 rounded-full text-sm font-medium ${styles[status as keyof typeof styles]}`}
+        className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status as keyof typeof styles]}`}
       >
         {labels[status as keyof typeof labels]}
       </span>
@@ -52,8 +54,11 @@ export default function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
       toast.success('제안을 수락했습니다. 구매자에게 특별 가격으로 구매할 권한이 부여되었습니다.');
       onUpdate?.();
     } catch (error: any) {
-      const message = error.response?.data?.message || '수락에 실패했습니다.';
-      toast.error(message);
+      // 401 에러는 조용히 무시
+      if (error?.response?.status !== 401 && error?.response?.data?.statusCode !== 401) {
+        const message = error.response?.data?.message || '수락에 실패했습니다.';
+        toast.error(message);
+      }
     }
   };
 
@@ -65,8 +70,11 @@ export default function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
       toast.success('제안을 거절했습니다.');
       onUpdate?.();
     } catch (error: any) {
-      const message = error.response?.data?.message || '거절에 실패했습니다.';
-      toast.error(message);
+      // 401 에러는 조용히 무시
+      if (error?.response?.status !== 401 && error?.response?.data?.statusCode !== 401) {
+        const message = error.response?.data?.message || '거절에 실패했습니다.';
+        toast.error(message);
+      }
     }
   };
 
@@ -79,12 +87,12 @@ export default function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
   );
 
   return (
-    <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 border border-gray-200">
-      <div className="flex space-x-4">
+    <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md hover:shadow-lg transition-all p-4 border border-slate-100">
+      <div className="flex gap-4">
         {/* 상품 이미지 */}
         <Link
           href={`/products/${offer.product_id}`}
-          className="flex-shrink-0 w-24 h-24 relative bg-gray-200 rounded-md overflow-hidden"
+          className="flex-shrink-0 w-20 h-20 relative bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
         >
           {primaryImage ? (
             <Image
@@ -92,71 +100,66 @@ export default function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
               alt={offer.product?.title || '상품'}
               fill
               className="object-cover"
-              sizes="96px"
+              sizes="112px"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-              No Image
+            <div className="w-full h-full flex items-center justify-center text-slate-400 text-xs">
+              이미지 없음
             </div>
           )}
         </Link>
 
         {/* 제안 정보 */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between mb-2">
+          <div className="flex items-start justify-between gap-2 mb-2">
             <div className="flex-1 min-w-0">
               <Link
                 href={`/products/${offer.product_id}`}
-                className="font-semibold text-gray-900 hover:text-blue-600 truncate block"
+                className="font-semibold text-slate-900 hover:text-primary-600 truncate block text-base transition-colors"
               >
                 {offer.product?.title}
               </Link>
-              <p className="text-sm text-gray-500">
+              <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+                <User className="w-3 h-3" />
                 {type === 'sent' ? '판매자' : '구매자'}:{' '}
-                {type === 'sent'
-                  ? offer.seller?.nickname
-                  : offer.buyer?.nickname}
+                <span className="font-medium text-slate-700">
+                  {type === 'sent'
+                    ? offer.seller?.nickname
+                    : offer.buyer?.nickname}
+                </span>
               </p>
             </div>
-            <div className="ml-4">{getStatusBadge(offer.status)}</div>
+            <div className="flex-shrink-0">{getStatusBadge(offer.status)}</div>
           </div>
 
-          <div className="space-y-1 mb-3">
-            <div className="flex items-baseline space-x-2">
-              <span className="text-sm text-gray-600">원가:</span>
-              <span className="text-gray-900 line-through">
-                {formatPrice(offer.product?.price || 0)}원
-              </span>
-            </div>
-            <div className="flex items-baseline space-x-2">
-              <span className="text-sm text-gray-600">제안가:</span>
-              <span className="text-xl font-bold text-blue-600">
-                {formatPrice(offer.offered_price)}원
-              </span>
-              <span className="text-sm text-green-600">
-                (
-                {formatPrice(
-                  (offer.product?.price || 0) - offer.offered_price,
-                )}
-                원 할인)
-              </span>
-            </div>
+          <div className="flex items-baseline gap-2 mb-2">
+            <span className="text-slate-400 line-through text-xs">
+              {formatPrice(offer.product?.price || 0)}원
+            </span>
+            <span className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-secondary-500">
+              {formatPrice(offer.offered_price)}원
+            </span>
+            <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-medium">
+              -{formatPrice((offer.product?.price || 0) - offer.offered_price)}원
+            </span>
           </div>
 
           {offer.message && (
-            <div className="bg-gray-50 rounded p-2 mb-3">
-              <p className="text-sm text-gray-700">{offer.message}</p>
+            <div className="bg-slate-50 rounded-lg p-2 mb-2 flex items-start gap-1.5">
+              <MessageSquare className="w-3.5 h-3.5 text-slate-400 mt-0.5 flex-shrink-0" />
+              <p className="text-xs text-slate-600 line-clamp-2">{offer.message}</p>
             </div>
           )}
 
           <div className="flex items-center justify-between">
-            <div className="text-xs text-gray-500">
+            <div className="text-xs text-slate-500 flex items-center gap-1">
+              <Clock className="w-3.5 h-3.5" />
               {isExpired || offer.status !== 'PENDING' ? (
                 <span>
                   {new Date(offer.created_at).toLocaleString('ko-KR')}
                 </span>
               ) : (
-                <span className="text-orange-600 font-medium">
+                <span className="text-amber-600 font-semibold">
                   {hoursLeft}시간 남음
                 </span>
               )}
@@ -164,20 +167,38 @@ export default function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
 
             {/* 수락/거절 버튼 (판매자가 받은 제안인 경우) */}
             {type === 'received' && offer.status === 'PENDING' && !isExpired && (
-              <div className="flex space-x-2">
-                <button
+              <div className="flex gap-1.5">
+                <Button
                   onClick={handleAccept}
-                  className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 transition-colors"
+                  size="sm"
+                  className="gap-1 text-xs px-2.5 py-1.5 h-auto"
                 >
+                  <Check className="w-3.5 h-3.5" />
                   수락
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={handleReject}
-                  className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors"
+                  variant="destructive"
+                  size="sm"
+                  className="gap-1 text-xs px-2.5 py-1.5 h-auto"
                 >
+                  <X className="w-3.5 h-3.5" />
                   거절
-                </button>
+                </Button>
               </div>
+            )}
+
+            {/* 구매하기 버튼 (보낸 제안이 수락된 경우) */}
+            {type === 'sent' && offer.status === 'ACCEPTED' && (
+              <Link href={`/products/${offer.product_id}`}>
+                <Button
+                  size="sm"
+                  className="gap-1 text-xs px-2.5 py-1.5 h-auto bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+                >
+                  <ShoppingCart className="w-3.5 h-3.5" />
+                  구매하기
+                </Button>
+              </Link>
             )}
           </div>
         </div>

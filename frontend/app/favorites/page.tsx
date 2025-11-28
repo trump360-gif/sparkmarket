@@ -32,8 +32,11 @@ export default function FavoritesPage() {
       setProducts(response.data);
       setTotal(response.total);
       setTotalPages(response.totalPages);
-    } catch (error) {
-      console.error('Failed to fetch favorites:', error);
+    } catch (error: any) {
+      // 401 에러는 조용히 무시
+      if (error?.response?.status !== 401) {
+        console.error('Failed to fetch favorites:', error);
+      }
     } finally {
       setIsLoading(false);
     }

@@ -5,7 +5,19 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 import { adminApi } from '@/lib/api/admin';
 import { TableSkeleton } from '@/components/ui/Skeleton';
-import type { User, UserStatus } from '@/types';
+import { UserStatus, UserRole } from '@/types';
+import type { User } from '@/types';
+import {
+  Search,
+  Users,
+  Shield,
+  Ban,
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+  User as UserIcon,
+  Filter
+} from 'lucide-react';
 
 export default function AdminUserList() {
   const [users, setUsers] = useState<User[]>([]);
@@ -30,8 +42,11 @@ export default function AdminUserList() {
       setUsers(response.data);
       setTotal(response.total);
       setTotalPages(response.totalPages);
-    } catch (error) {
-      console.error('Failed to fetch users:', error);
+    } catch (error: any) {
+      // 401 에러는 조용히 무시
+      if (error?.response?.status !== 401) {
+        console.error('Failed to fetch users:', error);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -48,12 +63,12 @@ export default function AdminUserList() {
   };
 
   const handleStatusChange = async (user: User, newStatus: UserStatus) => {
-    const action = newStatus === 'BANNED' ? '차단' : '활성화';
-    const reason = newStatus === 'BANNED'
+    const action = newStatus === UserStatus.BANNED ? '차단' : '활성화';
+    const reason = newStatus === UserStatus.BANNED
       ? prompt(`"${user.nickname}" 유저를 차단하시겠습니까?\n차단 사유를 입력하세요:`)
       : '';
 
-    if (newStatus === 'BANNED' && !reason) return;
+    if (newStatus === UserStatus.BANNED && !reason) return;
 
     if (!confirm(`정말 ${action}하시겠습니까?`)) return;
 
@@ -64,159 +79,202 @@ export default function AdminUserList() {
       });
       toast.success(`${action}되었습니다.`);
       fetchUsers();
-    } catch (error) {
-      toast.error(`${action}에 실패했습니다.`);
+    } catch (error: any) {
+      // 401 에러는 조용히 무시
+      if (error?.response?.status !== 401) {
+        toast.error(`${action}에 실패했습니다.`);
+      }
     }
   };
 
   const getStatusBadge = (status: UserStatus) => {
-    const styles = {
-      ACTIVE: 'bg-green-100 text-green-800',
-      BANNED: 'bg-red-100 text-red-800',
+    const config = {
+      [UserStatus.ACTIVE]: {
+        bg: 'bg-emerald-50',
+        text: 'text-emerald-700',
+        border: 'border-emerald-200',
+        icon: CheckCircle,
+        label: '활성'
+      },
+      [UserStatus.BANNED]: {
+        bg: 'bg-red-50',
+        text: 'text-red-700',
+        border: 'border-red-200',
+        icon: Ban,
+        label: '차단됨'
+      },
     };
 
-    const labels = {
-      ACTIVE: '활성',
-      BANNED: '차단됨',
-    };
+    const { bg, text, border, icon: Icon, label } = config[status];
 
     return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status]}`}>
-        {labels[status]}
+      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${bg} ${text} border ${border}`}>
+        <Icon className="w-3 h-3" />
+        {label}
       </span>
     );
   };
 
   const getRoleBadge = (role: string) => {
-    const isAdmin = role === 'ADMIN';
+    const isAdmin = role === UserRole.ADMIN;
     return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-        isAdmin ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'
+      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+        isAdmin
+          ? 'bg-purple-50 text-purple-700 border border-purple-200'
+          : 'bg-slate-50 text-slate-600 border border-slate-200'
       }`}>
+        {isAdmin ? <Shield className="w-3 h-3" /> : <UserIcon className="w-3 h-3" />}
         {isAdmin ? '관리자' : '일반'}
       </span>
     );
   };
 
   return (
-    <div className="p-8">
+    <div className="p-6 lg:p-8">
+      {/* 헤더 */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">유저 관리</h1>
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
+            <Users className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-bold text-slate-900">유저 관리</h1>
+            <p className="text-slate-500 text-sm">총 {total}명의 유저</p>
+          </div>
+        </div>
+      </div>
 
-        <div className="flex space-x-4 mb-4">
-          <form onSubmit={handleSearch} className="flex-1 flex space-x-2">
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="이메일 또는 닉네임으로 검색..."
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+      {/* 검색 및 필터 */}
+      <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200/50 p-4 mb-6">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <form onSubmit={handleSearch} className="flex-1 flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="이메일 또는 닉네임으로 검색..."
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
+              />
+            </div>
             <button
               type="submit"
-              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              className="px-5 py-2.5 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl hover:opacity-90 font-medium"
             >
               검색
             </button>
           </form>
 
-          <select
-            value={statusFilter}
-            onChange={(e) => {
-              setStatusFilter(e.target.value as UserStatus | '');
-              setPage(1);
-            }}
-            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">전체 상태</option>
-            <option value="ACTIVE">활성</option>
-            <option value="BANNED">차단됨</option>
-          </select>
+          <div className="relative">
+            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value as UserStatus | '');
+                setPage(1);
+              }}
+              className="pl-9 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 appearance-none cursor-pointer min-w-[140px]"
+            >
+              <option value="">전체 상태</option>
+              <option value={UserStatus.ACTIVE}>활성</option>
+              <option value={UserStatus.BANNED}>차단됨</option>
+            </select>
+          </div>
         </div>
-
-        <p className="text-gray-600">총 {total}명의 유저</p>
       </div>
 
       {isLoading ? (
-        <TableSkeleton rows={10} cols={6} />
+        <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200/50 overflow-hidden">
+          <TableSkeleton rows={10} cols={6} />
+        </div>
       ) : (
         <>
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">이메일</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">닉네임</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">역할</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">상태</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">가입일</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">작업</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {users.map((user) => (
-                  <tr key={user.id} className="hover:bg-gray-50 cursor-pointer transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{user.email}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <Link
-                        href={`/admin/users/${user.id}`}
-                        className="text-sm font-medium text-blue-600 hover:underline"
-                      >
-                        {user.nickname}
-                      </Link>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">{getRoleBadge(user.role)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(user.status)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(user.created_at).toLocaleDateString('ko-KR')}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      {user.role !== 'ADMIN' && (
-                        <>
-                          {user.status === 'ACTIVE' ? (
-                            <button
-                              onClick={() => handleStatusChange(user, 'BANNED')}
-                              className="text-red-600 hover:text-red-900 font-medium"
-                            >
-                              차단
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => handleStatusChange(user, 'ACTIVE')}
-                              className="text-green-600 hover:text-green-900 font-medium"
-                            >
-                              활성화
-                            </button>
-                          )}
-                        </>
-                      )}
-                    </td>
+          {/* 테이블 */}
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200/50 overflow-hidden shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-slate-200">
+                <thead>
+                  <tr className="bg-slate-50/80">
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">이메일</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">닉네임</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">역할</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">상태</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">가입일</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">작업</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {users.map((user) => (
+                    <tr key={user.id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-slate-700">{user.email}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <Link
+                          href={`/admin/users/${user.id}`}
+                          className="text-sm font-medium text-primary-600 hover:text-primary-700 hover:underline transition-colors"
+                        >
+                          {user.nickname}
+                        </Link>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">{getRoleBadge(user.role)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(user.status)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                        {new Date(user.created_at).toLocaleDateString('ko-KR')}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        {user.role !== UserRole.ADMIN && (
+                          <>
+                            {user.status === UserStatus.ACTIVE ? (
+                              <button
+                                onClick={() => handleStatusChange(user, UserStatus.BANNED)}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors"
+                              >
+                                <Ban className="w-4 h-4" />
+                                차단
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleStatusChange(user, UserStatus.ACTIVE)}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg font-medium transition-colors"
+                              >
+                                <CheckCircle className="w-4 h-4" />
+                                활성화
+                              </button>
+                            )}
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
-          {/* Pagination */}
-          <div className="mt-6 flex justify-center space-x-2">
+          {/* 페이지네이션 */}
+          <div className="mt-6 flex items-center justify-center gap-2">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-1 px-4 py-2 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
+              <ChevronLeft className="w-4 h-4" />
               이전
             </button>
-            <span className="px-4 py-2">
-              {page} / {totalPages}
-            </span>
+            <div className="flex items-center gap-1 px-4 py-2 bg-slate-100 rounded-xl">
+              <span className="font-medium text-primary-600">{page}</span>
+              <span className="text-slate-400">/</span>
+              <span className="text-slate-600">{totalPages}</span>
+            </div>
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-1 px-4 py-2 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               다음
+              <ChevronRight className="w-4 h-4" />
             </button>
           </div>
         </>

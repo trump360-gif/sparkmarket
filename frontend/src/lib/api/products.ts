@@ -7,12 +7,28 @@ import type {
   PaginatedResponse,
 } from '@/types';
 
+interface BackendPaginatedResponse<T> {
+  data: T[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+}
+
 export const productsApi = {
   getProducts: async (params: ProductQueryParams): Promise<PaginatedResponse<Product>> => {
-    const response = await apiClient.get<PaginatedResponse<Product>>('/products', {
+    const response = await apiClient.get<BackendPaginatedResponse<Product>>('/products', {
       params,
     });
-    return response.data;
+    // 백엔드 응답 구조를 프론트엔드 기대 구조로 변환
+    return {
+      data: response.data.data,
+      total: response.data.meta.total,
+      page: response.data.meta.page,
+      totalPages: response.data.meta.totalPages,
+    };
   },
 
   getProduct: async (id: string): Promise<Product> => {

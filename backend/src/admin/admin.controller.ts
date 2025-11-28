@@ -3,14 +3,17 @@ import {
   Get,
   Delete,
   Patch,
+  Post,
   Param,
   Query,
   Body,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { QueryAdminDto } from './dto/query-admin.dto';
 import { UpdateUserStatusDto } from './dto/update-user-status.dto';
+import { RejectProductDto } from './dto/review-product.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
 
@@ -64,5 +67,40 @@ export class AdminController {
   @Get('users/:id')
   getUserDetail(@Param('id') id: string) {
     return this.adminService.getUserDetail(id);
+  }
+
+  // 검토 대기 상품 수 조회 (대시보드용)
+  @Get('review/count')
+  getPendingReviewCount() {
+    return this.adminService.getPendingReviewCount();
+  }
+
+  // 검토 대기 상품 목록
+  @Get('review/products')
+  getPendingReviewProducts(@Query() queryDto: QueryAdminDto) {
+    const { page, limit, search } = queryDto;
+    return this.adminService.getPendingReviewProducts(page, limit, search);
+  }
+
+  // 검토 대기 상품 상세
+  @Get('review/products/:id')
+  getPendingReviewProduct(@Param('id') id: string) {
+    return this.adminService.getPendingReviewProduct(id);
+  }
+
+  // 상품 검토 승인
+  @Post('review/products/:id/approve')
+  approveProduct(@Param('id') id: string, @Request() req) {
+    return this.adminService.approveProduct(id, req.user.id);
+  }
+
+  // 상품 검토 거절
+  @Post('review/products/:id/reject')
+  rejectProduct(
+    @Param('id') id: string,
+    @Body() rejectDto: RejectProductDto,
+    @Request() req,
+  ) {
+    return this.adminService.rejectProduct(id, req.user.id, rejectDto.reason);
   }
 }

@@ -35,8 +35,8 @@ export default function FavoriteButton({
     try {
       const { isFavorited: favorited } = await favoritesApi.checkFavorite(productId);
       setIsFavorited(favorited);
-    } catch (error) {
-      // 에러는 무시 (로그인 안 된 상태일 수 있음)
+    } catch (error: any) {
+      // 401 에러는 무시 (로그인 안 된 상태)
     }
   };
 

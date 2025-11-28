@@ -13,12 +13,17 @@ model User {
   password_hash String
   nickname      String        @unique
   avatar_url    String?
+  bio           String?       @db.VarChar(200)
 
   // 역할 (일반 유저 / 관리자)
   role   String @default("USER") // USER | ADMIN
 
   // 계정 상태
   status String @default("ACTIVE") // ACTIVE | BANNED
+
+  // 판매자 프로필 강화
+  response_time   Int?     // 평균 응답 시간 (분)
+  last_active_at  DateTime? // 마지막 활동 시간
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -27,6 +32,34 @@ model User {
   favorites          Favorite[]
   sentPriceOffers    PriceOffer[] @relation("price_offers_buyer_idTousers")
   receivedPriceOffers PriceOffer[] @relation("price_offers_seller_idTousers")
+
+  // 리뷰 관계
+  writtenReviews     Review[] @relation("review_reviewer")
+  receivedReviews    Review[] @relation("review_reviewee")
+
+  // 거래 관계
+  soldTransactions   Transaction[] @relation("transaction_seller")
+  boughtTransactions Transaction[] @relation("transaction_buyer")
+
+  // 알림 관계
+  notifications      Notification[]
+
+  // 신고 관계
+  sentReports        Report[] @relation("report_reporter")
+
+  // 차단 관계
+  blocking           Block[] @relation("block_blocker")
+  blockedBy          Block[] @relation("block_blocked")
+
+  // 팔로우 관계
+  followers          Follow[] @relation("follow_following")
+  following          Follow[] @relation("follow_follower")
+
+  // 키워드 알림
+  keywordAlerts      KeywordAlert[]
+
+  // 최근 본 상품
+  recentViews        RecentView[]
 
   @@index([email])
   @@index([role, status])
@@ -41,12 +74,33 @@ model Product {
   title       String   @db.VarChar(100)
   description String   @db.Text
   price       Int
+  original_price Int?  // 원래 가격 (가격 인하 시 저장)
   category    String
 
-  status      String   @default("FOR_SALE") // FOR_SALE | SOLD | DELETED
+  status      String   @default("FOR_SALE") // FOR_SALE | SOLD | DELETED | PENDING_REVIEW | REJECTED
+
+  // 상품 상태 세분화
+  condition   String   @default("USED") // NEW | LIKE_NEW | USED | WELL_USED | FOR_PARTS
+
+  // 거래 방법
+  trade_method String  @default("BOTH") // DIRECT | DELIVERY | BOTH
+
+  // 직거래 희망 지역
+  trade_location String? @db.VarChar(100)
+
+  // 브랜드
+  brand_id    String?
+  brand       Brand?   @relation("product_brand", fields: [brand_id], references: [id])
+
+  // 검토 관련 필드
+  review_reason    String?  @db.Text  // 검토 대기 사유 (자동 필터링된 이유)
+  reviewed_at      DateTime?          // 검토 완료 시간
+  reviewed_by      String?            // 검토한 관리자 ID
+  rejection_reason String?  @db.Text  // 거절 사유
 
   view_count  Int      @default(0)
   chat_count  Int      @default(0)
+  favorite_count Int   @default(0)  // 찜 수 캐싱
 
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
@@ -54,11 +108,16 @@ model Product {
   images       ProductImage[]
   favorites    Favorite[]
   priceOffers  PriceOffer[]
+  hashtags     ProductHashtag[]
+  recentViews  RecentView[]
 
   @@index([seller_id, created_at(sort: Desc)])
   @@index([status, created_at(sort: Desc)])
   @@index([category, created_at(sort: Desc)])
+  @@index([brand_id])
   @@index([title])
+  @@index([condition])
+  @@index([trade_method])
   @@map("products")
 }
 
@@ -103,6 +162,11 @@ model Transaction {
   created_at        DateTime @default(now())
   updated_at        DateTime @updatedAt
 
+  // Relations
+  seller            User     @relation("transaction_seller", fields: [seller_id], references: [id], onDelete: Cascade)
+  buyer             User     @relation("transaction_buyer", fields: [buyer_id], references: [id], onDelete: Cascade)
+  reviews           Review[]
+
   @@index([seller_id, created_at(sort: Desc)])
   @@index([buyer_id, created_at(sort: Desc)])
   @@index([created_at(sort: Desc)])
@@ -144,4 +208,233 @@ model PriceOffer {
   @@index([seller_id, status, created_at(sort: Desc)])
   @@index([status, expires_at])
   @@map("price_offers")
+}
+
+model Review {
+  id            String   @id @default(cuid())
+  transaction_id String
+  reviewer_id   String   // 리뷰 작성자
+  reviewee_id   String   // 리뷰 대상자
+  rating        Int      // 1-5 별점
+  content       String?  @db.VarChar(500)
+  review_type   String   // BUYER_TO_SELLER | SELLER_TO_BUYER
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  transaction   Transaction @relation(fields: [transaction_id], references: [id], onDelete: Cascade)
+  reviewer      User     @relation("review_reviewer", fields: [reviewer_id], references: [id], onDelete: Cascade)
+  reviewee      User     @relation("review_reviewee", fields: [reviewee_id], references: [id], onDelete: Cascade)
+
+  @@unique([transaction_id, review_type])
+  @@index([reviewer_id, created_at(sort: Desc)])
+  @@index([reviewee_id, created_at(sort: Desc)])
+  @@index([reviewee_id, rating])
+  @@map("reviews")
+}
+
+// 콘텐츠 검토용 금지어
+model BannedWord {
+  id         String   @id @default(cuid())
+  word       String   @unique
+  category   String   // ILLEGAL | ADULT | WEAPON | PERSONAL_INFO | ILLEGAL_SERVICE | MEDICINE
+  created_at DateTime @default(now())
+  created_by String?  // 추가한 관리자 ID
+
+  @@index([category])
+  @@map("banned_words")
+}
+
+// 의심 키워드 (검토 필요)
+model SuspiciousWord {
+  id         String   @id @default(cuid())
+  word       String   @unique
+  category   String   // URGENT_SALE | PAYMENT | CONTACT | CLAIM
+  created_at DateTime @default(now())
+  created_by String?
+
+  @@index([category])
+  @@map("suspicious_words")
+}
+
+// 알림
+model Notification {
+  id         String   @id @default(cuid())
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  type       String   // PRICE_OFFER_RECEIVED | PRICE_OFFER_ACCEPTED | PRICE_OFFER_REJECTED |
+                      // REVIEW_RECEIVED | PRODUCT_SOLD | PRODUCT_APPROVED | PRODUCT_REJECTED |
+                      // KEYWORD_ALERT | PRICE_DROP | NEW_FOLLOWER | FOLLOWED_USER_PRODUCT
+  title      String
+  message    String
+
+  // 관련 리소스 (선택적)
+  related_id   String?  // 관련 엔티티 ID (product_id, offer_id, review_id 등)
+  related_type String?  // PRODUCT | PRICE_OFFER | REVIEW | TRANSACTION | USER
+
+  is_read    Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  @@index([user_id, is_read, created_at(sort: Desc)])
+  @@index([user_id, created_at(sort: Desc)])
+  @@map("notifications")
+}
+
+// 신고
+model Report {
+  id          String   @id @default(cuid())
+  reporter_id String
+  reporter    User     @relation("report_reporter", fields: [reporter_id], references: [id], onDelete: Cascade)
+
+  // 신고 대상 (사용자 또는 상품)
+  target_type String   // USER | PRODUCT
+  target_id   String   // user_id 또는 product_id
+
+  reason      String   // SPAM | FRAUD | INAPPROPRIATE | PROHIBITED_ITEM | FAKE | OTHER
+  description String?  @db.Text
+
+  status      String   @default("PENDING") // PENDING | REVIEWED | RESOLVED | DISMISSED
+  admin_note  String?  @db.Text  // 관리자 처리 메모
+  reviewed_by String?  // 처리한 관리자 ID
+  reviewed_at DateTime?
+
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@index([reporter_id, created_at(sort: Desc)])
+  @@index([target_type, target_id])
+  @@index([status, created_at(sort: Desc)])
+  @@map("reports")
+}
+
+// 차단
+model Block {
+  id          String   @id @default(cuid())
+  blocker_id  String
+  blocker     User     @relation("block_blocker", fields: [blocker_id], references: [id], onDelete: Cascade)
+  blocked_id  String
+  blocked     User     @relation("block_blocked", fields: [blocked_id], references: [id], onDelete: Cascade)
+  created_at  DateTime @default(now())
+
+  @@unique([blocker_id, blocked_id])
+  @@index([blocker_id])
+  @@index([blocked_id])
+  @@map("blocks")
+}
+
+// 팔로우
+model Follow {
+  id           String   @id @default(cuid())
+  follower_id  String
+  follower     User     @relation("follow_follower", fields: [follower_id], references: [id], onDelete: Cascade)
+  following_id String
+  following    User     @relation("follow_following", fields: [following_id], references: [id], onDelete: Cascade)
+  created_at   DateTime @default(now())
+
+  @@unique([follower_id, following_id])
+  @@index([follower_id, created_at(sort: Desc)])
+  @@index([following_id, created_at(sort: Desc)])
+  @@map("follows")
+}
+
+// 키워드 알림
+model KeywordAlert {
+  id         String   @id @default(cuid())
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  keyword    String   @db.VarChar(50)
+  category   String?  // 특정 카테고리로 제한 (선택사항)
+  min_price  Int?     // 최소 가격
+  max_price  Int?     // 최대 가격
+
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([user_id, keyword])
+  @@index([user_id, is_active])
+  @@index([keyword])
+  @@map("keyword_alerts")
+}
+
+// 최근 본 상품
+model RecentView {
+  id         String   @id @default(cuid())
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  product_id String
+  product    Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  viewed_at  DateTime @default(now())
+
+  @@unique([user_id, product_id])
+  @@index([user_id, viewed_at(sort: Desc)])
+  @@map("recent_views")
+}
+
+// 브랜드
+model Brand {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  name_ko     String?   // 한글명
+  logo_url    String?
+  description String?   @db.Text
+  category    String?   // 브랜드 카테고리 (FASHION | ELECTRONICS | SPORTS 등)
+  is_popular  Boolean   @default(false) // 인기 브랜드 여부
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  products    Product[] @relation("product_brand")
+
+  @@index([category])
+  @@index([is_popular])
+  @@map("brands")
+}
+
+// 카테고리 (동적 관리)
+model Category {
+  id          String     @id @default(cuid())
+  name        String     @unique
+  name_ko     String     // 한글명
+  slug        String     @unique
+  icon        String?    // 아이콘 이름 또는 URL
+  description String?
+  parent_id   String?    // 상위 카테고리
+  parent      Category?  @relation("category_parent", fields: [parent_id], references: [id])
+  children    Category[] @relation("category_parent")
+  sort_order  Int        @default(0)
+  is_active   Boolean    @default(true)
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
+
+  @@index([parent_id])
+  @@index([is_active, sort_order])
+  @@map("categories")
+}
+
+// 해시태그
+model Hashtag {
+  id         String   @id @default(cuid())
+  name       String   @unique // #없이 저장
+  use_count  Int      @default(0)
+  created_at DateTime @default(now())
+
+  products   ProductHashtag[]
+
+  @@index([use_count(sort: Desc)])
+  @@map("hashtags")
+}
+
+// 상품-해시태그 연결
+model ProductHashtag {
+  id         String   @id @default(cuid())
+  product_id String
+  product    Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  hashtag_id String
+  hashtag    Hashtag  @relation(fields: [hashtag_id], references: [id], onDelete: Cascade)
+  created_at DateTime @default(now())
+
+  @@unique([product_id, hashtag_id])
+  @@index([hashtag_id])
+  @@map("product_hashtags")
 }

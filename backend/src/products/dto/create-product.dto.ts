@@ -8,6 +8,7 @@ import {
   ValidateNested,
   IsOptional,
   IsBoolean,
+  IsEnum,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -51,4 +52,26 @@ export class CreateProductDto {
   @ValidateNested({ each: true })
   @Type(() => ProductImageDto)
   images?: ProductImageDto[];
+
+  @IsOptional()
+  @IsEnum(['NEW', 'LIKE_NEW', 'USED', 'WELL_USED', 'FOR_PARTS'])
+  condition?: string;
+
+  @IsOptional()
+  @IsEnum(['DIRECT', 'DELIVERY', 'BOTH'])
+  trade_method?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  trade_location?: string;
+
+  @IsOptional()
+  @IsString()
+  brand_id?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  hashtags?: string[];
 }

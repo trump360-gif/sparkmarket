@@ -53,9 +53,12 @@ export default function PriceOfferModal({
       onSuccess?.();
       onClose();
     } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message || '가격 제안에 실패했습니다.';
-      toast.error(errorMessage);
+      // 401 에러는 조용히 무시
+      if (error?.response?.status !== 401 && error?.response?.data?.statusCode !== 401) {
+        const errorMessage =
+          error.response?.data?.message || '가격 제안에 실패했습니다.';
+        toast.error(errorMessage);
+      }
     } finally {
       setIsSubmitting(false);
     }

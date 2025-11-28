@@ -1,4 +1,4 @@
-import { IsString, IsInt, IsOptional, MaxLength, Min, IsEnum } from 'class-validator';
+import { IsString, IsInt, IsOptional, MaxLength, Min, IsEnum, IsArray } from 'class-validator';
 
 export class UpdateProductDto {
   @IsString()
@@ -22,4 +22,26 @@ export class UpdateProductDto {
   @IsEnum(['FOR_SALE', 'SOLD', 'DELETED'])
   @IsOptional()
   status?: string;
+
+  @IsOptional()
+  @IsEnum(['NEW', 'LIKE_NEW', 'USED', 'WELL_USED', 'FOR_PARTS'])
+  condition?: string;
+
+  @IsOptional()
+  @IsEnum(['DIRECT', 'DELIVERY', 'BOTH'])
+  trade_method?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  trade_location?: string;
+
+  @IsOptional()
+  @IsString()
+  brand_id?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  hashtags?: string[];
 }

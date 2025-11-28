@@ -13,21 +13,23 @@ import { FavoritesService } from './favorites.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('favorites')
-@UseGuards(JwtAuthGuard)
 export class FavoritesController {
   constructor(private readonly favoritesService: FavoritesService) {}
 
   @Post('toggle/:productId')
+  @UseGuards(JwtAuthGuard)
   async toggleFavorite(@Request() req, @Param('productId') productId: string) {
     return this.favoritesService.toggleFavorite(req.user.id, productId);
   }
 
   @Get('check/:productId')
   async checkFavorite(@Request() req, @Param('productId') productId: string) {
-    return this.favoritesService.checkFavorite(req.user.id, productId);
+    const userId = req.user?.id || null;
+    return this.favoritesService.checkFavorite(userId, productId);
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   async getFavorites(
     @Request() req,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,

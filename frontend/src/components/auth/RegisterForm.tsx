@@ -7,6 +7,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '@/hooks/useAuth';
 import Link from 'next/link';
+import { Input } from '@/components/ui/Input';
+import { Button } from '@/components/ui/Button';
+import { Mail, Lock, User } from 'lucide-react';
 
 const registerSchema = z.object({
   email: z.string().email('올바른 이메일 주소를 입력해주세요'),
@@ -53,98 +56,101 @@ export default function RegisterForm() {
   };
 
   return (
-    <div className="w-full max-w-md mx-auto p-6">
-      <div className="bg-white rounded-lg shadow-md p-8">
-        <h2 className="text-2xl font-bold text-center mb-6">회원가입</h2>
+    <div className="glass-card p-8 rounded-2xl animate-slide-up">
+      <h2 className="text-2xl font-bold text-slate-900 mb-6">회원가입</h2>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-              이메일
-            </label>
-            <input
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
+            이메일
+          </label>
+          <div className="relative">
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Input
               id="email"
               type="email"
               {...register('email')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="pl-10"
               placeholder="example@email.com"
+              error={errors.email?.message}
             />
-            {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
-            )}
           </div>
+        </div>
 
-          <div>
-            <label htmlFor="nickname" className="block text-sm font-medium text-gray-700 mb-1">
-              닉네임
-            </label>
-            <input
+        <div>
+          <label htmlFor="nickname" className="block text-sm font-medium text-slate-700 mb-2">
+            닉네임
+          </label>
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Input
               id="nickname"
               type="text"
               {...register('nickname')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="pl-10"
               placeholder="닉네임"
+              error={errors.nickname?.message}
             />
-            {errors.nickname && (
-              <p className="text-red-500 text-sm mt-1">{errors.nickname.message}</p>
-            )}
           </div>
+        </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-              비밀번호
-            </label>
-            <input
+        <div>
+          <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
+            비밀번호
+          </label>
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Input
               id="password"
               type="password"
               {...register('password')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="pl-10"
               placeholder="••••••••"
+              error={errors.password?.message}
             />
-            {errors.password && (
-              <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
-            )}
           </div>
+        </div>
 
-          <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-              비밀번호 확인
-            </label>
-            <input
+        <div>
+          <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700 mb-2">
+            비밀번호 확인
+          </label>
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+            <Input
               id="confirmPassword"
               type="password"
               {...register('confirmPassword')}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="pl-10"
               placeholder="••••••••"
+              error={errors.confirmPassword?.message}
             />
-            {errors.confirmPassword && (
-              <p className="text-red-500 text-sm mt-1">{errors.confirmPassword.message}</p>
-            )}
           </div>
-
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-              {error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-          >
-            {isLoading ? '회원가입 중...' : '회원가입'}
-          </button>
-        </form>
-
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
-            이미 계정이 있으신가요?{' '}
-            <Link href="/login" className="text-blue-600 hover:underline">
-              로그인
-            </Link>
-          </p>
         </div>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+            {error}
+          </div>
+        )}
+
+        <Button
+          type="submit"
+          disabled={isLoading}
+          className="w-full"
+          size="lg"
+        >
+          {isLoading ? '회원가입 중...' : '회원가입'}
+        </Button>
+      </form>
+
+      <div className="mt-6 text-center">
+        <p className="text-sm text-slate-600">
+          이미 계정이 있으신가요?{' '}
+          <Link href="/login" className="text-primary-600 hover:text-primary-700 font-medium hover:underline">
+            로그인
+          </Link>
+        </p>
       </div>
     </div>
   );

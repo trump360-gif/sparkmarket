@@ -6,10 +6,14 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePriceOfferDto } from './dto/create-price-offer.dto';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class PriceOffersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationsService: NotificationsService,
+  ) {}
 
   async createOffer(
     buyerId: string,
@@ -47,6 +51,12 @@ export class PriceOffersService {
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + 72);
 
+    // 구매자 정보 조회
+    const buyer = await this.prisma.user.findUnique({
+      where: { id: buyerId },
+      select: { nickname: true },
+    });
+
     // 가격 제안 생성
     const offer = await this.prisma.priceOffer.create({
       data: {
@@ -75,6 +85,16 @@ export class PriceOffersService {
         },
       },
     });
+
+    // 판매자에게 알림 전송
+    await this.notificationsService.notifyPriceOfferReceived(
+      product.seller_id,
+      buyer?.nickname || '알 수 없음',
+      product.title,
+      createDto.offered_price,
+      offer.id,
+      productId,
+    );
 
     return offer;
   }
@@ -124,6 +144,15 @@ export class PriceOffersService {
     });
 
     // 같은 상품에 대한 다른 대기중인 제안들을 거절 처리
+    const otherOffers = await this.prisma.priceOffer.findMany({
+      where: {
+        product_id: offer.product_id,
+        id: { not: offerId },
+        status: 'PENDING',
+      },
+      select: { buyer_id: true },
+    });
+
     await this.prisma.priceOffer.updateMany({
       where: {
         product_id: offer.product_id,
@@ -133,12 +162,30 @@ export class PriceOffersService {
       data: { status: 'REJECTED' },
     });
 
+    // 수락된 제안의 구매자에게 알림
+    await this.notificationsService.notifyPriceOfferAccepted(
+      offer.buyer_id,
+      updatedOffer.product.title,
+      offer.offered_price,
+      offer.product_id,
+    );
+
+    // 거절된 다른 제안자들에게 알림
+    for (const otherOffer of otherOffers) {
+      await this.notificationsService.notifyPriceOfferRejected(
+        otherOffer.buyer_id,
+        updatedOffer.product.title,
+        offer.product_id,
+      );
+    }
+
     return updatedOffer;
   }
 
   async rejectOffer(sellerId: string, offerId: string) {
     const offer = await this.prisma.priceOffer.findUnique({
       where: { id: offerId },
+      include: { product: true },
     });
 
     if (!offer) {
@@ -169,6 +216,13 @@ export class PriceOffersService {
         product: true,
       },
     });
+
+    // 구매자에게 알림
+    await this.notificationsService.notifyPriceOfferRejected(
+      offer.buyer_id,
+      offer.product.title,
+      offer.product_id,
+    );
 
     return updatedOffer;
   }

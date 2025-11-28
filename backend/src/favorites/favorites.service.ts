@@ -45,7 +45,11 @@ export class FavoritesService {
     }
   }
 
-  async checkFavorite(userId: string, productId: string) {
+  async checkFavorite(userId: string | null, productId: string) {
+    if (!userId) {
+      return { isFavorited: false };
+    }
+
     const favorite = await this.prisma.favorite.findUnique({
       where: {
         user_id_product_id: {

@@ -22,8 +22,11 @@ export default function AdminUserDashboard({ userId }: AdminUserDashboardProps) 
       try {
         const data = await adminApi.getUserDetail(userId);
         setUser(data);
-      } catch (error) {
-        console.error('Failed to fetch user:', error);
+      } catch (error: any) {
+        // 401 에러는 조용히 무시
+        if (error?.response?.status !== 401) {
+          console.error('Failed to fetch user:', error);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -48,8 +51,11 @@ export default function AdminUserDashboard({ userId }: AdminUserDashboardProps) 
       // Refresh user data
       const updatedData = await adminApi.getUserDetail(userId);
       setUser(updatedData);
-    } catch (error) {
-      toast.error(`${action}에 실패했습니다.`);
+    } catch (error: any) {
+      // 401 에러는 조용히 무시
+      if (error?.response?.status !== 401) {
+        toast.error(`${action}에 실패했습니다.`);
+      }
     }
   };
 

@@ -5,6 +5,18 @@ import { toast } from 'sonner';
 import { commissionApi } from '@/lib/api/commission';
 import { DashboardCardSkeleton, Skeleton } from '@/components/ui/Skeleton';
 import type { CommissionStatistics, CommissionSettings } from '@/types';
+import {
+  Percent,
+  TrendingUp,
+  DollarSign,
+  ShoppingBag,
+  Wallet,
+  Clock,
+  Loader2,
+  AlertCircle,
+  BarChart3,
+  Calendar
+} from 'lucide-react';
 
 export default function AdminCommissionPage() {
   const [settings, setSettings] = useState<CommissionSettings | null>(null);
@@ -63,9 +75,9 @@ export default function AdminCommissionPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="p-6 lg:p-8">
         <Skeleton className="h-10 w-48 mb-8" />
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <div className="bg-white/80 rounded-xl border border-slate-200/50 p-6 mb-8">
           <Skeleton className="h-8 w-40 mb-4" />
           <Skeleton className="h-12 w-full" />
         </div>
@@ -79,49 +91,82 @@ export default function AdminCommissionPage() {
 
   if (error) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="text-lg text-red-600">{error}</div>
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="w-8 h-8 text-red-500" />
+          </div>
+          <p className="text-lg text-red-600">{error}</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">수수료 관리</h1>
-
-      {/* 수수료율 설정 */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-4">수수료율 설정</h2>
-        <form onSubmit={handleUpdateRate} className="flex items-end space-x-4">
-          <div className="flex-1">
-            <label htmlFor="commission_rate" className="block text-sm font-medium text-gray-700 mb-1">
-              현재 수수료율
-            </label>
-            <div className="flex items-center space-x-2">
-              <input
-                id="commission_rate"
-                type="number"
-                step="0.1"
-                min="0"
-                max="100"
-                value={newRate}
-                onChange={(e) => setNewRate(e.target.value)}
-                className="w-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <span className="text-lg font-medium">%</span>
-            </div>
+    <div className="p-6 lg:p-8">
+      {/* 헤더 */}
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/30">
+            <Percent className="w-5 h-5 text-white" />
           </div>
-          <button
-            type="submit"
-            disabled={isUpdating}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
-          >
-            {isUpdating ? '변경 중...' : '수수료율 변경'}
-          </button>
-        </form>
-        <p className="mt-2 text-sm text-gray-600">
-          마지막 업데이트: {settings ? new Date(settings.updated_at).toLocaleString('ko-KR') : '-'}
-        </p>
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-bold text-slate-900">수수료 관리</h1>
+            <p className="text-slate-500 text-sm">수수료율 설정 및 통계</p>
+          </div>
+        </div>
+      </div>
+
+      {/* 수수료율 설정 카드 */}
+      <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl shadow-lg shadow-primary-500/30 p-6 lg:p-8 text-white relative overflow-hidden mb-8">
+        {/* 배경 장식 */}
+        <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
+
+        <div className="relative">
+          <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <Percent className="w-5 h-5" />
+            수수료율 설정
+          </h2>
+          <form onSubmit={handleUpdateRate} className="flex flex-col sm:flex-row items-start sm:items-end gap-4">
+            <div className="flex-1">
+              <label htmlFor="commission_rate" className="block text-sm font-medium text-white/80 mb-2">
+                현재 수수료율
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  id="commission_rate"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="100"
+                  value={newRate}
+                  onChange={(e) => setNewRate(e.target.value)}
+                  className="w-32 px-4 py-3 bg-white/20 border border-white/30 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50 text-lg font-semibold"
+                />
+                <span className="text-2xl font-bold">%</span>
+              </div>
+            </div>
+            <button
+              type="submit"
+              disabled={isUpdating}
+              className="px-6 py-3 bg-white text-primary-600 rounded-xl hover:bg-white/90 disabled:bg-white/50 disabled:cursor-not-allowed font-semibold shadow-lg flex items-center gap-2"
+            >
+              {isUpdating ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  변경 중...
+                </>
+              ) : (
+                '수수료율 변경'
+              )}
+            </button>
+          </form>
+          <p className="mt-4 text-sm text-white/70 flex items-center gap-2">
+            <Clock className="w-4 h-4" />
+            마지막 업데이트: {settings ? new Date(settings.updated_at).toLocaleString('ko-KR') : '-'}
+          </p>
+        </div>
       </div>
 
       {/* 통계 대시보드 */}
@@ -129,28 +174,43 @@ export default function AdminCommissionPage() {
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             {/* 전체 통계 */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-lg font-semibold mb-4 text-gray-800">전체 통계</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center pb-2 border-b">
-                  <span className="text-gray-600">총 거래 수</span>
-                  <span className="text-lg font-medium">{statistics.total.transactions.toLocaleString()}건</span>
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200/50 p-6">
+              <div className="flex items-center gap-2 mb-5">
+                <BarChart3 className="w-5 h-5 text-primary-500" />
+                <h3 className="text-lg font-semibold text-slate-900">전체 통계</h3>
+              </div>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+                  <div className="flex items-center gap-2 text-slate-600">
+                    <ShoppingBag className="w-4 h-4" />
+                    <span>총 거래 수</span>
+                  </div>
+                  <span className="text-lg font-semibold text-slate-900">{statistics.total.transactions.toLocaleString()}건</span>
                 </div>
-                <div className="flex justify-between items-center pb-2 border-b">
-                  <span className="text-gray-600">총 거래액</span>
-                  <span className="text-lg font-medium text-blue-600">
+                <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+                  <div className="flex items-center gap-2 text-slate-600">
+                    <TrendingUp className="w-4 h-4" />
+                    <span>총 거래액</span>
+                  </div>
+                  <span className="text-lg font-semibold text-blue-600">
                     {statistics.total.totalSales.toLocaleString()}원
                   </span>
                 </div>
-                <div className="flex justify-between items-center pb-2 border-b">
-                  <span className="text-gray-600">총 수수료</span>
-                  <span className="text-lg font-medium text-green-600">
+                <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+                  <div className="flex items-center gap-2 text-slate-600">
+                    <DollarSign className="w-4 h-4" />
+                    <span>총 수수료</span>
+                  </div>
+                  <span className="text-lg font-semibold text-emerald-600">
                     {statistics.total.totalCommission.toLocaleString()}원
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">판매자 정산액</span>
-                  <span className="text-lg font-medium">
+                  <div className="flex items-center gap-2 text-slate-600">
+                    <Wallet className="w-4 h-4" />
+                    <span>판매자 정산액</span>
+                  </div>
+                  <span className="text-lg font-semibold text-slate-900">
                     {statistics.total.totalSellerAmount.toLocaleString()}원
                   </span>
                 </div>
@@ -158,28 +218,43 @@ export default function AdminCommissionPage() {
             </div>
 
             {/* 이번 달 통계 */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-lg font-semibold mb-4 text-gray-800">이번 달 통계</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center pb-2 border-b">
-                  <span className="text-gray-600">거래 수</span>
-                  <span className="text-lg font-medium">{statistics.monthly.transactions.toLocaleString()}건</span>
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200/50 p-6">
+              <div className="flex items-center gap-2 mb-5">
+                <Calendar className="w-5 h-5 text-primary-500" />
+                <h3 className="text-lg font-semibold text-slate-900">이번 달 통계</h3>
+              </div>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+                  <div className="flex items-center gap-2 text-slate-600">
+                    <ShoppingBag className="w-4 h-4" />
+                    <span>거래 수</span>
+                  </div>
+                  <span className="text-lg font-semibold text-slate-900">{statistics.monthly.transactions.toLocaleString()}건</span>
                 </div>
-                <div className="flex justify-between items-center pb-2 border-b">
-                  <span className="text-gray-600">거래액</span>
-                  <span className="text-lg font-medium text-blue-600">
+                <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+                  <div className="flex items-center gap-2 text-slate-600">
+                    <TrendingUp className="w-4 h-4" />
+                    <span>거래액</span>
+                  </div>
+                  <span className="text-lg font-semibold text-blue-600">
                     {statistics.monthly.totalSales.toLocaleString()}원
                   </span>
                 </div>
-                <div className="flex justify-between items-center pb-2 border-b">
-                  <span className="text-gray-600">수수료</span>
-                  <span className="text-lg font-medium text-green-600">
+                <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+                  <div className="flex items-center gap-2 text-slate-600">
+                    <DollarSign className="w-4 h-4" />
+                    <span>수수료</span>
+                  </div>
+                  <span className="text-lg font-semibold text-emerald-600">
                     {statistics.monthly.totalCommission.toLocaleString()}원
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">판매자 정산액</span>
-                  <span className="text-lg font-medium">
+                  <div className="flex items-center gap-2 text-slate-600">
+                    <Wallet className="w-4 h-4" />
+                    <span>판매자 정산액</span>
+                  </div>
+                  <span className="text-lg font-semibold text-slate-900">
                     {statistics.monthly.totalSellerAmount.toLocaleString()}원
                   </span>
                 </div>
@@ -188,48 +263,60 @@ export default function AdminCommissionPage() {
           </div>
 
           {/* 최근 거래 내역 */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h3 className="text-lg font-semibold mb-4">최근 거래 내역</h3>
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200/50 overflow-hidden">
+            <div className="p-6 border-b border-slate-100">
+              <h3 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                <Clock className="w-5 h-5 text-primary-500" />
+                최근 거래 내역
+              </h3>
+            </div>
             {statistics.recentTransactions.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">거래 내역이 없습니다.</p>
+              <div className="p-8 text-center">
+                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <ShoppingBag className="w-8 h-8 text-slate-400" />
+                </div>
+                <p className="text-slate-500">거래 내역이 없습니다.</p>
+              </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <table className="min-w-full divide-y divide-slate-200">
+                  <thead>
+                    <tr className="bg-slate-50/80">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
                         거래 일시
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
                         상품 가격
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
                         수수료율
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
                         수수료
                       </th>
-                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
                         판매자 정산액
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="divide-y divide-slate-100">
                     {statistics.recentTransactions.map((transaction) => (
-                      <tr key={transaction.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                      <tr key={transaction.id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700">
                           {new Date(transaction.created_at).toLocaleString('ko-KR')}
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">
                           {transaction.product_price.toLocaleString()}원
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                          {transaction.commission_rate}%
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
+                            {transaction.commission_rate}%
+                          </span>
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-green-600 font-medium">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-emerald-600">
                           {transaction.commission_amount.toLocaleString()}원
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-700">
                           {transaction.seller_amount.toLocaleString()}원
                         </td>
                       </tr>

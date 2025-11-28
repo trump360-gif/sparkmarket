@@ -3,12 +3,30 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --background: 255 255 255;
+    --foreground: 15 23 42;
+    --primary: 139 92 246;
+    --primary-foreground: 255 255 255;
+    --secondary: 245 158 11;
+    --secondary-foreground: 255 255 255;
+    --muted: 241 245 249;
+    --muted-foreground: 100 116 139;
+    --card: 255 255 255;
+    --card-foreground: 15 23 42;
+    --border: 226 232 240;
+  }
+
   html {
     @apply scroll-smooth;
   }
 
   body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+    @apply bg-gray-50 text-gray-900 antialiased font-sans;
+    background-image: 
+      radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, rgba(245, 158, 11, 0.1) 0px, transparent 50%);
+    background-attachment: fixed;
   }
 }
 
@@ -16,4 +34,60 @@
   .text-balance {
     text-wrap: balance;
   }
+  
+  .glass {
+    @apply bg-white/70 backdrop-blur-lg border border-white/20 shadow-sm;
+  }
+  
+  .glass-dark {
+    @apply bg-slate-900/80 backdrop-blur-lg border border-slate-800/50 shadow-sm;
+  }
+  
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-md border border-white/40 shadow-sm hover:shadow-md transition-all duration-300;
+  }
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hide scrollbar for IE, Edge and Firefox */
+  .no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+}
+
+/* Hero Feature Card Animations */
+.feature-card-wiggle:hover .feature-icon {
+  animation: wiggle 0.5s ease-in-out;
+}
+
+.feature-card-bounce:hover .feature-icon {
+  animation: bounceLight 0.5s ease-in-out;
+}
+
+.feature-card-float:hover .feature-icon {
+  animation: floatUp 0.5s ease-in-out;
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-12deg); }
+  75% { transform: rotate(12deg); }
+}
+
+@keyframes bounceLight {
+  0%, 100% { transform: translateY(0) scale(1); }
+  20% { transform: translateY(-10px) scale(1.1); }
+  40% { transform: translateY(0) scale(1); }
+  60% { transform: translateY(-6px) scale(1.05); }
+  80% { transform: translateY(0) scale(1); }
+}
+
+@keyframes floatUp {
+  0% { transform: translateY(0) rotate(0deg); }
+  30% { transform: translateY(-12px) rotate(108deg); }
+  100% { transform: translateY(0) rotate(360deg); }
 }
