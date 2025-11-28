@@ -28,7 +28,7 @@ export default function FollowersPage() {
 
     setIsLoading(true);
     try {
-      const response = await socialApi.getFollowers(user.id, { page, limit: 20 });
+      const response = await socialApi.getMyFollowers({ page, limit: 20 });
       if (page === 1) {
         setFollowers(response.data);
       } else {

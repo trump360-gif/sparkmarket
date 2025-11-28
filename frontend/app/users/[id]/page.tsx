@@ -46,7 +46,6 @@ export default function UserProfilePage() {
   useEffect(() => {
     loadUserProfile();
     loadUserProducts();
-    loadFollowStats();
     checkBlockStatus();
   }, [userId]);
 
@@ -54,6 +53,13 @@ export default function UserProfilePage() {
     try {
       const data = await usersApi.getUserProfile(userId);
       setProfile(data);
+      // 프로필에서 팔로우 통계 추출
+      if (data.stats) {
+        setFollowStats({
+          followersCount: data.stats.followersCount || 0,
+          followingCount: data.stats.followingCount || 0,
+        });
+      }
     } catch (error: any) {
       toast.error(error.response?.data?.message || '사용자 정보를 불러오는데 실패했습니다.');
       router.push('/');
@@ -73,15 +79,6 @@ export default function UserProfilePage() {
       console.error('Failed to load user products:', error);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const loadFollowStats = async () => {
-    try {
-      const stats = await socialApi.getFollowStats(userId);
-      setFollowStats(stats);
-    } catch (error: any) {
-      console.error('Failed to load follow stats:', error);
     }
   };
 
@@ -187,7 +184,7 @@ export default function UserProfilePage() {
                     <>
                       <FollowButton
                         userId={userId}
-                        onFollowChange={loadFollowStats}
+                        onFollowChange={() => loadUserProfile()}
                       />
 
                       {/* More Menu */}

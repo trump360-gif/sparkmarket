@@ -77,7 +77,7 @@ model Product {
   original_price Int?  // 원래 가격 (가격 인하 시 저장)
   category    String
 
-  status      String   @default("FOR_SALE") // FOR_SALE | SOLD | DELETED | PENDING_REVIEW | REJECTED
+  status      String   @default("FOR_SALE") // FOR_SALE | SOLD | DELETED | PENDING_REVIEW | REJECTED | SUSPENDED
 
   // 상품 상태 세분화
   condition   String   @default("USED") // NEW | LIKE_NEW | USED | WELL_USED | FOR_PARTS

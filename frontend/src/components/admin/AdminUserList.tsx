@@ -73,16 +73,22 @@ export default function AdminUserList() {
     if (!confirm(`정말 ${action}하시겠습니까?`)) return;
 
     try {
-      await adminApi.updateUserStatus(user.id, {
+      const result = await adminApi.updateUserStatus(user.id, {
         status: newStatus,
         reason: reason || undefined,
       });
-      toast.success(`${action}되었습니다.`);
-      fetchUsers();
-    } catch (error: any) {
-      // 401 에러는 조용히 무시
-      if (error?.response?.status !== 401) {
+      if (result.success) {
+        toast.success(`${action}되었습니다.`);
+        fetchUsers();
+      } else {
         toast.error(`${action}에 실패했습니다.`);
+      }
+    } catch (error: any) {
+      console.error('User status update error:', error);
+      // 401 에러는 조용히 무시 (세션 만료)
+      if (error?.response?.status !== 401 && error?.response?.data?.statusCode !== 401) {
+        const errorMessage = error?.response?.data?.message || `${action}에 실패했습니다.`;
+        toast.error(errorMessage);
       }
     }
   };

@@ -17,7 +17,9 @@ import {
   Loader2,
   ImageIcon,
   Clock,
-  XCircle
+  XCircle,
+  PauseCircle,
+  PlayCircle
 } from 'lucide-react';
 
 interface AdminProductListProps {
@@ -171,6 +173,13 @@ export default function AdminProductList({ initialStatus = '' }: AdminProductLis
         icon: XCircle,
         label: '거절됨'
       },
+      [ProductStatus.SUSPENDED]: {
+        bg: 'bg-orange-50',
+        text: 'text-orange-700',
+        border: 'border-orange-200',
+        icon: PauseCircle,
+        label: '게시중지'
+      },
     };
 
     const { bg, text, border, icon: Icon, label } = config[status];
@@ -183,10 +192,33 @@ export default function AdminProductList({ initialStatus = '' }: AdminProductLis
     );
   };
 
+  const handleSuspend = async (id: string, title: string, currentStatus: ProductStatus) => {
+    const isSuspended = currentStatus === ProductStatus.SUSPENDED;
+    const action = isSuspended ? '게시 재개' : '게시 중지';
+
+    if (!confirm(`"${title}" 상품을 ${action}하시겠습니까?`)) return;
+
+    try {
+      if (isSuspended) {
+        await adminApi.unsuspendProduct(id);
+      } else {
+        await adminApi.suspendProduct(id);
+      }
+      toast.success(`${action}되었습니다.`);
+      setPage(1);
+      fetchProducts(1, false);
+    } catch (error: any) {
+      if (error?.response?.status !== 401) {
+        toast.error(`${action}에 실패했습니다.`);
+      }
+    }
+  };
+
   const statusButtons = [
     { value: '', label: '전체', activeBg: 'bg-slate-900', inactiveBg: 'bg-slate-100', inactiveText: 'text-slate-700' },
     { value: ProductStatus.FOR_SALE, label: '판매중', activeBg: 'bg-emerald-600', inactiveBg: 'bg-emerald-50', inactiveText: 'text-emerald-700' },
     { value: ProductStatus.SOLD, label: '판매완료', activeBg: 'bg-blue-600', inactiveBg: 'bg-blue-50', inactiveText: 'text-blue-700' },
+    { value: ProductStatus.SUSPENDED, label: '게시중지', activeBg: 'bg-orange-600', inactiveBg: 'bg-orange-50', inactiveText: 'text-orange-700' },
     { value: ProductStatus.DELETED, label: '삭제됨', activeBg: 'bg-red-600', inactiveBg: 'bg-red-50', inactiveText: 'text-red-700' },
   ];
 
@@ -256,17 +288,17 @@ export default function AdminProductList({ initialStatus = '' }: AdminProductLis
           {/* 테이블 */}
           <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200/50 overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
-              <table className="w-full divide-y divide-slate-200 table-fixed">
+              <table className="min-w-full divide-y divide-slate-200">
                 <thead>
                   <tr className="bg-slate-50/80">
-                    <th className="w-14 px-2 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">이미지</th>
-                    <th className="w-40 lg:w-48 px-2 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">제목</th>
-                    <th className="w-24 px-2 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">가격</th>
-                    <th className="w-20 px-2 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider hidden xl:table-cell">카테고리</th>
-                    <th className="w-20 px-2 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider hidden lg:table-cell">판매자</th>
-                    <th className="w-20 px-2 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">상태</th>
-                    <th className="w-24 px-2 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider hidden md:table-cell">등록일</th>
-                    <th className="w-14 px-2 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">작업</th>
+                    <th className="px-2 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">이미지</th>
+                    <th className="px-2 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">제목</th>
+                    <th className="px-2 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">가격</th>
+                    <th className="px-2 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap hidden xl:table-cell">카테고리</th>
+                    <th className="px-2 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">판매자</th>
+                    <th className="px-2 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">상태</th>
+                    <th className="px-2 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap hidden md:table-cell">등록일</th>
+                    <th className="px-2 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider whitespace-nowrap">작업</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -274,7 +306,7 @@ export default function AdminProductList({ initialStatus = '' }: AdminProductLis
                     const primaryImage = product.images.find((img) => img.is_primary) || product.images[0];
                     return (
                       <tr key={product.id} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="px-2 py-2 whitespace-nowrap">
+                        <td className="px-2 py-2 whitespace-nowrap w-14">
                           <div className="w-10 h-10 relative bg-slate-100 rounded-lg overflow-hidden">
                             {primaryImage ? (
                               <Image
@@ -291,7 +323,7 @@ export default function AdminProductList({ initialStatus = '' }: AdminProductLis
                             )}
                           </div>
                         </td>
-                        <td className="px-2 py-2">
+                        <td className="px-2 py-2 max-w-[200px]">
                           <Link
                             href={`/admin/products/${product.id}`}
                             className="text-primary-600 hover:text-primary-700 hover:underline block truncate font-medium transition-colors text-sm"
@@ -303,9 +335,9 @@ export default function AdminProductList({ initialStatus = '' }: AdminProductLis
                           <span className="font-semibold text-slate-900 text-sm">{formatPrice(product.price)}원</span>
                         </td>
                         <td className="px-2 py-2 whitespace-nowrap hidden xl:table-cell">
-                          <span className="text-xs text-slate-600 bg-slate-100 px-2 py-0.5 rounded-lg truncate block">{product.category}</span>
+                          <span className="text-xs text-slate-600 bg-slate-100 px-2 py-0.5 rounded-lg">{product.category}</span>
                         </td>
-                        <td className="px-2 py-2 whitespace-nowrap text-sm text-slate-600 hidden lg:table-cell truncate">
+                        <td className="px-2 py-2 whitespace-nowrap text-sm text-slate-600 hidden lg:table-cell">
                           {product.seller?.nickname || '-'}
                         </td>
                         <td className="px-2 py-2 whitespace-nowrap">{getStatusBadge(product.status)}</td>
@@ -313,13 +345,37 @@ export default function AdminProductList({ initialStatus = '' }: AdminProductLis
                           {new Date(product.created_at).toLocaleDateString('ko-KR')}
                         </td>
                         <td className="px-2 py-2 whitespace-nowrap">
-                          <button
-                            onClick={() => handleDelete(product.id, product.title)}
-                            className="inline-flex items-center gap-1 px-2 py-1 text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors text-sm"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                            <span className="hidden sm:inline">삭제</span>
-                          </button>
+                          <div className="flex items-center gap-1">
+                            {(product.status === ProductStatus.FOR_SALE || product.status === ProductStatus.SUSPENDED) && (
+                              <button
+                                onClick={() => handleSuspend(product.id, product.title, product.status)}
+                                className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg font-medium transition-colors text-sm ${
+                                  product.status === ProductStatus.SUSPENDED
+                                    ? 'text-emerald-600 hover:bg-emerald-50'
+                                    : 'text-orange-600 hover:bg-orange-50'
+                                }`}
+                              >
+                                {product.status === ProductStatus.SUSPENDED ? (
+                                  <>
+                                    <PlayCircle className="w-4 h-4" />
+                                    <span className="hidden lg:inline">재개</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <PauseCircle className="w-4 h-4" />
+                                    <span className="hidden lg:inline">중지</span>
+                                  </>
+                                )}
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleDelete(product.id, product.title)}
+                              className="inline-flex items-center gap-1 px-2 py-1 text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors text-sm"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                              <span className="hidden sm:inline">삭제</span>
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );

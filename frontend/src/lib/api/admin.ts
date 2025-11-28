@@ -22,10 +22,16 @@ export const adminApi = {
   },
 
   getProducts: async (params: AdminProductQueryParams): Promise<PaginatedResponse<Product>> => {
-    const response = await apiClient.get<PaginatedResponse<Product>>('/admin/products', {
+    const response = await apiClient.get<{ data: Product[]; meta: { total: number; page: number; totalPages: number } }>('/admin/products', {
       params,
     });
-    return response.data;
+    // Transform backend response (data + meta) to PaginatedResponse format
+    return {
+      data: response.data.data,
+      total: response.data.meta.total,
+      page: response.data.meta.page,
+      totalPages: response.data.meta.totalPages,
+    };
   },
 
   deleteProduct: async (id: string, data?: DeleteProductRequest): Promise<{ success: boolean }> => {
@@ -36,10 +42,16 @@ export const adminApi = {
   },
 
   getUsers: async (params: AdminUserQueryParams): Promise<PaginatedResponse<User>> => {
-    const response = await apiClient.get<PaginatedResponse<User>>('/admin/users', {
+    const response = await apiClient.get<{ data: User[]; meta: { total: number; page: number; totalPages: number } }>('/admin/users', {
       params,
     });
-    return response.data;
+    // Transform backend response (data + meta) to PaginatedResponse format
+    return {
+      data: response.data.data,
+      total: response.data.meta.total,
+      page: response.data.meta.page,
+      totalPages: response.data.meta.totalPages,
+    };
   },
 
   updateUserStatus: async (id: string, data: UpdateUserStatusRequest): Promise<{ success: boolean; user: User }> => {
@@ -59,10 +71,16 @@ export const adminApi = {
   },
 
   getPendingReviewProducts: async (params: AdminProductQueryParams): Promise<PaginatedResponse<Product>> => {
-    const response = await apiClient.get<PaginatedResponse<Product>>('/admin/review/products', {
+    const response = await apiClient.get<{ data: Product[]; meta: { total: number; page: number; totalPages: number } }>('/admin/review/products', {
       params,
     });
-    return response.data;
+    // Transform backend response (data + meta) to PaginatedResponse format
+    return {
+      data: response.data.data,
+      total: response.data.meta.total,
+      page: response.data.meta.page,
+      totalPages: response.data.meta.totalPages,
+    };
   },
 
   getPendingReviewProduct: async (id: string): Promise<Product> => {
@@ -119,6 +137,17 @@ export const adminApi = {
 
   deleteSuspiciousWord: async (id: string): Promise<{ success: boolean }> => {
     const response = await apiClient.delete<{ success: boolean }>(`/admin/moderation/suspicious-words/${id}`);
+    return response.data;
+  },
+
+  // 상품 게시 중지/재개 API
+  suspendProduct: async (id: string): Promise<{ success: boolean; message: string; product: Product }> => {
+    const response = await apiClient.patch<{ success: boolean; message: string; product: Product }>(`/admin/products/${id}/suspend`);
+    return response.data;
+  },
+
+  unsuspendProduct: async (id: string): Promise<{ success: boolean; message: string; product: Product }> => {
+    const response = await apiClient.patch<{ success: boolean; message: string; product: Product }>(`/admin/products/${id}/unsuspend`);
     return response.data;
   },
 };

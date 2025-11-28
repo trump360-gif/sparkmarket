@@ -383,3 +383,56 @@ npm install
 npm run build
 npm start
 ```
+
+---
+
+## 8. 버전 히스토리
+
+| 버전 | 날짜 | 변경 내용 |
+|------|------|----------|
+| 1.0 | 2024-11-28 | 초기 TRD 작성 |
+| 1.1 | 2025-11-28 | Phase 7 완료, API 및 스키마 업데이트 |
+
+---
+
+## 9. 구현 완료 모듈
+
+### Backend Modules ✅
+- AuthModule - JWT 인증 (Access/Refresh Token)
+- UsersModule - 사용자 관리, 프로필
+- ProductsModule - 상품 CRUD, 검색/필터
+- FavoritesModule - 찜하기
+- PriceOffersModule - 가격 제안 시스템
+- ReviewsModule - 거래 리뷰
+- NotificationsModule - 알림 시스템
+- FollowsModule - 팔로우/언팔로우
+- BlocksModule - 사용자 차단
+- ReportsModule - 신고 시스템
+- KeywordAlertsModule - 키워드 알림
+- RecentViewsModule - 최근 본 상품
+- BrandsModule - 브랜드 관리
+- CategoriesModule - 카테고리 관리
+- HashtagsModule - 해시태그
+- ModerationModule - 콘텐츠 검토
+- AdminModule - 관리자 기능
+
+### Frontend Pages ✅
+- / - 메인 페이지 (상품 목록)
+- /login - 로그인
+- /register - 회원가입
+- /products/[id] - 상품 상세
+- /products/new - 상품 등록
+- /products/[id]/edit - 상품 수정
+- /mypage - 마이페이지
+- /favorites - 찜 목록
+- /offers - 가격 제안 관리
+- /notifications - 알림
+- /users/[id] - 공개 프로필
+- /profile/edit - 프로필 수정
+- /admin/* - 관리자 페이지
+
+### 주요 수정 사항 (Phase 7)
+- UpdateUserStatusDto: @IsEnum → @IsIn 수정
+- Admin API: 응답 포맷 통일 (data + meta → PaginatedResponse)
+- AdminProductList: 테이블 레이아웃 개선
+- AdminUserList: 에러 핸들링 개선

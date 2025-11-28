@@ -27,6 +27,8 @@ export interface UserStats {
   salesCount: number;
   purchaseCount: number;
   activeProductsCount: number;
+  followersCount?: number;
+  followingCount?: number;
 }
 
 export interface FollowStats {
@@ -51,6 +53,7 @@ export enum ProductStatus {
   DELETED = 'DELETED',
   PENDING_REVIEW = 'PENDING_REVIEW',
   REJECTED = 'REJECTED',
+  SUSPENDED = 'SUSPENDED',
 }
 
 export enum ProductCategory {

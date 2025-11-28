@@ -103,4 +103,16 @@ export class AdminController {
   ) {
     return this.adminService.rejectProduct(id, req.user.id, rejectDto.reason);
   }
+
+  // 상품 게시 중지
+  @Patch('products/:id/suspend')
+  suspendProduct(@Param('id') id: string) {
+    return this.adminService.suspendProduct(id);
+  }
+
+  // 상품 게시 재개
+  @Patch('products/:id/unsuspend')
+  unsuspendProduct(@Param('id') id: string) {
+    return this.adminService.unsuspendProduct(id);
+  }
 }

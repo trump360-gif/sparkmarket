@@ -250,7 +250,10 @@ export class AdminService {
       },
     });
 
-    return updatedUser;
+    return {
+      success: true,
+      user: updatedUser,
+    };
   }
 
   // 최근 상품 목록 (대시보드용)
@@ -506,5 +509,79 @@ export class AdminService {
     });
 
     return { count };
+  }
+
+  // 상품 게시 중지 (판매 잠금)
+  async suspendProduct(productId: string) {
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    if (!product) {
+      throw new NotFoundException('상품을 찾을 수 없습니다');
+    }
+
+    // FOR_SALE 상태인 상품만 게시 중지 가능
+    if (product.status !== 'FOR_SALE') {
+      throw new BadRequestException('판매 중인 상품만 게시 중지할 수 있습니다');
+    }
+
+    const updatedProduct = await this.prisma.product.update({
+      where: { id: productId },
+      data: { status: 'SUSPENDED' },
+      include: {
+        seller: {
+          select: {
+            id: true,
+            email: true,
+            nickname: true,
+          },
+        },
+        images: true,
+      },
+    });
+
+    return {
+      success: true,
+      message: '상품 게시가 중지되었습니다',
+      product: updatedProduct,
+    };
+  }
+
+  // 상품 게시 재개
+  async unsuspendProduct(productId: string) {
+    const product = await this.prisma.product.findUnique({
+      where: { id: productId },
+    });
+
+    if (!product) {
+      throw new NotFoundException('상품을 찾을 수 없습니다');
+    }
+
+    // SUSPENDED 상태인 상품만 게시 재개 가능
+    if (product.status !== 'SUSPENDED') {
+      throw new BadRequestException('게시 중지된 상품만 재개할 수 있습니다');
+    }
+
+    const updatedProduct = await this.prisma.product.update({
+      where: { id: productId },
+      data: { status: 'FOR_SALE' },
+      include: {
+        seller: {
+          select: {
+            id: true,
+            email: true,
+            nickname: true,
+          },
+        },
+        images: true,
+      },
+    });
+
+    return {
+      success: true,
+      message: '상품 게시가 재개되었습니다',
+      product: updatedProduct,
+    };
   }
 }

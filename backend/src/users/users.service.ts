@@ -53,6 +53,12 @@ export class UsersService {
       where: { seller_id: id, status: 'FOR_SALE' },
     });
 
+    // 팔로워/팔로잉 통계
+    const [followersCount, followingCount] = await Promise.all([
+      this.prisma.follow.count({ where: { following_id: id } }),
+      this.prisma.follow.count({ where: { follower_id: id } }),
+    ]);
+
     return {
       ...user,
       stats: {
@@ -61,6 +67,8 @@ export class UsersService {
         salesCount,
         purchaseCount,
         activeProductsCount,
+        followersCount,
+        followingCount,
       },
     };
   }

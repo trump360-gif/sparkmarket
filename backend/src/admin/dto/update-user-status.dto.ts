@@ -1,8 +1,12 @@
-import { IsString, IsNotEmpty, IsEnum } from 'class-validator';
+import { IsString, IsNotEmpty, IsIn, IsOptional } from 'class-validator';
 
 export class UpdateUserStatusDto {
   @IsString()
   @IsNotEmpty()
-  @IsEnum(['ACTIVE', 'BANNED'])
+  @IsIn(['ACTIVE', 'BANNED'])
   status: string;
+
+  @IsString()
+  @IsOptional()
+  reason?: string;
 }
