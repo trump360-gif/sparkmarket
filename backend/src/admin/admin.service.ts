@@ -7,7 +7,7 @@ export class AdminService {
   constructor(
     private prisma: PrismaService,
     private notificationsService: NotificationsService,
-  ) {}
+  ) { }
 
   // 대시보드 통계
   async getDashboardStats() {
@@ -85,6 +85,57 @@ export class AdminService {
       });
     }
 
+    // 최근 30일간 일별 가입 유저 통계 (그래프용)
+    const last30DaysUsers: Array<{ date: string; count: number }> = [];
+    for (let i = 29; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      date.setHours(0, 0, 0, 0);
+
+      const nextDate = new Date(date);
+      nextDate.setDate(nextDate.getDate() + 1);
+
+      const usersOnDay = await this.prisma.user.count({
+        where: {
+          created_at: {
+            gte: date,
+            lt: nextDate,
+          },
+        },
+      });
+
+      last30DaysUsers.push({
+        date: date.toISOString().split('T')[0],
+        count: usersOnDay,
+      });
+    }
+
+    // 카테고리별 상품 분포 (파이 차트용)
+    const categoryStatsRaw = await this.prisma.product.groupBy({
+      by: ['category'],
+      _count: {
+        category: true,
+      },
+    });
+
+    const category_stats = categoryStatsRaw.map((item) => ({
+      name: item.category,
+      value: item._count.category,
+    }));
+
+    // 상품 상태별 현황 (도넛 차트용)
+    const statusStatsRaw = await this.prisma.product.groupBy({
+      by: ['status'],
+      _count: {
+        status: true,
+      },
+    });
+
+    const status_stats = statusStatsRaw.map((item) => ({
+      name: item.status,
+      value: item._count.status,
+    }));
+
     return {
       total_users,
       total_products,
@@ -94,6 +145,9 @@ export class AdminService {
       new_products_today,
       today_sales,
       sales_chart: last7Days,
+      user_registration_chart: last30DaysUsers,
+      category_stats,
+      status_stats,
     };
   }
 

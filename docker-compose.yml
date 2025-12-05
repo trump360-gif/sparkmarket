@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  data-store:
+    image: postgres:15-alpine
+    container_name: sparkmarket-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: username
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: sparkmarket
+    ports:
+      - '5433:5432'
+    volumes:
+      - sparkmarket_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  sparkmarket_postgres_data:

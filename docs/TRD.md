@@ -359,7 +359,7 @@ AWS_S3_BUCKET=your-bucket-name
 
 ### 6.2 Frontend (.env.local)
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:3001
+NEXT_PUBLIC_API_URL=http://localhost:3003
 ```
 
 ---
@@ -392,6 +392,7 @@ npm start
 |------|------|----------|
 | 1.0 | 2024-11-28 | 초기 TRD 작성 |
 | 1.1 | 2025-11-28 | Phase 7 완료, API 및 스키마 업데이트 |
+| 1.2 | 2025-12-06 | 포트 변경, 로컬 이미지 업로드, Seed 확장, Admin 차트 강화 |
 
 ---
 

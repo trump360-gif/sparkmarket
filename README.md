@@ -79,11 +79,11 @@ pnpm install
 ### 실행
 
 ```bash
-# Frontend (http://localhost:3000)
+# Frontend (http://localhost:3002)
 cd frontend
 pnpm dev
 
-# Backend (http://localhost:3001)
+# Backend (http://localhost:3003)
 cd backend
 pnpm start:dev
 ```

@@ -9,12 +9,18 @@ async function main() {
 
   // Clear existing data
   console.log('🗑️  Clearing existing data...');
+  await prisma.productHashtag.deleteMany();
+  await prisma.hashtag.deleteMany();
   await prisma.productImage.deleteMany();
+  await prisma.transaction.deleteMany(); // Added Transaction cleanup
   await prisma.product.deleteMany();
+  await prisma.brand.deleteMany(); // Added Brand cleanup
   await prisma.user.deleteMany();
 
   // Create users
   console.log('👥 Creating users...');
+
+  // ... (User creation code remains same) ...
 
   const hashedPassword = await bcrypt.hash('user123456', 10);
   const hashedAdminPassword = await bcrypt.hash('admin123456', 10);
@@ -61,7 +67,46 @@ async function main() {
 
   console.log(`✅ Created ${4} users`);
 
-  // Create products
+  // Create Brands
+  console.log('🏢 Creating brands...');
+  const brandsData = [
+    { name: 'Apple', name_ko: '애플', logo_url: 'https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg' },
+    { name: 'Samsung', name_ko: '삼성전자', logo_url: 'https://upload.wikimedia.org/wikipedia/commons/2/24/Samsung_Logo.svg' },
+    { name: 'Nike', name_ko: '나이키', logo_url: 'https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg' },
+    { name: 'Adidas', name_ko: '아디다스', logo_url: 'https://upload.wikimedia.org/wikipedia/commons/2/20/Adidas_Logo.svg' },
+    { name: 'LG', name_ko: 'LG전자', logo_url: 'https://upload.wikimedia.org/wikipedia/commons/b/bf/LG_logo_%282015%29.svg' },
+    { name: 'Sony', name_ko: '소니', logo_url: 'https://upload.wikimedia.org/wikipedia/commons/c/ca/Sony_logo.svg' },
+    { name: 'Nintendo', name_ko: '닌텐도', logo_url: 'https://upload.wikimedia.org/wikipedia/commons/0/0d/Nintendo.svg' },
+    { name: 'NorthFace', name_ko: '노스페이스', logo_url: 'https://upload.wikimedia.org/wikipedia/commons/d/dc/The_North_Face_logo.svg' },
+  ];
+
+  const createdBrands: Record<string, any> = {};
+  for (const brand of brandsData) {
+    const createdBrand = await prisma.brand.create({
+      data: brand,
+    });
+    createdBrands[brand.name] = createdBrand;
+  }
+  console.log(`✅ Created ${brandsData.length} brands`);
+
+  // Create Hashtags
+  console.log('🏷️  Creating hashtags...');
+  const hashtagNames = [
+    '중고거래', '깨끗해요', '거의새것', '급처', '네고가능',
+    '착용안함', '정품', '명품', '무료배송', '한정판',
+    '아이폰', '맥북', '갤럭시', '에어팟', '나이키',
+    '아디다스', '캠핑용품', '게이밍의자'
+  ];
+
+  const createdHashtags: Record<string, any> = {};
+  for (const name of hashtagNames) {
+    const hashtag = await prisma.hashtag.create({
+      data: { name, use_count: 0 }
+    });
+    createdHashtags[name] = hashtag;
+  }
+
+  // Create products with specific hashtags
   console.log('📦 Creating products...');
 
   const products = [
@@ -73,6 +118,7 @@ async function main() {
       category: 'ELECTRONICS',
       status: 'FOR_SALE',
       seller_id: testUser.id,
+      tags: ['아이폰', '중고거래', '깨끗해요']
     },
     {
       title: '맥북 에어 M2 2023년형',
@@ -81,6 +127,7 @@ async function main() {
       category: 'ELECTRONICS',
       status: 'FOR_SALE',
       seller_id: user2.id,
+      tags: ['맥북', '거의새것', '정품']
     },
     {
       title: '에어팟 프로 2세대',
@@ -89,6 +136,7 @@ async function main() {
       category: 'ELECTRONICS',
       status: 'FOR_SALE',
       seller_id: user3.id,
+      tags: ['에어팟', '깨끗해요']
     },
     {
       title: '삼성 갤럭시 탭 S9',
@@ -97,6 +145,7 @@ async function main() {
       category: 'ELECTRONICS',
       status: 'SOLD',
       seller_id: testUser.id,
+      tags: ['갤럭시', '급처']
     },
     {
       title: '소니 WH-1000XM5 헤드폰',
@@ -105,6 +154,7 @@ async function main() {
       category: 'ELECTRONICS',
       status: 'FOR_SALE',
       seller_id: user2.id,
+      tags: ['중고거래', '무료배송']
     },
 
     // Fashion
@@ -115,6 +165,7 @@ async function main() {
       category: 'FASHION',
       status: 'FOR_SALE',
       seller_id: user3.id,
+      tags: ['나이키', '깨끗해요', '정품']
     },
     {
       title: '노스페이스 구스다운 패딩 (100)',
@@ -123,6 +174,7 @@ async function main() {
       category: 'FASHION',
       status: 'FOR_SALE',
       seller_id: testUser.id,
+      tags: ['정품', '중고거래']
     },
     {
       title: '디스커버리 백팩',
@@ -131,6 +183,7 @@ async function main() {
       category: 'FASHION',
       status: 'FOR_SALE',
       seller_id: user2.id,
+      tags: ['중고거래', '깨끗해요']
     },
 
     // Home
@@ -141,6 +194,7 @@ async function main() {
       category: 'HOME',
       status: 'FOR_SALE',
       seller_id: user3.id,
+      tags: ['중고거래', '깨끗해요', '무료배송']
     },
     {
       title: '다이슨 무선청소기 V15',
@@ -149,6 +203,7 @@ async function main() {
       category: 'HOME',
       status: 'FOR_SALE',
       seller_id: testUser.id,
+      tags: ['중고거래', '급처']
     },
     {
       title: '에이스 침대 퀸 매트리스',
@@ -157,6 +212,7 @@ async function main() {
       category: 'HOME',
       status: 'SOLD',
       seller_id: user2.id,
+      tags: ['중고거래', '네고가능']
     },
     {
       title: '한샘 책상 세트',
@@ -165,6 +221,7 @@ async function main() {
       category: 'HOME',
       status: 'FOR_SALE',
       seller_id: user3.id,
+      tags: ['중고거래']
     },
 
     // Books
@@ -175,6 +232,7 @@ async function main() {
       category: 'BOOKS',
       status: 'FOR_SALE',
       seller_id: testUser.id,
+      tags: ['깨끗해요', '중고거래']
     },
     {
       title: '해리포터 시리즈 전권 (1-7권)',
@@ -183,6 +241,7 @@ async function main() {
       category: 'BOOKS',
       status: 'FOR_SALE',
       seller_id: user2.id,
+      tags: ['중고거래', '거의새것']
     },
     {
       title: '토익 기출 문제집 10권',
@@ -191,6 +250,7 @@ async function main() {
       category: 'BOOKS',
       status: 'FOR_SALE',
       seller_id: user3.id,
+      tags: ['중고거래', '깨끗해요']
     },
 
     // Sports
@@ -201,6 +261,7 @@ async function main() {
       category: 'SPORTS',
       status: 'FOR_SALE',
       seller_id: testUser.id,
+      tags: ['중고거래', '네고가능']
     },
     {
       title: '요가매트 + 요가볼 세트',
@@ -209,6 +270,7 @@ async function main() {
       category: 'SPORTS',
       status: 'FOR_SALE',
       seller_id: user2.id,
+      tags: ['거의새것', '무료배송']
     },
     {
       title: '캠핑 텐트 (4인용)',
@@ -217,6 +279,7 @@ async function main() {
       category: 'SPORTS',
       status: 'SOLD',
       seller_id: user3.id,
+      tags: ['캠핑용품', '중고거래']
     },
 
     // Others
@@ -227,6 +290,7 @@ async function main() {
       category: 'OTHER',
       status: 'FOR_SALE',
       seller_id: testUser.id,
+      tags: ['중고거래', '깨끗해요', '급처']
     },
     {
       title: '닌텐도 스위치 OLED',
@@ -235,6 +299,7 @@ async function main() {
       category: 'OTHER',
       status: 'FOR_SALE',
       seller_id: user2.id,
+      tags: ['중고거래', '네고가능']
     },
   ];
 
@@ -284,8 +349,9 @@ async function main() {
   };
 
   for (const productData of products) {
+    const { tags, ...data } = productData;
     const product = await prisma.product.create({
-      data: productData,
+      data: data,
     });
 
     // Add product image
@@ -308,10 +374,68 @@ async function main() {
       });
     }
 
+    // Link hashtags
+    for (const tagName of tags) {
+      const hashtag = createdHashtags[tagName];
+      if (hashtag) {
+        await prisma.productHashtag.create({
+          data: {
+            product_id: product.id,
+            hashtag_id: hashtag.id,
+          }
+        });
+
+        await prisma.hashtag.update({
+          where: { id: hashtag.id },
+          data: { use_count: { increment: 1 } }
+        });
+      }
+    }
+
     categoryCounters[category]++;
   }
 
-  console.log(`✅ Created ${products.length} products with images`);
+  console.log(`✅ Created products and linked hashtags`);
+
+  // Create transactions for SOLD products
+  console.log('💸 Creating transactions for SOLD products...');
+  const soldProducts = await prisma.product.findMany({
+    where: { status: 'SOLD' },
+    include: { seller: true }
+  });
+
+  for (const product of soldProducts) {
+    // Determine buyer (randomly pick a user who is not the seller)
+    const possibleBuyers = [testUser, user2, user3].filter(u => u.id !== product.seller_id);
+    const buyer = possibleBuyers[Math.floor(Math.random() * possibleBuyers.length)];
+
+    // Calculate commission (5%)
+    const commissionRate = 5.0;
+    const commissionAmount = Math.floor(product.price * (commissionRate / 100));
+    const sellerAmount = product.price - commissionAmount;
+
+    // Create transaction date (randomly within last 7 days)
+    const randomDaysAgo = Math.floor(Math.random() * 7);
+    const transactionDate = new Date();
+    transactionDate.setDate(transactionDate.getDate() - randomDaysAgo);
+
+    await prisma.transaction.create({
+      data: {
+        product_id: product.id,
+        seller_id: product.seller_id,
+        buyer_id: buyer.id,
+        product_price: product.price,
+        commission_rate: commissionRate,
+        commission_amount: commissionAmount,
+        seller_amount: sellerAmount,
+        status: 'COMPLETED',
+        created_at: transactionDate,
+        updated_at: transactionDate
+      }
+    });
+  }
+
+  console.log(`✅ Created transactions for ${soldProducts.length} sold products`);
 
   // Get final counts
   const userCount = await prisma.user.count();

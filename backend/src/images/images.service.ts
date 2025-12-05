@@ -9,8 +9,9 @@ import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class ImagesService {
-  private s3Client: S3Client;
+  private s3Client: S3Client | null = null;
   private bucketName: string;
+  private isLocalMode: boolean = false;
 
   constructor(
     private configService: ConfigService,
@@ -22,7 +23,8 @@ export class ImagesService {
     this.bucketName = this.configService.get('R2_BUCKET_NAME') || 'sparkmarket';
 
     if (!accountId || !accessKeyId || !secretAccessKey) {
-      console.warn('R2 credentials not configured. Image upload will not work.');
+      console.warn('⚠️ R2 credentials not found. Switching to Local Storage Mode.');
+      this.isLocalMode = true;
     } else {
       this.s3Client = new S3Client({
         region: 'auto',
@@ -36,6 +38,27 @@ export class ImagesService {
   }
 
   async generatePresignedUrl(uploadDto: UploadPresignedUrlDto) {
+    // Local Mode handling
+    if (this.isLocalMode) {
+      const { filename } = uploadDto;
+      const ext = filename.split('.').pop();
+      const key = `products/${uuidv4()}.${ext}`;
+
+      // Return a URL that the frontend will PUT to (mimicking S3)
+      // We'll add an endpoint in the controller: /images/local-upload
+      // NOTE: backend Global Prefix is 'api', so we must include it.
+      const backendUrl = this.configService.get('BACKEND_URL') || 'http://localhost:3003';
+      const presignedUrl = `${backendUrl}/api/images/local-upload?key=${key}`;
+      const publicUrl = `${backendUrl}/uploads/${key}`;
+
+      return {
+        presignedUrl,
+        key,
+        publicUrl,
+        expiresIn: 3600,
+      };
+    }
+
     if (!this.s3Client) {
       throw new BadRequestException('이미지 업로드 기능이 설정되지 않았습니다');
     }

@@ -10,7 +10,7 @@ import {
   IsBoolean,
   IsEnum,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 
 class ProductImageDto {
   @IsString()
@@ -68,6 +68,7 @@ export class CreateProductDto {
 
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value === '' ? null : value)
   brand_id?: string;
 
   @IsOptional()

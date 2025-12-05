@@ -143,7 +143,7 @@ useEffect(() => {
 
 ```bash
 # frontend/.env.local
-NEXT_PUBLIC_API_URL=http://localhost:3001
+NEXT_PUBLIC_API_URL=http://localhost:3003
 ```
 
 ## 개발 서버 실행
@@ -152,7 +152,7 @@ NEXT_PUBLIC_API_URL=http://localhost:3001
 # 의존성 설치
 npm install
 
-# 개발 서버 시작 (localhost:3000)
+# 개발 서버 시작 (localhost:3002)
 npm run dev
 
 # 프로덕션 빌드

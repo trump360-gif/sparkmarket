@@ -22,7 +22,7 @@ export class ProductsService {
     private keywordAlertsService: KeywordAlertsService,
     private followsService: FollowsService,
     private notificationsService: NotificationsService,
-  ) {}
+  ) { }
 
   async create(userId: string, createProductDto: CreateProductDto) {
     const {
@@ -67,13 +67,13 @@ export class ProductsService {
         brand_id,
         images: images
           ? {
-              create: images.map((img) => ({
-                url: img.url,
-                key: img.key,
-                order: img.order,
-                is_primary: img.is_primary,
-              })),
-            }
+            create: images.map((img) => ({
+              url: img.url,
+              key: img.key,
+              order: img.order,
+              is_primary: img.is_primary,
+            })),
+          }
           : undefined,
       },
       include: {
@@ -272,6 +272,11 @@ export class ProductsService {
               name: true,
               name_ko: true,
               logo_url: true,
+            },
+          },
+          hashtags: {
+            include: {
+              hashtag: true,
             },
           },
         },

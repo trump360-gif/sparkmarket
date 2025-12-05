@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Hash, TrendingUp } from 'lucide-react';
 import type { Hashtag } from '@/types';
 
+import { hashtagsApi } from '@/lib/api/hashtags';
+
 interface PopularHashtagsProps {
   limit?: number;
   showTitle?: boolean;
@@ -26,24 +28,8 @@ export default function PopularHashtags({
   const fetchPopularHashtags = async () => {
     try {
       setIsLoading(true);
-      // TODO: Replace with actual API call
-      // const response = await apiClient.get(`/hashtags/popular?limit=${limit}`);
-      // setHashtags(response.data);
-
-      // Mock data
-      const mockHashtags: Hashtag[] = [
-        { id: '1', name: '중고거래', use_count: 256 },
-        { id: '2', name: '깨끗해요', use_count: 189 },
-        { id: '3', name: '거의새것', use_count: 145 },
-        { id: '4', name: '급처', use_count: 123 },
-        { id: '5', name: '네고가능', use_count: 98 },
-        { id: '6', name: '착용안함', use_count: 87 },
-        { id: '7', name: '정품', use_count: 76 },
-        { id: '8', name: '명품', use_count: 65 },
-        { id: '9', name: '무료배송', use_count: 54 },
-        { id: '10', name: '한정판', use_count: 43 },
-      ];
-      setHashtags(mockHashtags.slice(0, limit));
+      const data = await hashtagsApi.getPopularHashtags();
+      setHashtags(data.slice(0, limit));
     } catch (error) {
       console.error('Failed to fetch popular hashtags:', error);
     } finally {
@@ -86,7 +72,7 @@ export default function PopularHashtags({
         {hashtags.map((hashtag, index) => (
           <Link
             key={hashtag.id}
-            href={`/hashtags/${encodeURIComponent(hashtag.name)}`}
+            href={`/?hashtag=${encodeURIComponent(hashtag.name)}`}
             className="group relative px-4 py-2 bg-white border border-slate-200 rounded-full hover:border-primary-500 hover:bg-primary-50 transition-all"
           >
             <div className="flex items-center gap-1.5">
@@ -101,8 +87,15 @@ export default function PopularHashtags({
 
             {/* Top 3 badge */}
             {index < 3 && (
-              <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-md">
-                <span className="text-white text-[10px] font-bold">{index + 1}</span>
+              <div
+                className={`absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full flex items-center justify-center shadow-md ${index === 0
+                    ? 'bg-gradient-to-br from-yellow-300 to-yellow-500' // Gold
+                    : index === 1
+                      ? 'bg-gradient-to-br from-slate-300 to-slate-400' // Silver
+                      : 'bg-gradient-to-br from-orange-300 to-orange-400' // Bronze
+                  }`}
+              >
+                <span className="text-white text-[10px] font-bold text-shadow-sm">{index + 1}</span>
               </div>
             )}
           </Link>

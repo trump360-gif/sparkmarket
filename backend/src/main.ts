@@ -16,14 +16,14 @@ async function bootstrap() {
 
   // CORS
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: process.env.FRONTEND_URL || 'http://localhost:3002',
     credentials: true,
   });
 
   // Global prefix
   app.setGlobalPrefix('api');
 
-  await app.listen(process.env.PORT ?? 3001);
-  console.log(`🚀 Server is running on: http://localhost:${process.env.PORT ?? 3001}/api`);
+  await app.listen(process.env.PORT ?? 3003);
+  console.log(`🚀 Server is running on: http://localhost:${process.env.PORT ?? 3003}/api`);
 }
 bootstrap();

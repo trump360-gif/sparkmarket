@@ -412,7 +412,7 @@ R2_PUBLIC_URL="https://..."
 
 ### Frontend (.env.local)
 ```
-NEXT_PUBLIC_API_URL="http://localhost:3001"
+NEXT_PUBLIC_API_URL="http://localhost:3003"
 ```
 
 ## 9. 배포
@@ -434,7 +434,7 @@ npx prisma db seed
 
 ---
 
-## 10. 현재 구현 상태 (2025-11-23)
+## 10. 현재 구현 상태 (2025-12-06)
 
 ### ✅ 완료된 작업
 
@@ -748,9 +748,42 @@ npx prisma db seed
 - 링크 클릭 시 자동으로 메뉴 닫기
 - Desktop 버튼들은 `hidden sm:block`으로 숨김
 
+### 📝 주요 변경사항 (2025-12-06)
+
+#### 개발 환경 포트 변경
+- **Backend**: 3001 → 3003
+- **Frontend**: 3000 → 3002
+- **.env.example** 파일들 업데이트
+
+#### 로컬 이미지 업로드 모드
+- **R2 대체**: R2 설정 없을 시 자동으로 로컬 스토리지 모드 전환
+- **저장 위치**: `backend/public/uploads/`
+- **서빙**: `@nestjs/serve-static` 모듈로 `/uploads` 경로 서빙
+- **엔드포인트**: `PUT /api/images/local-upload?key=<filename>` 추가
+
+#### Seed 데이터 확장
+- **브랜드**: 8개 추가 (Apple, Samsung, Nike, Adidas, LG, Sony, Nintendo, NorthFace)
+- **해시태그**: 18개 추가 (중고거래, 깨끗해요, 거의새것, 급처, 네고가능 등)
+- **상품-해시태그 연결**: 상품별로 관련 해시태그 자동 연결
+- **트랜잭션**: SOLD 상태 상품에 대한 거래 내역 자동 생성
+
+#### Admin 대시보드 통계 API 확장
+- **user_registration_chart**: 최근 30일 유저 가입 추이
+- **category_stats**: 카테고리별 상품 분포
+- **status_stats**: 상품 상태별 현황
+
+#### UI/UX 개선
+- **ProductCard**: 해시태그 표시 (최대 2개)
+- **PopularHashtags**: 컴포넌트 간소화
+- **Dashboard**: Firebase Analytics 스타일 차트 컴포넌트 추가
+
+#### 테스트 환경 개선
+- 모든 `*.spec.ts` 파일에 의존성 주입 추가
+- `uuid` 모듈 mock 설정 (`test/mocks/uuid.ts`)
+- Jest `moduleNameMapper` 설정 추가
+
 ### 🎯 다음 단계
 
-- [ ] Cloudflare R2 설정 (이미지 업로드 테스트)
 - [ ] 프론트엔드-백엔드 통합 테스트
 - [ ] 배포 준비 (Vercel + Railway)
 - [ ] Phase 2 기능 (채팅, 소셜 로그인 등)
@@ -758,5 +791,5 @@ npx prisma db seed
 ### 🔗 관련 링크
 
 - GitHub: https://github.com/trump360-gif/sparkmarket
-- 로컬 백엔드: http://localhost:3001
-- 로컬 프론트엔드: http://localhost:3000
+- 로컬 백엔드: http://localhost:3003
+- 로컬 프론트엔드: http://localhost:3002

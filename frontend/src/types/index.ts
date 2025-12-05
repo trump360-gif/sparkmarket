@@ -212,6 +212,7 @@ export interface ProductQueryParams extends PaginationParams {
   maxPrice?: number;
   status?: ProductStatus;
   seller_id?: string;
+  hashtag?: string;
 }
 
 // Upload Types
@@ -241,6 +242,18 @@ export interface AdminDashboardStats {
     date: string;
     sales: number;
     count: number;
+  }[];
+  user_registration_chart: {
+    date: string;
+    count: number;
+  }[];
+  category_stats: {
+    name: string;
+    value: number;
+  }[];
+  status_stats: {
+    name: string;
+    value: number;
   }[];
 }
 

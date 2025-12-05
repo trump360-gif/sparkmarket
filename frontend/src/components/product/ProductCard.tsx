@@ -130,6 +130,23 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
 
         <p className="text-sm text-gray-500 line-clamp-1 mb-2">{product.category}</p>
 
+        {/* 해시태그 */}
+        {product.hashtags && product.hashtags.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-3">
+            {product.hashtags.slice(0, 3).map((item) => (
+              <span
+                key={item.hashtag.id}
+                className="text-[10px] text-primary-600 bg-primary-50 px-1.5 py-0.5 rounded-full"
+              >
+                #{item.hashtag.name}
+              </span>
+            ))}
+            {product.hashtags.length > 3 && (
+              <span className="text-[10px] text-gray-400">+{product.hashtags.length - 3}</span>
+            )}
+          </div>
+        )}
+
         <div className="flex items-center justify-between text-xs text-gray-500">
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-1">

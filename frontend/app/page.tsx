@@ -10,7 +10,8 @@ import { ProductListSkeleton } from '@/components/ui/Skeleton';
 import { useAuth } from '@/hooks/useAuth';
 import type { Product } from '@/types';
 import { Button } from '@/components/ui/Button';
-import { ArrowRight, Sparkles, BadgePercent, ShieldCheck, Zap, Hash, TrendingUp } from 'lucide-react';
+import { ArrowRight, Sparkles, BadgePercent, ShieldCheck, Zap } from 'lucide-react';
+import PopularHashtags from '@/components/hashtag/PopularHashtags';
 
 function HomeContent() {
   const searchParams = useSearchParams();
@@ -27,7 +28,9 @@ function HomeContent() {
     searchParams.get('category') ||
     searchParams.get('minPrice') ||
     searchParams.get('maxPrice') ||
-    searchParams.get('status');
+    searchParams.get('maxPrice') ||
+    searchParams.get('status') ||
+    searchParams.get('hashtag');
 
   // 필터가 활성화되면 hasUsedFilters를 true로 설정
   useEffect(() => {
@@ -51,12 +54,14 @@ function HomeContent() {
         const minPrice = searchParams.get('minPrice');
         const maxPrice = searchParams.get('maxPrice');
         const status = searchParams.get('status');
+        const hashtag = searchParams.get('hashtag');
 
         if (search) params.search = search;
         if (category) params.category = category;
         if (minPrice) params.minPrice = parseInt(minPrice);
         if (maxPrice) params.maxPrice = parseInt(maxPrice);
         if (status) params.status = status;
+        if (hashtag) params.hashtag = hashtag;
 
         const response = await productsApi.getProducts(params);
         setInitialProducts(response.data);
@@ -160,27 +165,12 @@ function HomeContent() {
         </section>
       )}
 
-      {/* 인기 해시태그 섹션 - API 구현 후 활성화 */}
+      {/* 인기 해시태그 섹션 */}
       {!searchQuery && !hasActiveFilters && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 border-b border-slate-200">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-              <Hash className="w-5 h-5 text-primary-600" />
-              인기 해시태그
-            </h2>
-            <TrendingUp className="w-5 h-5 text-slate-400" />
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {/* TODO: API에서 인기 해시태그 데이터 가져오기 */}
-            {['아이폰', '맥북', '갤럭시', '에어팟', '나이키', '아디다스', '캠핑용품', '게이밍의자'].map((tag) => (
-              <Link key={tag} href={`/?hashtag=${tag}`}>
-                <button className="px-4 py-2 bg-gradient-to-r from-primary-50 to-secondary-50 hover:from-primary-100 hover:to-secondary-100 text-primary-700 rounded-full text-sm font-medium transition-all shadow-sm hover:shadow-md">
-                  #{tag}
-                </button>
-              </Link>
-            ))}
-          </div>
-        </div>
+        <PopularHashtags
+          className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 border-b border-slate-200 ${showHeroSection ? '' : 'mt-20'
+            }`}
+        />
       )}
 
       <div id="product-list" className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 ${showHeroSection ? '' : 'pt-32'}`}>

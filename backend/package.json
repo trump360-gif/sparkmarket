@@ -32,6 +32,7 @@
     "@nestjs/common": "^11.0.1",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/serve-static": "^5.0.4",
     "@prisma/client": "5.22.0",
     "bcrypt": "^6.0.0",
     "dotenv": "^17.2.3",
@@ -78,6 +79,9 @@
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "moduleNameMapper": {
+      "^uuid$": "<rootDir>/../test/mocks/uuid.ts"
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"

@@ -16,6 +16,7 @@ import {
   ArrowRight,
   Coins
 } from 'lucide-react';
+import FirebaseAnalyticsCharts from './FirebaseAnalyticsCharts';
 
 export default function Dashboard() {
   const [stats, setStats] = useState<AdminDashboardStats | null>(null);
@@ -186,49 +187,15 @@ export default function Dashboard() {
         })}
       </div>
 
-      {/* 최근 7일 판매 그래프 */}
-      {salesChart.length > 0 && (
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200/50 p-6 mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-slate-900">최근 7일 판매 추이</h2>
-            <div className="flex items-center gap-2 text-xs text-slate-500">
-              <div className="w-3 h-3 bg-gradient-to-r from-primary-500 to-primary-600 rounded" />
-              <span>판매 금액</span>
-            </div>
-          </div>
-          <div className="space-y-3">
-            {salesChart.map((data, index) => {
-              const percentage = maxSales > 0 ? (data.sales / maxSales) * 100 : 0;
-              const date = new Date(data.date);
-              const dayLabel = `${date.getMonth() + 1}/${date.getDate()}`;
-
-              return (
-                <div key={index} className="flex items-center space-x-4 group">
-                  <div className="w-16 text-sm text-slate-600 font-medium">{dayLabel}</div>
-                  <div className="flex-1 bg-slate-100 rounded-full h-10 relative overflow-hidden">
-                    <div
-                      className="bg-gradient-to-r from-primary-500 to-primary-600 h-full rounded-full flex items-center justify-end px-4"
-                      style={{ width: `${Math.max(percentage, 5)}%` }}
-                    >
-                      {data.sales > 0 && percentage > 20 && (
-                        <span className="text-white text-sm font-semibold whitespace-nowrap">
-                          {formatPrice(data.sales)}원
-                        </span>
-                      )}
-                    </div>
-                    {data.sales > 0 && percentage <= 20 && (
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 text-sm font-semibold">
-                        {formatPrice(data.sales)}원
-                      </span>
-                    )}
-                  </div>
-                  <div className="w-14 text-sm text-slate-500 text-right">{data.count}건</div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      {/* Firebase Analytics Style Charts */}
+      <div className="mb-8">
+        <FirebaseAnalyticsCharts
+          salesData={salesChart}
+          userData={stats.user_registration_chart || []}
+          categoryStats={stats.category_stats || []}
+          statusStats={stats.status_stats || []}
+        />
+      </div>
 
       {/* 요약 섹션 */}
       <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200/50 p-6">
