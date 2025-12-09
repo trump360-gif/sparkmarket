@@ -37,7 +37,13 @@ export class ImagesController {
   @Post('presigned-url')
   @UseGuards(JwtAuthGuard)
   generatePresignedUrl(@Body() uploadDto: UploadPresignedUrlDto) {
-    return this.imagesService.generatePresignedUrl(uploadDto);
+    return this.imagesService.generatePresignedUrl(uploadDto, 'product');
+  }
+
+  @Post('avatar-presigned-url')
+  @UseGuards(JwtAuthGuard)
+  generateAvatarPresignedUrl(@Body() uploadDto: UploadPresignedUrlDto) {
+    return this.imagesService.generatePresignedUrl(uploadDto, 'avatar');
   }
 
   @Post('product-image')

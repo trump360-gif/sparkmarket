@@ -1,5 +1,7 @@
-import { IsOptional, IsString, IsInt, Min } from 'class-validator';
+import { IsOptional, IsString, IsInt, Min, IsIn } from 'class-validator';
 import { Type } from 'class-transformer';
+
+export type SortOption = 'latest' | 'price_asc' | 'price_desc' | 'popular';
 
 export class QueryProductDto {
   @IsOptional()
@@ -41,6 +43,19 @@ export class QueryProductDto {
   @IsOptional()
   @IsString()
   hashtag?: string;
+
+  @IsOptional()
+  @IsString()
+  seller_id?: string;
+
+  @IsOptional()
+  @IsString()
+  exclude?: string;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['latest', 'price_asc', 'price_desc', 'popular'])
+  sort?: SortOption = 'latest';
 
   @IsOptional()
   @Type(() => Number)

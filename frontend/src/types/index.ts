@@ -204,6 +204,16 @@ export interface PaginatedResponse<T> {
   totalPages: number;
 }
 
+// Product Sort Types
+export type SortOption = 'latest' | 'price_asc' | 'price_desc' | 'popular';
+
+export const SORT_OPTION_LABELS: Record<SortOption, string> = {
+  latest: '최신순',
+  price_asc: '가격 낮은순',
+  price_desc: '가격 높은순',
+  popular: '인기순',
+};
+
 // Product Query Types
 export interface ProductQueryParams extends PaginationParams {
   category?: ProductCategory;
@@ -213,6 +223,8 @@ export interface ProductQueryParams extends PaginationParams {
   status?: ProductStatus;
   seller_id?: string;
   hashtag?: string;
+  sort?: SortOption;
+  exclude?: string;
 }
 
 // Upload Types

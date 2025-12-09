@@ -434,7 +434,7 @@ npx prisma db seed
 
 ---
 
-## 10. 현재 구현 상태 (2025-12-06)
+## 10. 현재 구현 상태 (2025-12-09)
 
 ### ✅ 완료된 작업
 
@@ -782,11 +782,443 @@ npx prisma db seed
 - `uuid` 모듈 mock 설정 (`test/mocks/uuid.ts`)
 - Jest `moduleNameMapper` 설정 추가
 
+---
+
+## 11. Phase 8-10 기술 명세 (UX 개선) - 2025-12-09 업데이트
+
+### Phase 8: 핵심 UX 개선 ✅ 완료
+
+#### 8.1 Navbar "판매하기" 버튼 ✅
+
+**Frontend 수정** (`frontend/src/components/ui/Navbar.tsx`):
+```tsx
+// 알림 드롭다운 앞에 추가
+<Link href={isAuthenticated ? "/products/new" : `/login?returnUrl=${encodeURIComponent('/products/new')}`}>
+  <Button className="gap-1.5">
+    <Plus className="w-4 h-4" />
+    <span className="hidden sm:inline">판매하기</span>
+  </Button>
+</Link>
+```
+
+**변경 파일**:
+- `frontend/src/components/ui/Navbar.tsx`
+
+---
+
+#### 8.2 상품 목록 정렬 옵션 ✅
+
+**Backend API 수정** (`backend/src/products/products.service.ts`):
+```typescript
+// 쿼리 파라미터 추가
+interface GetProductsDto {
+  // ... 기존 필드
+  sort?: 'latest' | 'price_asc' | 'price_desc' | 'popular';
+}
+
+// orderBy 로직
+const orderBy = {
+  latest: { created_at: 'desc' },
+  price_asc: { price: 'asc' },
+  price_desc: { price: 'desc' },
+  popular: [{ view_count: 'desc' }, { favorite_count: 'desc' }],
+}[sort || 'latest'];
+```
+
+**Frontend 수정** (`frontend/app/page.tsx`):
+```tsx
+// 정렬 셀렉트박스 추가
+<select
+  value={sort}
+  onChange={(e) => updateQueryParam('sort', e.target.value)}
+  className="..."
+>
+  <option value="latest">최신순</option>
+  <option value="price_asc">가격 낮은순</option>
+  <option value="price_desc">가격 높은순</option>
+  <option value="popular">인기순</option>
+</select>
+```
+
+**변경 파일**:
+- `backend/src/products/dto/get-products.dto.ts` - sort 필드 추가
+- `backend/src/products/products.service.ts` - orderBy 로직 추가
+- `frontend/app/page.tsx` - 정렬 UI 추가
+- `frontend/src/lib/api/products.ts` - sort 파라미터 전달
+
+---
+
+#### 8.3 프로필 이미지 업로드 ✅
+
+**구현 방식**: 기존 users API + 새로운 avatar 전용 presigned URL 엔드포인트
+
+**Backend API 추가** (`backend/src/images/images.controller.ts`):
+```typescript
+@Post('avatar-presigned-url')
+@UseGuards(JwtAuthGuard)
+generateAvatarPresignedUrl(@Body() uploadDto: UploadPresignedUrlDto) {
+  return this.imagesService.generatePresignedUrl(uploadDto, 'avatar');
+}
+```
+
+**Backend Service 수정** (`backend/src/images/images.service.ts`):
+```typescript
+async generatePresignedUrl(uploadDto: UploadPresignedUrlDto, type: 'product' | 'avatar' = 'product') {
+  const folder = type === 'avatar' ? 'avatars' : 'products';
+  const key = `${folder}/${uuidv4()}.${ext}`;
+  // ...
+}
+```
+
+**Frontend API 추가** (`frontend/src/lib/api/upload.ts`):
+```typescript
+getAvatarPresignedUrl: async (data: PresignedUrlRequest): Promise<PresignedUrlResponse> => {
+  const response = await apiClient.post<PresignedUrlResponse>('/images/avatar-presigned-url', data);
+  return response.data;
+},
+uploadAvatar: async (file: File): Promise<PresignedUrlResponse> => { ... }
+```
+
+**변경 파일**:
+- `backend/src/images/images.controller.ts` - avatar-presigned-url 엔드포인트 추가
+- `backend/src/images/images.service.ts` - type 파라미터로 폴더 분기
+- `frontend/src/lib/api/upload.ts` - avatar 전용 API 함수
+- `frontend/app/profile/settings/page.tsx` - avatar 업로드 로직 변경
+
+---
+
+**이전 명세 (참고용)**:
+
+**Backend API 추가** (`backend/src/users/users.controller.ts`):
+```typescript
+@Patch('me/avatar')
+@UseGuards(JwtAuthGuard)
+async updateAvatar(
+  @Request() req,
+  @Body() body: { avatar_url: string }
+) {
+  return this.usersService.updateAvatar(req.user.id, body.avatar_url);
+}
+```
+
+**Backend Service** (`backend/src/users/users.service.ts`):
+```typescript
+async updateAvatar(userId: string, avatarUrl: string) {
+  return this.prisma.user.update({
+    where: { id: userId },
+    data: { avatar_url: avatarUrl },
+    select: { id: true, avatar_url: true },
+  });
+}
+```
+
+**Frontend 수정** (`frontend/app/profile/settings/page.tsx`):
+- 아바타 미리보기 영역 추가
+- 이미지 선택 input
+- 업로드 로직 (기존 presigned URL 활용)
+- 저장 버튼
+
+**변경 파일**:
+- `backend/src/users/users.controller.ts` - PATCH /me/avatar 추가
+- `backend/src/users/users.service.ts` - updateAvatar 메서드 추가
+- `frontend/app/profile/settings/page.tsx` - 아바타 업로드 UI
+- `frontend/src/lib/api/users.ts` - updateAvatar API 함수 추가
+
+---
+
+### Phase 9: 상품 상세 개선 ✅ 완료
+
+#### 9.1 상품 공유 기능 ✅
+
+**구현 방식**: Web Share API 우선, 미지원 시 클립보드 복사
+
+**Frontend 수정** (`frontend/src/components/product/ProductDetail.tsx`):
+```tsx
+const handleShare = async () => {
+  const url = window.location.href;
+
+  // Web Share API 지원 시 네이티브 공유 사용
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: product.title,
+        text: `${product.title} - ${formattedPrice}원`,
+        url: url,
+      });
+      return;
+    } catch (error) {
+      if ((error as Error).name === 'AbortError') return;
+    }
+  }
+
+  // 클립보드 복사
+  await navigator.clipboard.writeText(url);
+  toast.success('링크가 복사되었습니다');
+};
+```
+
+**변경 파일**:
+- `frontend/src/components/product/ProductDetail.tsx` - handleShare 함수 및 Share2 버튼 추가
+
+---
+
+#### 9.2 이미지 확대 보기 ✅
+
+**새 컴포넌트** (`frontend/src/components/ui/ImageZoomModal.tsx`):
+- 전체 화면 모달 (검은 배경 95% 불투명도)
+- 좌우 화살표 네비게이션
+- 하단 썸네일 네비게이션
+- ESC 키 및 좌우 방향키 지원
+- 확대/축소 버튼 (0.5x ~ 3x)
+- 이미지 카운터 표시
+- 로딩 스피너
+
+**변경 파일**:
+- `frontend/src/components/ui/ImageZoomModal.tsx` - 새 파일 생성
+- `frontend/src/components/product/ProductDetail.tsx` - 이미지 클릭 핸들러, 모달 상태 관리
+
+---
+
+#### 9.3 판매자 다른 상품 보기 ✅
+
+**Backend API 수정** (`backend/src/products/dto/query-product.dto.ts`):
+```typescript
+@IsOptional()
+@IsString()
+seller_id?: string;
+
+@IsOptional()
+@IsString()
+exclude?: string;
+```
+
+**Backend Service 수정** (`backend/src/products/products.service.ts`):
+```typescript
+// 판매자 필터
+if (seller_id) {
+  where.seller_id = seller_id;
+}
+
+// 제외할 상품
+if (exclude) {
+  where.id = { not: exclude };
+}
+```
+
+**Frontend 수정** (`frontend/src/components/product/ProductDetail.tsx`):
+- `sellerProducts` 상태 추가
+- 판매자 다른 상품 API 호출 (seller_id, exclude, status=FOR_SALE, limit=4)
+- 상품 상세 하단에 그리드 형태로 표시 (2x2 모바일, 1x4 데스크톱)
+- "더보기" 버튼으로 판매자 프로필 페이지 이동
+
+**변경 파일**:
+- `backend/src/products/dto/query-product.dto.ts` - seller_id, exclude 파라미터 추가
+- `backend/src/products/products.service.ts` - 필터 로직 추가
+- `frontend/src/types/index.ts` - ProductQueryParams에 exclude 추가
+- `frontend/src/components/product/ProductDetail.tsx` - 판매자 다른 상품 섹션 추가
+
+---
+
+### Phase 10: 추가 개선 ✅ 완료
+
+#### 10.1 카테고리 페이지 ✅
+
+**새 페이지** (`frontend/app/categories/page.tsx` + `CategoriesPageClient.tsx`):
+```tsx
+// page.tsx - 서버 컴포넌트 (메타데이터)
+export const metadata: Metadata = {
+  title: '카테고리',
+  description: '스파크마켓의 다양한 중고 상품 카테고리를 둘러보세요...',
+};
+
+// CategoriesPageClient.tsx - 클라이언트 컴포넌트
+const CATEGORIES: CategoryItem[] = [
+  { name: ProductCategory.DIGITAL, label: '디지털/가전', icon: <Smartphone />, ... },
+  { name: ProductCategory.FASHION_CLOTHES, label: '패션의류', icon: <Shirt />, ... },
+  // ... 10개 카테고리
+];
+```
+
+**기능**:
+- 카테고리별 아이콘 + 이름 + 상품 수 표시
+- 인기 카테고리 섹션 (상품 수 기준 상위 3개)
+- 전체 상품 수 표시
+- 다크 모드 지원
+- 카테고리 클릭 시 `/?category=XXX`로 이동
+
+**변경 파일**:
+- `frontend/app/categories/page.tsx` - 서버 컴포넌트 + 메타데이터
+- `frontend/app/categories/CategoriesPageClient.tsx` - 클라이언트 컴포넌트
+
+---
+
+#### 10.2 다크 모드 ✅
+
+**Tailwind 설정** (`frontend/tailwind.config.ts`):
+```ts
+const config: Config = {
+  darkMode: 'class',
+  // ...
+}
+```
+
+**Zustand Store** (`frontend/src/stores/themeStore.ts`):
+```ts
+export type Theme = 'light' | 'dark' | 'system';
+
+interface ThemeState {
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+}
+
+export const useThemeStore = create<ThemeState>()(
+  persist(
+    (set) => ({
+      theme: 'system',
+      setTheme: (theme) => set({ theme }),
+    }),
+    { name: 'theme-storage' }
+  )
+);
+```
+
+**ThemeProvider** (`frontend/src/components/providers/ThemeProvider.tsx`):
+- 테마 상태 감지 및 적용
+- `prefers-color-scheme` 미디어 쿼리 리스너
+- `<html>` 태그에 `dark` 클래스 토글
+
+**ThemeToggle** (`frontend/src/components/ui/ThemeToggle.tsx`):
+- Sun / Moon / Monitor 아이콘으로 모드 표시
+- 클릭 시 light → dark → system 순환
+
+**변경 파일**:
+- `frontend/tailwind.config.ts` - darkMode: 'class' 추가
+- `frontend/src/stores/themeStore.ts` - 새 파일
+- `frontend/src/components/providers/ThemeProvider.tsx` - 새 파일
+- `frontend/src/components/ui/ThemeToggle.tsx` - 새 파일
+- `frontend/app/layout.tsx` - ThemeProvider 래핑, body dark 클래스
+- `frontend/src/components/ui/Navbar.tsx` - ThemeToggle 추가, dark 스타일
+- 기타 컴포넌트에 `dark:` 클래스 추가
+
+---
+
+#### 10.3 SEO 기본 최적화 ✅
+
+**전역 메타데이터** (`frontend/app/layout.tsx`):
+```tsx
+export const metadata: Metadata = {
+  title: {
+    default: '스파크마켓 - 중고거래 플랫폼',
+    template: '%s | 스파크마켓',
+  },
+  description: '안전하고 빠른 중고거래, 스파크마켓에서 시작하세요...',
+  keywords: ['중고거래', '중고마켓', '스파크마켓', ...],
+  openGraph: { type: 'website', locale: 'ko_KR', ... },
+  twitter: { card: 'summary_large_image', ... },
+  robots: { index: true, follow: true, ... },
+};
+```
+
+**상품 상세 동적 메타** (`frontend/app/products/[id]/page.tsx`):
+```tsx
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params;
+  const product = await getProduct(id);
+
+  return {
+    title: product.title,
+    description: `${product.description?.slice(0, 150)} | ${price}원`,
+    openGraph: {
+      title: product.title,
+      description: `${price}원 - ${product.category}`,
+      images: [{ url: imageUrl, width: 800, height: 600, alt: product.title }],
+    },
+    twitter: { card: 'summary_large_image', ... },
+  };
+}
+```
+
+**Sitemap** (`frontend/app/sitemap.ts`):
+```tsx
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const staticPages = [
+    { url: baseUrl, priority: 1 },
+    { url: `${baseUrl}/categories`, priority: 0.8 },
+    // ...
+  ];
+
+  const products = await getProducts();
+  const productPages = products.map((p) => ({
+    url: `${baseUrl}/products/${p.id}`,
+    lastModified: new Date(p.updated_at),
+    priority: 0.7,
+  }));
+
+  return [...staticPages, ...productPages];
+}
+```
+
+**Robots** (`frontend/app/robots.ts`):
+```tsx
+export default function robots(): MetadataRoute.Robots {
+  return {
+    rules: [{
+      userAgent: '*',
+      allow: '/',
+      disallow: ['/admin/', '/api/', '/profile/settings', ...],
+    }],
+    sitemap: `${baseUrl}/sitemap.xml`,
+  };
+}
+```
+
+**변경 파일**:
+- `frontend/app/layout.tsx` - 전역 메타데이터 강화
+- `frontend/app/products/[id]/page.tsx` - 서버 컴포넌트 + generateMetadata
+- `frontend/app/products/[id]/ProductPageClient.tsx` - 클라이언트 로직 분리
+- `frontend/app/sitemap.ts` - 새 파일 (동적 sitemap)
+- `frontend/app/robots.ts` - 새 파일
+
+---
+
 ### 🎯 다음 단계
 
+- [x] Phase 8 구현 (핵심 UX 개선) ✅ 2025-12-09 완료
+- [x] Phase 9 구현 (상품 상세 개선) ✅ 2025-12-09 완료
+- [x] Phase 10 구현 (추가 개선) ✅ 2025-12-09 완료
 - [ ] 프론트엔드-백엔드 통합 테스트
 - [ ] 배포 준비 (Vercel + Railway)
-- [ ] Phase 2 기능 (채팅, 소셜 로그인 등)
+
+### 📝 변경 이력
+
+#### 2025-12-09 (Phase 10 완료)
+- **10.1 카테고리 페이지**: `/categories` 라우트 추가
+  - 10개 카테고리 그리드 (아이콘 + 이름 + 상품 수)
+  - 인기 카테고리 섹션 (상위 3개)
+  - 다크 모드 지원
+- **10.2 다크 모드**: 전체 앱 다크 모드 지원
+  - Zustand + persist로 테마 상태 관리
+  - light / dark / system 3가지 모드
+  - ThemeProvider, ThemeToggle 컴포넌트
+  - Navbar 및 주요 컴포넌트에 dark 스타일 적용
+- **10.3 SEO 최적화**: 검색 엔진 최적화
+  - layout.tsx: 전역 메타데이터 (title template, OG, Twitter)
+  - 상품 상세: generateMetadata로 동적 OG 태그
+  - sitemap.ts: 정적 + 동적 페이지 sitemap 생성
+  - robots.ts: 관리자 페이지 등 크롤링 제외
+
+#### 2025-12-09 (Phase 9 완료)
+- **9.1 상품 공유**: Share2 아이콘 버튼, Web Share API + 클립보드 폴백
+- **9.2 이미지 확대**: ImageZoomModal 컴포넌트 신규 생성
+  - 전체 화면 모달, 좌우 네비게이션, 썸네일 하단 표시
+  - ESC/방향키 키보드 지원, 확대/축소 버튼
+- **9.3 판매자 다른 상품**: ProductDetail 하단에 판매자 상품 4개 표시
+  - Backend: `seller_id`, `exclude` 쿼리 파라미터 추가
+
+#### 2025-12-09 (Phase 8 완료)
+- **8.1 판매하기 버튼**: Navbar에 상시 노출, 비로그인 시 로그인 페이지로 리다이렉트
+- **8.2 정렬 옵션**: 최신순/가격낮은순/가격높은순/인기순 탭 UI (SortTabs 컴포넌트)
+- **8.3 프로필 이미지**: avatars 폴더 분리, 전용 presigned URL 엔드포인트
 
 ### 🔗 관련 링크
 

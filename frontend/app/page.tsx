@@ -12,6 +12,8 @@ import type { Product } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { ArrowRight, Sparkles, BadgePercent, ShieldCheck, Zap } from 'lucide-react';
 import PopularHashtags from '@/components/hashtag/PopularHashtags';
+import SortTabs from '@/components/product/SortTabs';
+import type { SortOption } from '@/types';
 
 function HomeContent() {
   const searchParams = useSearchParams();
@@ -28,9 +30,9 @@ function HomeContent() {
     searchParams.get('category') ||
     searchParams.get('minPrice') ||
     searchParams.get('maxPrice') ||
-    searchParams.get('maxPrice') ||
     searchParams.get('status') ||
-    searchParams.get('hashtag');
+    searchParams.get('hashtag') ||
+    searchParams.get('sort');
 
   // 필터가 활성화되면 hasUsedFilters를 true로 설정
   useEffect(() => {
@@ -55,6 +57,7 @@ function HomeContent() {
         const maxPrice = searchParams.get('maxPrice');
         const status = searchParams.get('status');
         const hashtag = searchParams.get('hashtag');
+        const sort = searchParams.get('sort') as SortOption | null;
 
         if (search) params.search = search;
         if (category) params.category = category;
@@ -62,6 +65,7 @@ function HomeContent() {
         if (maxPrice) params.maxPrice = parseInt(maxPrice);
         if (status) params.status = status;
         if (hashtag) params.hashtag = hashtag;
+        if (sort) params.sort = sort;
 
         const response = await productsApi.getProducts(params);
         setInitialProducts(response.data);
@@ -174,7 +178,7 @@ function HomeContent() {
       )}
 
       <div id="product-list" className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 ${showHeroSection ? '' : 'pt-32'}`}>
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
           <div>
             <h2 className="text-3xl font-bold text-slate-900 mb-2 flex items-center gap-2">
               {searchQuery ? (
@@ -200,6 +204,11 @@ function HomeContent() {
               </Button>
             </Link>
           )}
+        </div>
+
+        {/* 정렬 옵션 */}
+        <div className="mb-8">
+          <SortTabs />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">

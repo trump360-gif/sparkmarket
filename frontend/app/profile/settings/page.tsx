@@ -74,7 +74,7 @@ export default function ProfileSettingsPage() {
 
     setIsUploading(true);
     try {
-      const { presignedUrl, publicUrl } = await uploadApi.getPresignedUrl({
+      const { presignedUrl, publicUrl } = await uploadApi.getAvatarPresignedUrl({
         filename: file.name,
         contentType: file.type,
         fileSize: file.size,

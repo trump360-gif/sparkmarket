@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { productsApi } from '@/lib/api/products';
-import type { Product, ProductQueryParams, ProductCategory, ProductStatus } from '@/types';
+import type { Product, ProductQueryParams, ProductCategory, ProductStatus, SortOption } from '@/types';
 import ProductCard from './ProductCard';
 
 interface ProductListProps {
@@ -48,12 +48,14 @@ export default function ProductList({
       const minPrice = searchParams.get('minPrice');
       const maxPrice = searchParams.get('maxPrice');
       const status = searchParams.get('status');
+      const sort = searchParams.get('sort') as SortOption | null;
 
       if (search) params.search = search;
       if (category) params.category = category as ProductCategory;
       if (minPrice) params.minPrice = parseInt(minPrice);
       if (maxPrice) params.maxPrice = parseInt(maxPrice);
       if (status) params.status = status as ProductStatus;
+      if (sort) params.sort = sort;
 
       const response = await productsApi.getProducts(params);
       setProducts((prev) => [...prev, ...response.data]);

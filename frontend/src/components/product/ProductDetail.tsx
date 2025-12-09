@@ -10,9 +10,10 @@ import { priceOffersApi } from '@/lib/api/priceOffers';
 import { usersApi } from '@/lib/api/users';
 import FavoriteButton from '@/components/ui/FavoriteButton';
 import PriceOfferModal from '@/components/product/PriceOfferModal';
+import ImageZoomModal from '@/components/ui/ImageZoomModal';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { Edit3, Trash2, ShoppingCart, MessageCircle, Tag, User, Calendar, CheckCircle2, Eye, Star, ChevronRight, Clock, XCircle, Truck, MapPin, UserPlus, AlertTriangle, Sparkles, Hash } from 'lucide-react';
+import { Edit3, Trash2, ShoppingCart, MessageCircle, Tag, User, Calendar, CheckCircle2, Eye, Star, ChevronRight, Clock, XCircle, Truck, MapPin, UserPlus, AlertTriangle, Sparkles, Hash, Share2, ZoomIn } from 'lucide-react';
 import type { Product, PriceOffer, UserProfile, ProductCondition, TradeMethod } from '@/types';
 import { ProductStatus } from '@/types';
 
@@ -44,9 +45,38 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   const [sellerProfile, setSellerProfile] = useState<UserProfile | null>(null);
   const [isFollowing, setIsFollowing] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [isImageZoomOpen, setIsImageZoomOpen] = useState(false);
+  const [zoomImageIndex, setZoomImageIndex] = useState(0);
+  const [sellerProducts, setSellerProducts] = useState<Product[]>([]);
+  const [isLoadingSellerProducts, setIsLoadingSellerProducts] = useState(false);
 
   const formattedPrice = new Intl.NumberFormat('ko-KR').format(product.price);
   const isOwner = isAuthenticated && user?.id === product.seller_id;
+
+  // 판매자 다른 상품 가져오기
+  useEffect(() => {
+    const fetchSellerProducts = async () => {
+      if (!product.seller_id) return;
+
+      setIsLoadingSellerProducts(true);
+      try {
+        const response = await productsApi.getProducts({
+          seller_id: product.seller_id,
+          exclude: product.id,
+          status: ProductStatus.FOR_SALE,
+          limit: 4,
+        });
+        setSellerProducts(response.data);
+      } catch (error: any) {
+        if (error?.response?.status !== 401) {
+          console.error('Failed to fetch seller products:', error);
+        }
+      } finally {
+        setIsLoadingSellerProducts(false);
+      }
+    };
+    fetchSellerProducts();
+  }, [product.seller_id, product.id]);
 
   // 판매자 프로필 가져오기
   useEffect(() => {
@@ -161,6 +191,38 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     setShowMoreMenu(false);
   };
 
+  const handleShare = async () => {
+    const url = window.location.href;
+
+    // Web Share API 지원 시 네이티브 공유 사용
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: product.title,
+          text: `${product.title} - ${formattedPrice}원`,
+          url: url,
+        });
+        return;
+      } catch (error) {
+        // 사용자가 공유 취소한 경우 무시
+        if ((error as Error).name === 'AbortError') return;
+      }
+    }
+
+    // 클립보드 복사
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success('링크가 복사되었습니다');
+    } catch {
+      toast.error('링크 복사에 실패했습니다');
+    }
+  };
+
+  const handleImageClick = (index: number) => {
+    setZoomImageIndex(index);
+    setIsImageZoomOpen(true);
+  };
+
   return (
     <div className="max-w-5xl mx-auto">
       {/* 검토 대기/거절 상태 안내 배너 (소유자에게만 표시) */}
@@ -211,14 +273,21 @@ export default function ProductDetail({ product }: ProductDetailProps) {
           <div>
             {product.images.length > 0 ? (
               <>
-                <div className="aspect-square relative bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl overflow-hidden mb-3 shadow-md">
+                <div
+                  className="aspect-square relative bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl overflow-hidden mb-3 shadow-md cursor-zoom-in group"
+                  onClick={() => handleImageClick(selectedImage)}
+                >
                   <Image
                     src={product.images[selectedImage].url}
                     alt={product.title}
                     fill
-                    className="object-cover"
+                    className="object-cover transition-transform group-hover:scale-105"
                     sizes="(max-width: 768px) 100vw, 50vw"
                   />
+                  {/* 확대 아이콘 */}
+                  <div className="absolute bottom-3 right-3 p-2 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                    <ZoomIn className="w-5 h-5 text-white" />
+                  </div>
                   {product.status === ProductStatus.SOLD && (
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center">
                       <div className="bg-white/20 backdrop-blur-md px-6 py-3 rounded-xl border border-white/30">
@@ -287,9 +356,18 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
               <div className="flex items-start justify-between gap-3 mb-4">
                 <h1 className="text-2xl font-bold text-slate-900 leading-tight">{product.title}</h1>
-                {!isOwner && (
-                  <FavoriteButton productId={product.id} size="md" />
-                )}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleShare}
+                    className="p-2 rounded-full hover:bg-slate-100 transition-colors"
+                    aria-label="공유하기"
+                  >
+                    <Share2 className="w-5 h-5 text-slate-500" />
+                  </button>
+                  {!isOwner && (
+                    <FavoriteButton productId={product.id} size="md" />
+                  )}
+                </div>
               </div>
 
               {/* 가격 표시 - 수락된 제안이 있으면 특별 가격 표시 */}
@@ -574,11 +652,69 @@ export default function ProductDetail({ product }: ProductDetailProps) {
         </div>
       </div>
 
+      {/* 판매자 다른 상품 섹션 */}
+      {sellerProducts.length > 0 && (
+        <div className="mt-8 bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-slate-100 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <User className="w-5 h-5 text-primary-500" />
+              {product.seller?.nickname || '판매자'}님의 다른 상품
+            </h2>
+            <button
+              onClick={() => router.push(`/users/${product.seller_id}`)}
+              className="text-sm text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 transition-colors"
+            >
+              더보기
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {sellerProducts.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => router.push(`/products/${item.id}`)}
+                className="group text-left"
+              >
+                <div className="aspect-square relative bg-slate-100 rounded-lg overflow-hidden mb-2">
+                  {item.images[0]?.url ? (
+                    <Image
+                      src={item.images[0].url}
+                      alt={item.title}
+                      fill
+                      className="object-cover transition-transform group-hover:scale-105"
+                      sizes="(max-width: 768px) 50vw, 25vw"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-slate-400">
+                      <Tag className="w-8 h-8" />
+                    </div>
+                  )}
+                </div>
+                <h3 className="text-sm font-medium text-slate-900 truncate group-hover:text-primary-600 transition-colors">
+                  {item.title}
+                </h3>
+                <p className="text-sm font-bold text-primary-600">
+                  {new Intl.NumberFormat('ko-KR').format(item.price)}원
+                </p>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* 가격 제안 모달 */}
       <PriceOfferModal
         product={product}
         isOpen={isOfferModalOpen}
         onClose={() => setIsOfferModalOpen(false)}
+      />
+
+      {/* 이미지 확대 모달 */}
+      <ImageZoomModal
+        images={product.images}
+        initialIndex={zoomImageIndex}
+        isOpen={isImageZoomOpen}
+        onClose={() => setIsImageZoomOpen(false)}
       />
     </div>
   );

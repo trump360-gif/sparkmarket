@@ -168,12 +168,25 @@ export class ProductsService {
       trade_method,
       brand_id,
       hashtag,
+      seller_id,
+      exclude,
+      sort = 'latest',
       page = 1,
       limit = 20,
     } = queryDto;
     const skip = (page - 1) * limit;
 
     const where: any = {};
+
+    // 판매자 필터
+    if (seller_id) {
+      where.seller_id = seller_id;
+    }
+
+    // 제외할 상품
+    if (exclude) {
+      where.id = { not: exclude };
+    }
 
     if (category) {
       where.category = category;
@@ -247,12 +260,21 @@ export class ProductsService {
       ];
     }
 
+    // 정렬 옵션 설정
+    const orderByMap: Record<string, any> = {
+      latest: { created_at: 'desc' },
+      price_asc: { price: 'asc' },
+      price_desc: { price: 'desc' },
+      popular: [{ view_count: 'desc' }, { favorite_count: 'desc' }],
+    };
+    const orderBy = orderByMap[sort] || { created_at: 'desc' };
+
     const [products, total] = await Promise.all([
       this.prisma.product.findMany({
         where,
         skip,
         take: limit,
-        orderBy: { created_at: 'desc' },
+        orderBy,
         include: {
           seller: {
             select: {

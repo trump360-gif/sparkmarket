@@ -37,12 +37,14 @@ export class ImagesService {
     }
   }
 
-  async generatePresignedUrl(uploadDto: UploadPresignedUrlDto) {
+  async generatePresignedUrl(uploadDto: UploadPresignedUrlDto, type: 'product' | 'avatar' = 'product') {
+    const folder = type === 'avatar' ? 'avatars' : 'products';
+
     // Local Mode handling
     if (this.isLocalMode) {
       const { filename } = uploadDto;
       const ext = filename.split('.').pop();
-      const key = `products/${uuidv4()}.${ext}`;
+      const key = `${folder}/${uuidv4()}.${ext}`;
 
       // Return a URL that the frontend will PUT to (mimicking S3)
       // We'll add an endpoint in the controller: /images/local-upload
@@ -72,7 +74,7 @@ export class ImagesService {
 
     // 고유한 키 생성
     const ext = filename.split('.').pop();
-    const key = `products/${uuidv4()}.${ext}`;
+    const key = `${folder}/${uuidv4()}.${ext}`;
 
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
