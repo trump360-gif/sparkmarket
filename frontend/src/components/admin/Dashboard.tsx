@@ -45,7 +45,7 @@ export default function Dashboard() {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
-          <p className="text-slate-500">데이터를 불러오는 중...</p>
+          <p className="text-slate-500 dark:text-slate-400">데이터를 불러오는 중...</p>
         </div>
       </div>
     );
@@ -55,10 +55,10 @@ export default function Dashboard() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Package className="w-8 h-8 text-slate-400" />
+          <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Package className="w-8 h-8 text-slate-400 dark:text-slate-500" />
           </div>
-          <p className="text-slate-500">데이터를 불러올 수 없습니다.</p>
+          <p className="text-slate-500 dark:text-slate-400">데이터를 불러올 수 없습니다.</p>
         </div>
       </div>
     );
@@ -132,8 +132,8 @@ export default function Dashboard() {
     <div className="p-6 lg:p-8">
       {/* 헤더 */}
       <div className="mb-8">
-        <h1 className="text-2xl lg:text-3xl font-bold text-slate-900">대시보드</h1>
-        <p className="text-slate-500 mt-1">실시간 통계 및 현황을 확인하세요</p>
+        <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white">대시보드</h1>
+        <p className="text-slate-500 dark:text-slate-400 mt-1">실시간 통계 및 현황을 확인하세요</p>
       </div>
 
       {/* 오늘 거래 금액 - 하이라이트 */}
@@ -167,18 +167,18 @@ export default function Dashboard() {
             <Link
               key={card.label}
               href={card.href}
-              className="group bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200/50 p-5 hover:shadow-md hover:border-slate-300 transition-colors"
+              className="group bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl border border-slate-200/50 dark:border-slate-700/50 p-5 hover:shadow-md hover:border-slate-300 dark:hover:border-slate-600 transition-colors"
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-slate-500 text-sm font-medium mb-1">{card.label}</p>
-                  <p className="text-2xl lg:text-3xl font-bold text-slate-900">{card.value}</p>
+                  <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">{card.label}</p>
+                  <p className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white">{card.value}</p>
                 </div>
-                <div className={`${card.bgColor} w-14 h-14 rounded-xl flex items-center justify-center`}>
+                <div className={`${card.bgColor} dark:bg-opacity-20 w-14 h-14 rounded-xl flex items-center justify-center`}>
                   <Icon className={`w-7 h-7 ${card.textColor}`} />
                 </div>
               </div>
-              <div className="flex items-center justify-end mt-3 text-xs text-slate-400 group-hover:text-primary-500">
+              <div className="flex items-center justify-end mt-3 text-xs text-slate-400 dark:text-slate-500 group-hover:text-primary-500 dark:group-hover:text-primary-400">
                 <span>자세히 보기</span>
                 <ArrowRight className="w-3 h-3 ml-1" />
               </div>
@@ -198,37 +198,37 @@ export default function Dashboard() {
       </div>
 
       {/* 요약 섹션 */}
-      <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200/50 p-6">
-        <h2 className="text-xl font-bold text-slate-900 mb-5">요약</h2>
+      <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl border border-slate-200/50 dark:border-slate-700/50 p-6">
+        <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-5">요약</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50/50">
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50/50 dark:bg-blue-900/20">
             <Users className="w-5 h-5 text-blue-500" />
-            <p className="text-slate-700">
-              총 <span className="font-bold text-blue-600">{stats.total_users}명</span>의 유저가 가입했습니다.
+            <p className="text-slate-700 dark:text-slate-300">
+              총 <span className="font-bold text-blue-600 dark:text-blue-400">{stats.total_users}명</span>의 유저가 가입했습니다.
             </p>
           </div>
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-emerald-50/50">
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-emerald-50/50 dark:bg-emerald-900/20">
             <Package className="w-5 h-5 text-emerald-500" />
-            <p className="text-slate-700">
-              총 <span className="font-bold text-emerald-600">{stats.total_products}개</span>의 상품이 등록되었습니다.
+            <p className="text-slate-700 dark:text-slate-300">
+              총 <span className="font-bold text-emerald-600 dark:text-emerald-400">{stats.total_products}개</span>의 상품이 등록되었습니다.
             </p>
           </div>
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-50/50">
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-50/50 dark:bg-amber-900/20">
             <ShoppingCart className="w-5 h-5 text-amber-500" />
-            <p className="text-slate-700">
-              현재 <span className="font-bold text-amber-600">{stats.active_products}개</span>의 상품이 판매중입니다.
+            <p className="text-slate-700 dark:text-slate-300">
+              현재 <span className="font-bold text-amber-600 dark:text-amber-400">{stats.active_products}개</span>의 상품이 판매중입니다.
             </p>
           </div>
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-purple-50/50">
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-purple-50/50 dark:bg-purple-900/20">
             <CheckCircle className="w-5 h-5 text-purple-500" />
-            <p className="text-slate-700">
-              <span className="font-bold text-purple-600">{stats.sold_products}개</span>의 상품이 판매 완료되었습니다.
+            <p className="text-slate-700 dark:text-slate-300">
+              <span className="font-bold text-purple-600 dark:text-purple-400">{stats.sold_products}개</span>의 상품이 판매 완료되었습니다.
             </p>
           </div>
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-primary-50/50 md:col-span-2">
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-primary-50/50 dark:bg-primary-900/20 md:col-span-2">
             <Coins className="w-5 h-5 text-primary-500" />
-            <p className="text-slate-700">
-              오늘 <span className="font-bold text-primary-600">{formatPrice(stats.today_sales || 0)}원</span>의 거래가 발생했습니다.
+            <p className="text-slate-700 dark:text-slate-300">
+              오늘 <span className="font-bold text-primary-600 dark:text-primary-400">{formatPrice(stats.today_sales || 0)}원</span>의 거래가 발생했습니다.
             </p>
           </div>
         </div>

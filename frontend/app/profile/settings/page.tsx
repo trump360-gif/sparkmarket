@@ -140,10 +140,10 @@ export default function ProfileSettingsPage() {
 
   if (authLoading || isLoading) {
     return (
-      <main className="min-h-screen bg-gray-50 pt-24">
+      <main className="min-h-screen bg-gray-50 dark:bg-slate-900 pt-24">
         <div className="max-w-2xl mx-auto px-4">
           <Skeleton className="h-8 w-48 mb-6" />
-          <div className="bg-white rounded-xl p-6 space-y-6">
+          <div className="bg-white dark:bg-slate-800 rounded-xl p-6 space-y-6">
             <Skeleton className="h-24 w-24 rounded-full mx-auto" />
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-24 w-full" />
@@ -154,20 +154,20 @@ export default function ProfileSettingsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 pt-24 pb-12">
+    <main className="min-h-screen bg-gray-50 dark:bg-slate-900 pt-24 pb-12">
       <div className="max-w-2xl mx-auto px-4">
         {/* 헤더 */}
         <div className="flex items-center gap-3 mb-6">
           <button
             onClick={() => router.back()}
-            className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
           >
-            <ArrowLeft className="w-5 h-5 text-slate-600" />
+            <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
           </button>
-          <h1 className="text-2xl font-bold text-slate-900">프로필 설정</h1>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">프로필 설정</h1>
         </div>
 
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 p-6 space-y-6">
+        <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 dark:border-slate-700 p-6 space-y-6">
           {/* 프로필 사진 */}
           <div className="flex flex-col items-center">
             <div className="relative">
@@ -188,9 +188,9 @@ export default function ProfileSettingsPage() {
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
-                className="absolute bottom-0 right-0 p-2 bg-white rounded-full shadow-md border border-slate-200 hover:bg-slate-50 transition-colors disabled:opacity-50"
+                className="absolute bottom-0 right-0 p-2 bg-white dark:bg-slate-700 rounded-full shadow-md border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors disabled:opacity-50"
               >
-                <Camera className="w-4 h-4 text-slate-600" />
+                <Camera className="w-4 h-4 text-slate-600 dark:text-slate-300" />
               </button>
               <input
                 ref={fileInputRef}
@@ -201,34 +201,34 @@ export default function ProfileSettingsPage() {
               />
             </div>
             {isUploading && (
-              <p className="text-sm text-slate-500 mt-2">업로드 중...</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">업로드 중...</p>
             )}
           </div>
 
           {/* 통계 */}
           {profile?.stats && (
-            <div className="grid grid-cols-3 gap-4 p-4 bg-slate-50 rounded-lg">
+            <div className="grid grid-cols-3 gap-4 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
               <div className="text-center">
                 <div className="flex items-center justify-center gap-1 text-amber-500 mb-1">
                   <Star className="w-4 h-4 fill-current" />
                   <span className="font-bold">{profile.stats.rating.toFixed(1)}</span>
                 </div>
-                <p className="text-xs text-slate-500">평점 ({profile.stats.reviewCount})</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">평점 ({profile.stats.reviewCount})</p>
               </div>
               <div className="text-center">
-                <p className="font-bold text-slate-900">{profile.stats.salesCount}</p>
-                <p className="text-xs text-slate-500">판매</p>
+                <p className="font-bold text-slate-900 dark:text-white">{profile.stats.salesCount}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">판매</p>
               </div>
               <div className="text-center">
-                <p className="font-bold text-slate-900">{profile.stats.purchaseCount}</p>
-                <p className="text-xs text-slate-500">구매</p>
+                <p className="font-bold text-slate-900 dark:text-white">{profile.stats.purchaseCount}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">구매</p>
               </div>
             </div>
           )}
 
           {/* 닉네임 */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
               닉네임
             </label>
             <div className="relative">
@@ -239,7 +239,7 @@ export default function ProfileSettingsPage() {
                 onChange={(e) => setNickname(e.target.value)}
                 placeholder="닉네임을 입력하세요"
                 maxLength={20}
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm text-slate-900 dark:text-white placeholder-slate-400"
               />
             </div>
             <p className="text-xs text-slate-400 mt-1">2~20자, 한글/영문/숫자/밑줄 사용 가능</p>
@@ -247,7 +247,7 @@ export default function ProfileSettingsPage() {
 
           {/* 자기소개 */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
               자기소개
             </label>
             <textarea
@@ -256,21 +256,21 @@ export default function ProfileSettingsPage() {
               placeholder="자기소개를 입력하세요 (선택)"
               maxLength={200}
               rows={3}
-              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm resize-none"
+              className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm text-slate-900 dark:text-white placeholder-slate-400 resize-none"
             />
             <p className="text-xs text-slate-400 mt-1">{bio.length}/200</p>
           </div>
 
           {/* 이메일 (읽기 전용) */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
               이메일
             </label>
             <input
               type="email"
               value={profile?.email || ''}
               disabled
-              className="w-full px-4 py-2.5 bg-slate-100 border border-slate-200 rounded-lg text-sm text-slate-500"
+              className="w-full px-4 py-2.5 bg-slate-100 dark:bg-slate-600 border border-slate-200 dark:border-slate-500 rounded-lg text-sm text-slate-500 dark:text-slate-400"
             />
             <p className="text-xs text-slate-400 mt-1">이메일은 변경할 수 없습니다</p>
           </div>

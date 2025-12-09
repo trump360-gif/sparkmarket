@@ -33,13 +33,13 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
   return (
     <Link
       href={`/products/${product.id}`}
-      className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden group"
+      className="bg-white dark:bg-slate-800 rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden group"
     >
-      <div className="aspect-square relative bg-gray-100">
+      <div className="aspect-square relative bg-gray-100 dark:bg-slate-700">
         {primaryImage ? (
           <>
             {!isImageLoaded && (
-              <div className="absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 animate-pulse" />
+              <div className="absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700 animate-pulse" />
             )}
             <Image
               src={primaryImage.url}
@@ -53,7 +53,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
             />
           </>
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-400">
+          <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-slate-500">
             No Image
           </div>
         )}
@@ -115,20 +115,20 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
       </div>
 
       <div className="p-4">
-        <h3 className="font-semibold text-lg mb-1 line-clamp-1 group-hover:text-primary-600 transition-colors">
+        <h3 className="font-semibold text-lg mb-1 line-clamp-1 text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
           {product.title}
         </h3>
 
         <div className="mb-2">
           {hasDiscount && (
-            <p className="text-xs text-gray-400 line-through">
+            <p className="text-xs text-gray-400 dark:text-slate-500 line-through">
               {new Intl.NumberFormat('ko-KR').format(product.original_price!)}원
             </p>
           )}
-          <p className="text-xl font-bold text-blue-600">{formattedPrice}원</p>
+          <p className="text-xl font-bold text-blue-600 dark:text-blue-400">{formattedPrice}원</p>
         </div>
 
-        <p className="text-sm text-gray-500 line-clamp-1 mb-2">{product.category}</p>
+        <p className="text-sm text-gray-500 dark:text-slate-400 line-clamp-1 mb-2">{product.category}</p>
 
         {/* 해시태그 */}
         {product.hashtags && product.hashtags.length > 0 && (
@@ -136,18 +136,18 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
             {product.hashtags.slice(0, 3).map((item) => (
               <span
                 key={item.hashtag.id}
-                className="text-[10px] text-primary-600 bg-primary-50 px-1.5 py-0.5 rounded-full"
+                className="text-[10px] text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 px-1.5 py-0.5 rounded-full"
               >
                 #{item.hashtag.name}
               </span>
             ))}
             {product.hashtags.length > 3 && (
-              <span className="text-[10px] text-gray-400">+{product.hashtags.length - 3}</span>
+              <span className="text-[10px] text-gray-400 dark:text-slate-500">+{product.hashtags.length - 3}</span>
             )}
           </div>
         )}
 
-        <div className="flex items-center justify-between text-xs text-gray-500">
+        <div className="flex items-center justify-between text-xs text-gray-500 dark:text-slate-400">
           <div className="flex items-center space-x-3">
             <div className="flex items-center space-x-1">
               <span>👁️</span>
@@ -159,7 +159,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
             </div>
           </div>
           {product.favorite_count && product.favorite_count > 0 && (
-            <div className="flex items-center space-x-1 text-red-500">
+            <div className="flex items-center space-x-1 text-red-500 dark:text-red-400">
               <span>❤️</span>
               <span>{product.favorite_count}</span>
             </div>

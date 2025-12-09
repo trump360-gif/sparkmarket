@@ -28,8 +28,8 @@ export default function AdminLayout({
 
   if (!isAuthenticated || !isAdmin) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white flex items-center justify-center">
-        <div className="flex items-center gap-3 text-slate-500">
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 flex items-center justify-center">
+        <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">
           <Loader2 className="w-5 h-5 animate-spin" />
           <span>권한을 확인하는 중...</span>
         </div>
@@ -38,19 +38,19 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800">
       {/* 배경 장식 */}
       <div className="fixed top-0 left-0 right-0 h-96 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-10 left-1/4 w-72 h-72 bg-primary-400/10 rounded-full blur-3xl"></div>
-        <div className="absolute top-20 right-1/4 w-96 h-96 bg-secondary-400/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-10 left-1/4 w-72 h-72 bg-primary-400/10 dark:bg-primary-600/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-20 right-1/4 w-96 h-96 bg-secondary-400/10 dark:bg-secondary-600/10 rounded-full blur-3xl"></div>
       </div>
 
       {/* 모바일 메뉴 버튼 */}
       <button
         onClick={() => setIsMobileSidebarOpen(true)}
-        className="lg:hidden fixed top-20 left-4 z-40 p-2 bg-white/80 backdrop-blur-sm rounded-lg shadow-md border border-slate-200"
+        className="lg:hidden fixed top-20 left-4 z-40 p-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-lg shadow-md border border-slate-200 dark:border-slate-700"
       >
-        <Menu className="w-5 h-5 text-slate-600" />
+        <Menu className="w-5 h-5 text-slate-600 dark:text-slate-300" />
       </button>
 
       {/* 모바일 사이드바 오버레이 */}

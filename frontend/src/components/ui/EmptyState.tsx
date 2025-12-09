@@ -19,10 +19,10 @@ export default function EmptyState({
   action,
 }: EmptyStateProps) {
   return (
-    <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-12 text-center">
       {icon && <div className="mb-4 flex justify-center">{icon}</div>}
-      <h3 className="text-lg font-medium text-gray-900 mb-2">{title}</h3>
-      {description && <p className="text-sm text-gray-500 mb-6">{description}</p>}
+      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">{title}</h3>
+      {description && <p className="text-sm text-gray-500 dark:text-slate-400 mb-6">{description}</p>}
       {action && (
         <button
           onClick={action.onClick}
@@ -39,7 +39,7 @@ export default function EmptyState({
 export const EmptyIcons = {
   Box: (
     <svg
-      className="w-16 h-16 text-gray-400"
+      className="w-16 h-16 text-gray-400 dark:text-slate-500"
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"
@@ -54,7 +54,7 @@ export const EmptyIcons = {
   ),
   Heart: (
     <svg
-      className="w-16 h-16 text-gray-400"
+      className="w-16 h-16 text-gray-400 dark:text-slate-500"
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"
@@ -69,7 +69,7 @@ export const EmptyIcons = {
   ),
   Currency: (
     <svg
-      className="w-16 h-16 text-gray-400"
+      className="w-16 h-16 text-gray-400 dark:text-slate-500"
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"
@@ -84,7 +84,7 @@ export const EmptyIcons = {
   ),
   Search: (
     <svg
-      className="w-16 h-16 text-gray-400"
+      className="w-16 h-16 text-gray-400 dark:text-slate-500"
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"
@@ -99,7 +99,7 @@ export const EmptyIcons = {
   ),
   Inbox: (
     <svg
-      className="w-16 h-16 text-gray-400"
+      className="w-16 h-16 text-gray-400 dark:text-slate-500"
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"

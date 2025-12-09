@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { productsApi } from '@/lib/api/products';
-import type { Product, ProductQueryParams, ProductCategory, ProductStatus, SortOption } from '@/types';
+import type { Product, ProductQueryParams, ProductCategory, ProductStatus, ProductCondition, TradeMethod, SortOption } from '@/types';
 import ProductCard from './ProductCard';
 
 interface ProductListProps {
@@ -48,6 +48,8 @@ export default function ProductList({
       const minPrice = searchParams.get('minPrice');
       const maxPrice = searchParams.get('maxPrice');
       const status = searchParams.get('status');
+      const condition = searchParams.get('condition');
+      const tradeMethod = searchParams.get('tradeMethod');
       const sort = searchParams.get('sort') as SortOption | null;
 
       if (search) params.search = search;
@@ -55,6 +57,8 @@ export default function ProductList({
       if (minPrice) params.minPrice = parseInt(minPrice);
       if (maxPrice) params.maxPrice = parseInt(maxPrice);
       if (status) params.status = status as ProductStatus;
+      if (condition) params.condition = condition as ProductCondition;
+      if (tradeMethod) params.trade_method = tradeMethod as TradeMethod;
       if (sort) params.sort = sort;
 
       const response = await productsApi.getProducts(params);
@@ -89,7 +93,7 @@ export default function ProductList({
   if (products.length === 0) {
     return (
       <div className="text-center py-20">
-        <p className="text-gray-500 text-lg">등록된 상품이 없습니다.</p>
+        <p className="text-gray-500 dark:text-gray-400 text-lg">등록된 상품이 없습니다.</p>
       </div>
     );
   }
@@ -104,13 +108,13 @@ export default function ProductList({
 
       {isLoading && (
         <div className="text-center py-8">
-          <p className="text-gray-500">로딩 중...</p>
+          <p className="text-gray-500 dark:text-gray-400">로딩 중...</p>
         </div>
       )}
 
       {!hasMore && products.length > 0 && (
         <div className="text-center py-8">
-          <p className="text-gray-500">모든 상품을 불러왔습니다.</p>
+          <p className="text-gray-500 dark:text-gray-400">모든 상품을 불러왔습니다.</p>
         </div>
       )}
     </div>

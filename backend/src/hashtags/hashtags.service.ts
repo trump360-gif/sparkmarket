@@ -127,10 +127,25 @@ export class HashtagsService {
    * @param hashtagNames 해시태그 이름 배열 (# 없이)
    */
   async syncHashtags(productId: string, hashtagNames: string[]) {
+    // 기존 연결된 해시태그 ID 조회
+    const existingLinks = await this.prisma.productHashtag.findMany({
+      where: { product_id: productId },
+      select: { hashtag_id: true },
+    });
+    const existingHashtagIds = existingLinks.map((l) => l.hashtag_id);
+
     // 기존 연결 삭제
     await this.prisma.productHashtag.deleteMany({
       where: { product_id: productId },
     });
+
+    // 기존 해시태그들의 use_count 감소
+    if (existingHashtagIds.length > 0) {
+      await this.prisma.hashtag.updateMany({
+        where: { id: { in: existingHashtagIds } },
+        data: { use_count: { decrement: 1 } },
+      });
+    }
 
     if (!hashtagNames || hashtagNames.length === 0) {
       return [];

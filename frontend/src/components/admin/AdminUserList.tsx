@@ -144,14 +144,14 @@ export default function AdminUserList() {
             <Users className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl lg:text-3xl font-bold text-slate-900">유저 관리</h1>
-            <p className="text-slate-500 text-sm">총 {total}명의 유저</p>
+            <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white">유저 관리</h1>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">총 {total}명의 유저</p>
           </div>
         </div>
       </div>
 
       {/* 검색 및 필터 */}
-      <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200/50 p-4 mb-6">
+      <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl border border-slate-200/50 dark:border-slate-700/50 p-4 mb-6">
         <div className="flex flex-col sm:flex-row gap-4">
           <form onSubmit={handleSearch} className="flex-1 flex gap-2">
             <div className="relative flex-1">
@@ -161,7 +161,7 @@ export default function AdminUserList() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="이메일 또는 닉네임으로 검색..."
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 dark:text-white dark:placeholder-slate-400"
               />
             </div>
             <button
@@ -180,7 +180,7 @@ export default function AdminUserList() {
                 setStatusFilter(e.target.value as UserStatus | '');
                 setPage(1);
               }}
-              className="pl-9 pr-8 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 appearance-none cursor-pointer min-w-[140px]"
+              className="pl-9 pr-8 py-2.5 bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 appearance-none cursor-pointer min-w-[140px] dark:text-white"
             >
               <option value="">전체 상태</option>
               <option value={UserStatus.ACTIVE}>활성</option>
@@ -191,42 +191,42 @@ export default function AdminUserList() {
       </div>
 
       {isLoading ? (
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200/50 overflow-hidden">
+        <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl border border-slate-200/50 dark:border-slate-700/50 overflow-hidden">
           <TableSkeleton rows={10} cols={6} />
         </div>
       ) : (
         <>
           {/* 테이블 */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl border border-slate-200/50 overflow-hidden shadow-sm">
+          <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl border border-slate-200/50 dark:border-slate-700/50 overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-slate-200">
+              <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-700">
                 <thead>
-                  <tr className="bg-slate-50/80">
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">이메일</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">닉네임</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">역할</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">상태</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">가입일</th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">작업</th>
+                  <tr className="bg-slate-50/80 dark:bg-slate-700/50">
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">이메일</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">닉네임</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">역할</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">상태</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">가입일</th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">작업</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                   {users.map((user) => (
-                    <tr key={user.id} className="hover:bg-slate-50/50 transition-colors">
+                    <tr key={user.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-slate-700">{user.email}</div>
+                        <div className="text-sm text-slate-700 dark:text-slate-300">{user.email}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <Link
                           href={`/admin/users/${user.id}`}
-                          className="text-sm font-medium text-primary-600 hover:text-primary-700 hover:underline transition-colors"
+                          className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 hover:underline transition-colors"
                         >
                           {user.nickname}
                         </Link>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">{getRoleBadge(user.role)}</td>
                       <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(user.status)}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500 dark:text-slate-400">
                         {new Date(user.created_at).toLocaleDateString('ko-KR')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
@@ -235,7 +235,7 @@ export default function AdminUserList() {
                             {user.status === UserStatus.ACTIVE ? (
                               <button
                                 onClick={() => handleStatusChange(user, UserStatus.BANNED)}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg font-medium transition-colors"
                               >
                                 <Ban className="w-4 h-4" />
                                 차단
@@ -243,7 +243,7 @@ export default function AdminUserList() {
                             ) : (
                               <button
                                 onClick={() => handleStatusChange(user, UserStatus.ACTIVE)}
-                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg font-medium transition-colors"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg font-medium transition-colors"
                               >
                                 <CheckCircle className="w-4 h-4" />
                                 활성화
@@ -264,20 +264,20 @@ export default function AdminUserList() {
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="inline-flex items-center gap-1 px-4 py-2 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="inline-flex items-center gap-1 px-4 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors dark:text-white"
             >
               <ChevronLeft className="w-4 h-4" />
               이전
             </button>
-            <div className="flex items-center gap-1 px-4 py-2 bg-slate-100 rounded-xl">
-              <span className="font-medium text-primary-600">{page}</span>
+            <div className="flex items-center gap-1 px-4 py-2 bg-slate-100 dark:bg-slate-700 rounded-xl">
+              <span className="font-medium text-primary-600 dark:text-primary-400">{page}</span>
               <span className="text-slate-400">/</span>
-              <span className="text-slate-600">{totalPages}</span>
+              <span className="text-slate-600 dark:text-slate-300">{totalPages}</span>
             </div>
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="inline-flex items-center gap-1 px-4 py-2 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="inline-flex items-center gap-1 px-4 py-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors dark:text-white"
             >
               다음
               <ChevronRight className="w-4 h-4" />

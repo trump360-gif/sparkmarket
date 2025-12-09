@@ -57,17 +57,24 @@ export enum ProductStatus {
 }
 
 export enum ProductCategory {
-  DIGITAL = '디지털/가전',
-  FASHION_CLOTHES = '패션의류',
-  FASHION_ACCESSORIES = '패션잡화',
-  BEAUTY = '뷰티/미용',
-  SPORTS = '스포츠/레저',
-  FOOD = '생활/가공식품',
-  BOOKS = '도서',
-  FURNITURE = '가구/인테리어',
-  PET = '반려동물용품',
-  ETC = '기타',
+  ELECTRONICS = 'ELECTRONICS',
+  FASHION = 'FASHION',
+  BEAUTY = 'BEAUTY',
+  SPORTS = 'SPORTS',
+  HOME = 'HOME',
+  BOOKS = 'BOOKS',
+  OTHER = 'OTHER',
 }
+
+export const CATEGORY_LABELS: Record<ProductCategory, string> = {
+  [ProductCategory.ELECTRONICS]: '디지털/가전',
+  [ProductCategory.FASHION]: '패션의류',
+  [ProductCategory.BEAUTY]: '뷰티/미용',
+  [ProductCategory.SPORTS]: '스포츠/레저',
+  [ProductCategory.HOME]: '가구/인테리어',
+  [ProductCategory.BOOKS]: '도서',
+  [ProductCategory.OTHER]: '기타',
+};
 
 export interface ProductImage {
   id: string;
@@ -221,6 +228,8 @@ export interface ProductQueryParams extends PaginationParams {
   minPrice?: number;
   maxPrice?: number;
   status?: ProductStatus;
+  condition?: ProductCondition;
+  trade_method?: TradeMethod;
   seller_id?: string;
   hashtag?: string;
   sort?: SortOption;

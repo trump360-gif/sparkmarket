@@ -437,3 +437,14 @@ npm start
 - Admin API: 응답 포맷 통일 (data + meta → PaginatedResponse)
 - AdminProductList: 테이블 레이아웃 개선
 - AdminUserList: 에러 핸들링 개선
+
+### Phase 8: 버그 수정 (진행중)
+- [ ] 팔로우/팔로잉 상태 동기화 버그 수정
+  - **문제**: 다른 페이지에서 팔로우 후 마이페이지로 돌아가면 팔로잉 카운트 미갱신
+  - **문제**: 프로필 페이지 재방문 시 팔로우 버튼 상태 초기화 (다시 클릭해야 함)
+  - **해결**: Zustand 전역 상태로 팔로우 상태 캐싱 (`followStore.ts`)
+  - **수정 파일**:
+    - `frontend/src/stores/followStore.ts`: 사용자별 팔로우 상태 캐시 + 전역 카운트 관리
+    - `frontend/src/components/ui/FollowButton.tsx`: Zustand 캐시 연동
+    - `frontend/app/mypage/page.tsx`: Zustand 전역 카운트 사용
+    - `frontend/app/users/[id]/page.tsx`: 팔로우 시 팔로워 카운트 즉시 업데이트

@@ -42,13 +42,13 @@ export default function PopularHashtags({
       <div className={className}>
         {showTitle && (
           <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-5 h-5 text-primary-600" />
-            <h3 className="text-lg font-bold text-slate-900">인기 해시태그</h3>
+            <TrendingUp className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">인기 해시태그</h3>
           </div>
         )}
         <div className="flex flex-wrap gap-2 animate-pulse">
           {[...Array(limit)].map((_, i) => (
-            <div key={i} className="h-9 w-24 bg-slate-200 rounded-full"></div>
+            <div key={i} className="h-9 w-24 bg-slate-200 dark:bg-slate-700 rounded-full"></div>
           ))}
         </div>
       </div>
@@ -63,8 +63,8 @@ export default function PopularHashtags({
     <div className={className}>
       {showTitle && (
         <div className="flex items-center gap-2 mb-4">
-          <TrendingUp className="w-5 h-5 text-primary-600" />
-          <h3 className="text-lg font-bold text-slate-900">인기 해시태그</h3>
+          <TrendingUp className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white">인기 해시태그</h3>
         </div>
       )}
 
@@ -73,14 +73,14 @@ export default function PopularHashtags({
           <Link
             key={hashtag.id}
             href={`/?hashtag=${encodeURIComponent(hashtag.name)}`}
-            className="group relative px-4 py-2 bg-white border border-slate-200 rounded-full hover:border-primary-500 hover:bg-primary-50 transition-all"
+            className="group relative px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-full hover:border-primary-500 dark:hover:border-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 transition-all"
           >
             <div className="flex items-center gap-1.5">
-              <Hash className="w-3.5 h-3.5 text-slate-400 group-hover:text-primary-600 transition-colors" />
-              <span className="text-sm font-medium text-slate-700 group-hover:text-primary-700 transition-colors">
+              <Hash className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors" />
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-primary-700 dark:group-hover:text-primary-300 transition-colors">
                 {hashtag.name}
               </span>
-              <span className="text-xs text-slate-400 group-hover:text-primary-500 transition-colors">
+              <span className="text-xs text-slate-400 dark:text-slate-500 group-hover:text-primary-500 dark:group-hover:text-primary-400 transition-colors">
                 {hashtag.use_count}
               </span>
             </div>

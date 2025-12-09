@@ -91,19 +91,19 @@ export default function OffersPage() {
   const totalPages = Math.ceil(currentTotal / 20);
 
   return (
-    <main className="min-h-screen bg-gray-50 pt-16">
+    <main className="min-h-screen bg-gray-50 dark:bg-slate-900 pt-16">
       <div className="max-w-5xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">가격 제안 관리</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">가격 제안 관리</h1>
 
         {/* 탭 */}
-        <div className="bg-white rounded-lg shadow-sm mb-6">
-          <div className="flex border-b border-gray-200">
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm mb-6">
+          <div className="flex border-b border-gray-200 dark:border-slate-700">
             <button
               onClick={() => setActiveTab('sent')}
               className={`flex-1 px-6 py-4 font-medium text-center transition-colors ${
                 activeTab === 'sent'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                  : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
               보낸 제안 ({sentTotal})
@@ -112,8 +112,8 @@ export default function OffersPage() {
               onClick={() => setActiveTab('received')}
               className={`flex-1 px-6 py-4 font-medium text-center transition-colors ${
                 activeTab === 'received'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                  : 'text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-white'
               }`}
             >
               받은 제안 ({receivedTotal})
@@ -129,13 +129,13 @@ export default function OffersPage() {
             ))}
           </div>
         ) : currentOffers.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-            <p className="text-gray-500 text-lg mb-2">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-12 text-center">
+            <p className="text-gray-500 dark:text-slate-400 text-lg mb-2">
               {activeTab === 'sent'
                 ? '보낸 가격 제안이 없습니다.'
                 : '받은 가격 제안이 없습니다.'}
             </p>
-            <p className="text-gray-400 text-sm mb-6">
+            <p className="text-gray-400 dark:text-slate-500 text-sm mb-6">
               {activeTab === 'sent'
                 ? '관심있는 상품에 가격을 제안해보세요!'
                 : '판매중인 상품에 제안이 들어오면 여기에 표시됩니다.'}
@@ -166,11 +166,11 @@ export default function OffersPage() {
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  className="px-4 py-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="px-4 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-md hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-gray-700 dark:text-slate-300"
                 >
                   이전
                 </button>
-                <span className="text-gray-600">
+                <span className="text-gray-600 dark:text-slate-400">
                   {currentPage} / {totalPages}
                 </span>
                 <button
@@ -178,7 +178,7 @@ export default function OffersPage() {
                     setCurrentPage((p) => Math.min(totalPages, p + 1))
                   }
                   disabled={currentPage === totalPages}
-                  className="px-4 py-2 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="px-4 py-2 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-600 rounded-md hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-gray-700 dark:text-slate-300"
                 >
                   다음
                 </button>

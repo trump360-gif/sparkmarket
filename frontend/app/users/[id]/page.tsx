@@ -26,6 +26,7 @@ import { Button } from '@/components/ui/Button';
 import type { UserProfile, Product, FollowStats } from '@/types';
 import { ProductStatus } from '@/types';
 import Link from 'next/link';
+import { useFollowStore } from '@/stores/followStore';
 
 export default function UserProfilePage() {
   const params = useParams();
@@ -40,6 +41,9 @@ export default function UserProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showMenu, setShowMenu] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
+
+  // Zustand에서 팔로우 상태 가져오기
+  const cachedFollowStatus = useFollowStore((state) => state.followingMap[userId]);
 
   const isSelf = currentUser?.id === userId;
 
@@ -126,16 +130,16 @@ export default function UserProfilePage() {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 pt-16 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 pt-16">
       {/* Profile Header */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700">
         <div className="max-w-6xl mx-auto px-4 py-8">
           {isBlocked && (
             <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
@@ -158,8 +162,8 @@ export default function UserProfilePage() {
                   className="rounded-full object-cover"
                 />
               ) : (
-                <div className="w-30 h-30 rounded-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-gray-500 text-4xl font-medium">
+                <div className="w-30 h-30 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center">
+                  <span className="text-gray-500 dark:text-slate-300 text-4xl font-medium">
                     {profile.nickname.charAt(0).toUpperCase()}
                   </span>
                 </div>
@@ -170,11 +174,11 @@ export default function UserProfilePage() {
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between mb-3">
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900 mb-1">
+                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
                     {profile.nickname}
                   </h1>
                   {profile.bio && (
-                    <p className="text-gray-600 mb-2">{profile.bio}</p>
+                    <p className="text-gray-600 dark:text-slate-400 mb-2">{profile.bio}</p>
                   )}
                 </div>
 
@@ -184,7 +188,16 @@ export default function UserProfilePage() {
                     <>
                       <FollowButton
                         userId={userId}
-                        onFollowChange={() => loadUserProfile()}
+                        onFollowChange={(isFollowing) => {
+                          // 팔로우/언팔로우 시 팔로워 카운트 즉시 업데이트
+                          setFollowStats((prev) => {
+                            if (!prev) return prev;
+                            return {
+                              ...prev,
+                              followersCount: prev.followersCount + (isFollowing ? 1 : -1),
+                            };
+                          });
+                        }}
                       />
 
                       {/* More Menu */}
@@ -193,8 +206,9 @@ export default function UserProfilePage() {
                           variant="outline"
                           size="icon"
                           onClick={() => setShowMenu(!showMenu)}
+                          className="border-gray-300 dark:border-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600"
                         >
-                          <MoreVertical className="h-4 w-4" />
+                          <MoreVertical className="h-4 w-4 text-gray-600 dark:text-slate-300" />
                         </Button>
 
                         {showMenu && (
@@ -203,20 +217,20 @@ export default function UserProfilePage() {
                               className="fixed inset-0 z-10"
                               onClick={() => setShowMenu(false)}
                             />
-                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
+                            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-gray-200 dark:border-slate-700 py-1 z-20">
                               <button
                                 onClick={() => {
                                   setShowMenu(false);
                                   setShowReportModal(true);
                                 }}
-                                className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center"
+                                className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center"
                               >
                                 <Flag className="h-4 w-4 mr-2" />
                                 신고하기
                               </button>
                               <button
                                 onClick={handleBlockToggle}
-                                className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-50 flex items-center"
+                                className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-gray-50 dark:hover:bg-slate-700 flex items-center"
                               >
                                 <ShieldBan className="h-4 w-4 mr-2" />
                                 {isBlocked ? '차단 해제' : '차단하기'}
@@ -232,18 +246,18 @@ export default function UserProfilePage() {
 
               {/* Stats */}
               <div className="flex flex-wrap gap-6 mb-3">
-                <div className="flex items-center text-sm text-gray-600">
+                <div className="flex items-center text-sm text-gray-600 dark:text-slate-400">
                   <Star className="h-4 w-4 text-yellow-400 mr-1" />
                   <span className="font-medium mr-1">
                     {profile.stats.rating.toFixed(1)}
                   </span>
                   <span>({profile.stats.reviewCount}개 리뷰)</span>
                 </div>
-                <div className="flex items-center text-sm text-gray-600">
+                <div className="flex items-center text-sm text-gray-600 dark:text-slate-400">
                   <Package className="h-4 w-4 mr-1" />
                   <span>판매 {profile.stats.salesCount}건</span>
                 </div>
-                <div className="flex items-center text-sm text-gray-600">
+                <div className="flex items-center text-sm text-gray-600 dark:text-slate-400">
                   <ShoppingBag className="h-4 w-4 mr-1" />
                   <span>구매 {profile.stats.purchaseCount}건</span>
                 </div>
@@ -254,22 +268,22 @@ export default function UserProfilePage() {
                 <div className="flex gap-4 mb-3">
                   <Link
                     href={isSelf ? '/profile/followers' : '#'}
-                    className="text-sm hover:text-primary-600 transition-colors"
+                    className="text-sm text-slate-900 dark:text-slate-100 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                   >
                     <span className="font-medium">{followStats.followersCount}</span>{' '}
-                    <span className="text-gray-600">팔로워</span>
+                    <span className="text-gray-600 dark:text-slate-400">팔로워</span>
                   </Link>
                   <Link
                     href={isSelf ? '/profile/following' : '#'}
-                    className="text-sm hover:text-primary-600 transition-colors"
+                    className="text-sm text-slate-900 dark:text-slate-100 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                   >
                     <span className="font-medium">{followStats.followingCount}</span>{' '}
-                    <span className="text-gray-600">팔로잉</span>
+                    <span className="text-gray-600 dark:text-slate-400">팔로잉</span>
                   </Link>
                 </div>
               )}
 
-              <div className="flex items-center text-xs text-gray-500">
+              <div className="flex items-center text-xs text-gray-500 dark:text-slate-500">
                 <Calendar className="h-3 w-3 mr-1" />
                 <span>
                   가입일: {new Date(profile.created_at).toLocaleDateString('ko-KR')}
@@ -283,7 +297,7 @@ export default function UserProfilePage() {
       {/* Products Section */}
       <div className="max-w-6xl mx-auto px-4 py-8">
         <div className="mb-6">
-          <h2 className="text-xl font-bold text-gray-900">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">
             판매중인 상품 ({products.length})
           </h2>
         </div>
@@ -293,9 +307,9 @@ export default function UserProfilePage() {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600" />
           </div>
         ) : products.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm p-12 text-center">
-            <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500">판매중인 상품이 없습니다.</p>
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-12 text-center">
+            <Package className="h-16 w-16 text-gray-300 dark:text-slate-600 mx-auto mb-4" />
+            <p className="text-gray-500 dark:text-slate-400">판매중인 상품이 없습니다.</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

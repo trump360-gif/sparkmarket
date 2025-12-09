@@ -44,11 +44,11 @@ export default function FavoritesPage() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-gray-50 pt-16">
+      <main className="min-h-screen bg-gray-50 dark:bg-slate-900 pt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">찜한 상품</h1>
-            <p className="text-gray-600">로딩 중...</p>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">찜한 상품</h1>
+            <p className="text-gray-600 dark:text-slate-400">로딩 중...</p>
           </div>
           <ProductListSkeleton count={6} />
         </div>
@@ -57,18 +57,18 @@ export default function FavoritesPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50 pt-16">
+    <main className="min-h-screen bg-gray-50 dark:bg-slate-900 pt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">찜한 상품</h1>
-          <p className="text-gray-600">총 {total}개의 찜한 상품</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">찜한 상품</h1>
+          <p className="text-gray-600 dark:text-slate-400">총 {total}개의 찜한 상품</p>
         </div>
 
         {products.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-lg shadow-sm">
+          <div className="text-center py-16 bg-white dark:bg-slate-800 rounded-lg shadow-sm">
             <div className="text-6xl mb-4">❤️</div>
-            <p className="text-gray-500 text-lg mb-2">찜한 상품이 없습니다.</p>
-            <p className="text-gray-400 text-sm mb-6">마음에 드는 상품을 찜해보세요!</p>
+            <p className="text-gray-500 dark:text-slate-400 text-lg mb-2">찜한 상품이 없습니다.</p>
+            <p className="text-gray-400 dark:text-slate-500 text-sm mb-6">마음에 드는 상품을 찜해보세요!</p>
             <button
               onClick={() => router.push('/')}
               className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
@@ -90,17 +90,17 @@ export default function FavoritesPage() {
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   이전
                 </button>
-                <span className="px-4 py-2 flex items-center">
+                <span className="px-4 py-2 flex items-center text-gray-700 dark:text-slate-300">
                   {page} / {totalPages}
                 </span>
                 <button
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   다음
                 </button>

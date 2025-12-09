@@ -68,7 +68,7 @@ export default function AdminUserDashboard({ userId }: AdminUserDashboardProps) 
           <DashboardCardSkeleton />
           <DashboardCardSkeleton />
         </div>
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
           <Skeleton className="h-8 w-40 mb-6" />
           <Skeleton className="h-64 w-full" />
         </div>
@@ -79,7 +79,7 @@ export default function AdminUserDashboard({ userId }: AdminUserDashboardProps) 
   if (!user) {
     return (
       <div className="p-8 flex items-center justify-center">
-        <p className="text-gray-500">유저를 찾을 수 없습니다.</p>
+        <p className="text-gray-500 dark:text-slate-400">유저를 찾을 수 없습니다.</p>
       </div>
     );
   }
@@ -88,8 +88,8 @@ export default function AdminUserDashboard({ userId }: AdminUserDashboardProps) 
 
   const getStatusBadge = (status: string) => {
     const styles = {
-      ACTIVE: 'bg-green-100 text-green-800',
-      BANNED: 'bg-red-100 text-red-800',
+      ACTIVE: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400',
+      BANNED: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400',
     };
 
     const labels = {
@@ -106,8 +106,8 @@ export default function AdminUserDashboard({ userId }: AdminUserDashboardProps) 
 
   const getRoleBadge = (role: string) => {
     const styles = {
-      USER: 'bg-blue-100 text-blue-800',
-      ADMIN: 'bg-purple-100 text-purple-800',
+      USER: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400',
+      ADMIN: 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-400',
     };
 
     const labels = {
@@ -124,9 +124,9 @@ export default function AdminUserDashboard({ userId }: AdminUserDashboardProps) 
 
   const getProductStatusBadge = (status: string) => {
     const styles = {
-      FOR_SALE: 'bg-green-100 text-green-800',
-      SOLD: 'bg-blue-100 text-blue-800',
-      DELETED: 'bg-red-100 text-red-800',
+      FOR_SALE: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400',
+      SOLD: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400',
+      DELETED: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400',
     };
 
     const labels = {
@@ -148,11 +148,11 @@ export default function AdminUserDashboard({ userId }: AdminUserDashboardProps) 
         <div>
           <Link
             href="/admin/users"
-            className="text-blue-600 hover:underline mb-2 inline-block"
+            className="text-blue-600 dark:text-blue-400 hover:underline mb-2 inline-block"
           >
             ← 유저 목록으로 돌아가기
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">{user.nickname}</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{user.nickname}</h1>
         </div>
         <button
           onClick={handleStatusChange}
@@ -167,93 +167,93 @@ export default function AdminUserDashboard({ userId }: AdminUserDashboardProps) 
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
-          <p className="text-gray-600 text-sm font-medium mb-1">전체 상품</p>
-          <p className="text-3xl font-bold text-gray-900">{user.product_stats.total_products.toLocaleString()}</p>
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+          <p className="text-gray-600 dark:text-slate-400 text-sm font-medium mb-1">전체 상품</p>
+          <p className="text-3xl font-bold text-gray-900 dark:text-white">{user.product_stats.total_products.toLocaleString()}</p>
         </div>
-        <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
-          <p className="text-gray-600 text-sm font-medium mb-1">판매중</p>
-          <p className="text-3xl font-bold text-gray-900">{user.product_stats.active_products.toLocaleString()}</p>
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6 border-l-4 border-green-500">
+          <p className="text-gray-600 dark:text-slate-400 text-sm font-medium mb-1">판매중</p>
+          <p className="text-3xl font-bold text-gray-900 dark:text-white">{user.product_stats.active_products.toLocaleString()}</p>
         </div>
-        <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
-          <p className="text-gray-600 text-sm font-medium mb-1">판매완료</p>
-          <p className="text-3xl font-bold text-gray-900">{user.product_stats.sold_products.toLocaleString()}</p>
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6 border-l-4 border-purple-500">
+          <p className="text-gray-600 dark:text-slate-400 text-sm font-medium mb-1">판매완료</p>
+          <p className="text-3xl font-bold text-gray-900 dark:text-white">{user.product_stats.sold_products.toLocaleString()}</p>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">유저 정보</h2>
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6 mb-6">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">유저 정보</h2>
 
         <div className="space-y-4">
           <div>
-            <label className="text-sm font-medium text-gray-600">닉네임</label>
-            <p className="mt-1 text-lg font-semibold text-gray-900">{user.nickname}</p>
+            <label className="text-sm font-medium text-gray-600 dark:text-slate-400">닉네임</label>
+            <p className="mt-1 text-lg font-semibold text-gray-900 dark:text-white">{user.nickname}</p>
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-600">이메일</label>
-            <p className="mt-1 text-gray-900">{user.email}</p>
+            <label className="text-sm font-medium text-gray-600 dark:text-slate-400">이메일</label>
+            <p className="mt-1 text-gray-900 dark:text-slate-200">{user.email}</p>
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-600">역할</label>
+            <label className="text-sm font-medium text-gray-600 dark:text-slate-400">역할</label>
             <div className="mt-1">{getRoleBadge(user.role)}</div>
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-600">상태</label>
+            <label className="text-sm font-medium text-gray-600 dark:text-slate-400">상태</label>
             <div className="mt-1">{getStatusBadge(user.status)}</div>
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-600">가입일</label>
-            <p className="mt-1 text-gray-900">
+            <label className="text-sm font-medium text-gray-600 dark:text-slate-400">가입일</label>
+            <p className="mt-1 text-gray-900 dark:text-slate-200">
               {new Date(user.created_at).toLocaleDateString('ko-KR')}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">최근 상품</h2>
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">최근 상품</h2>
 
         {user.recent_products.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
+              <thead className="bg-gray-50 dark:bg-slate-700/50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                     제목
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                     가격
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                     상태
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                     등록일
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700">
                 {user.recent_products.map((product) => (
-                  <tr key={product.id} className="hover:bg-gray-50">
+                  <tr key={product.id} className="hover:bg-gray-50 dark:hover:bg-slate-700/50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <Link
                         href={`/admin/products/${product.id}`}
-                        className="text-blue-600 hover:underline font-medium"
+                        className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
                       >
                         {product.title}
                       </Link>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-900 dark:text-slate-200">
                       {formatPrice(product.price)}원
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {getProductStatusBadge(product.status)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-500 dark:text-slate-400">
                       {new Date(product.created_at).toLocaleDateString('ko-KR')}
                     </td>
                   </tr>
@@ -262,7 +262,7 @@ export default function AdminUserDashboard({ userId }: AdminUserDashboardProps) 
             </table>
           </div>
         ) : (
-          <p className="text-gray-500">등록된 상품이 없습니다.</p>
+          <p className="text-gray-500 dark:text-slate-400">등록된 상품이 없습니다.</p>
         )}
       </div>
     </div>

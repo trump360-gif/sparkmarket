@@ -52,9 +52,9 @@ export default function FollowersPage() {
 
   if (isLoading && page === 1) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 py-8 pt-24">
         <div className="max-w-4xl mx-auto px-4">
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-6">
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600" />
             </div>
@@ -65,29 +65,29 @@ export default function FollowersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 py-8 pt-24">
       <div className="max-w-4xl mx-auto px-4">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center space-x-3 mb-2">
-            <Users className="h-6 w-6 text-gray-700" />
-            <h1 className="text-2xl font-bold text-gray-900">팔로워</h1>
+            <Users className="h-6 w-6 text-gray-700 dark:text-gray-300" />
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">팔로워</h1>
           </div>
-          <p className="text-gray-600">나를 팔로우하는 사용자 목록입니다.</p>
+          <p className="text-gray-600 dark:text-gray-400">나를 팔로우하는 사용자 목록입니다.</p>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="bg-white rounded-t-lg shadow-sm border-b border-gray-200">
+        <div className="bg-white dark:bg-slate-800 rounded-t-lg shadow-sm border-b border-gray-200 dark:border-slate-700">
           <div className="flex">
             <Link
               href="/profile/followers"
-              className="flex-1 px-6 py-3 text-center font-medium text-primary-600 border-b-2 border-primary-600"
+              className="flex-1 px-6 py-3 text-center font-medium text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400"
             >
               팔로워
             </Link>
             <Link
               href="/profile/following"
-              className="flex-1 px-6 py-3 text-center font-medium text-gray-500 hover:text-gray-700 border-b-2 border-transparent"
+              className="flex-1 px-6 py-3 text-center font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 border-b-2 border-transparent"
             >
               팔로잉
             </Link>
@@ -95,20 +95,20 @@ export default function FollowersPage() {
         </div>
 
         {/* Followers List */}
-        <div className="bg-white rounded-b-lg shadow-sm">
+        <div className="bg-white dark:bg-slate-800 rounded-b-lg shadow-sm">
           {followers.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 px-4">
-              <UserX className="h-16 w-16 text-gray-300 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+              <UserX className="h-16 w-16 text-gray-300 dark:text-gray-600 mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
                 팔로워가 없습니다
               </h3>
-              <p className="text-sm text-gray-500 text-center">
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
                 아직 나를 팔로우하는 사용자가 없습니다.
               </p>
             </div>
           ) : (
             <>
-              <div className="divide-y divide-gray-200">
+              <div className="divide-y divide-gray-200 dark:divide-slate-700">
                 {followers.map((follow) => {
                   const follower = follow.follower;
                   if (!follower) return null;
@@ -116,7 +116,7 @@ export default function FollowersPage() {
                   return (
                     <div
                       key={follow.id}
-                      className="p-4 hover:bg-gray-50 transition-colors"
+                      className="p-4 hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors"
                     >
                       <div className="flex items-center justify-between">
                         <Link
@@ -134,8 +134,8 @@ export default function FollowersPage() {
                                 className="rounded-full object-cover"
                               />
                             ) : (
-                              <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-                                <span className="text-gray-500 text-lg font-medium">
+                              <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-slate-600 flex items-center justify-center">
+                                <span className="text-gray-500 dark:text-gray-300 text-lg font-medium">
                                   {follower.nickname.charAt(0).toUpperCase()}
                                 </span>
                               </div>
@@ -144,11 +144,11 @@ export default function FollowersPage() {
 
                           {/* User Info */}
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 truncate">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                               {follower.nickname}
                             </p>
                             {follower.bio && (
-                              <p className="text-xs text-gray-500 truncate">
+                              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                                 {follower.bio}
                               </p>
                             )}
@@ -173,11 +173,11 @@ export default function FollowersPage() {
 
               {/* Load More Button */}
               {hasMore && (
-                <div className="p-4 border-t border-gray-200">
+                <div className="p-4 border-t border-gray-200 dark:border-slate-700">
                   <button
                     onClick={handleLoadMore}
                     disabled={isLoading}
-                    className="w-full py-2 px-4 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="w-full py-2 px-4 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     {isLoading ? '로딩 중...' : '더 보기'}
                   </button>

@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { productsApi } from '@/lib/api/products';
 import { uploadApi } from '@/lib/api/upload';
-import { ProductCategory, PRODUCT_CONDITION_LABELS, TRADE_METHOD_LABELS, type ProductCondition, type TradeMethod, type Brand } from '@/types';
+import { ProductCategory, CATEGORY_LABELS, PRODUCT_CONDITION_LABELS, TRADE_METHOD_LABELS, type ProductCondition, type TradeMethod, type Brand } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { Package, Tag, DollarSign, FileText, Image as ImageIcon, X, Sparkles, Save, MapPin, Truck, Hash } from 'lucide-react';
 import type { Product } from '@/types';
@@ -207,28 +207,28 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="max-w-xl mx-auto bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-slate-100 p-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="max-w-xl mx-auto bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-lg border border-slate-100 dark:border-slate-700 p-6">
       <div className="flex items-center gap-2.5 mb-6">
         <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-lg flex items-center justify-center text-white shadow-md shadow-primary-500/30">
           {isEdit ? <Save className="w-5 h-5" /> : <Sparkles className="w-5 h-5" />}
         </div>
         <div>
-          <h2 className="text-xl font-bold text-slate-900">{isEdit ? '상품 수정' : '상품 등록'}</h2>
-          <p className="text-slate-500 text-xs">{isEdit ? '상품 정보를 수정하세요' : '새로운 상품을 등록하세요'}</p>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">{isEdit ? '상품 수정' : '상품 등록'}</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-xs">{isEdit ? '상품 정보를 수정하세요' : '새로운 상품을 등록하세요'}</p>
         </div>
       </div>
 
       <div className="space-y-4">
         <div>
-          <label htmlFor="title" className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-1.5">
-            <Package className="w-3.5 h-3.5 text-slate-400" />
+          <label htmlFor="title" className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+            <Package className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
             제목 *
           </label>
           <input
             id="title"
             type="text"
             {...register('title')}
-            className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white transition-all"
+            className="w-full px-3 py-2.5 text-sm border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-slate-700 dark:text-white transition-all"
             placeholder="상품 제목을 입력하세요"
           />
           {errors.title && (
@@ -237,8 +237,8 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
         </div>
 
         <div>
-          <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-2">
-            <Tag className="w-3.5 h-3.5 text-slate-400" />
+          <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
+            <Tag className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
             카테고리 *
           </label>
           <div className="flex flex-wrap gap-2">
@@ -252,10 +252,10 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
                   className={`px-3 py-1.5 text-sm rounded-lg border transition-all ${
                     isSelected
                       ? 'bg-primary-500 text-white border-primary-500 shadow-md shadow-primary-500/20'
-                      : 'bg-white text-slate-600 border-slate-200 hover:border-primary-300 hover:text-primary-600'
+                      : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-primary-300 dark:hover:border-primary-500 hover:text-primary-600 dark:hover:text-primary-400'
                   }`}
                 >
-                  {category}
+                  {CATEGORY_LABELS[category]}
                 </button>
               );
             })}
@@ -267,8 +267,8 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
         </div>
 
         <div>
-          <label htmlFor="price" className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-1.5">
-            <DollarSign className="w-3.5 h-3.5 text-slate-400" />
+          <label htmlFor="price" className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+            <DollarSign className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
             가격 *
           </label>
           <div className="relative">
@@ -276,10 +276,10 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
               id="price"
               type="number"
               {...register('price', { valueAsNumber: true })}
-              className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white transition-all pr-10"
+              className="w-full px-3 py-2.5 text-sm border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-slate-700 dark:text-white transition-all pr-10"
               placeholder="0"
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm font-medium">원</span>
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 text-sm font-medium">원</span>
           </div>
           {errors.price && (
             <p className="text-red-500 text-xs mt-1.5">{errors.price.message}</p>
@@ -287,15 +287,15 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
         </div>
 
         <div>
-          <label htmlFor="description" className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-1.5">
-            <FileText className="w-3.5 h-3.5 text-slate-400" />
+          <label htmlFor="description" className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+            <FileText className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
             설명 *
           </label>
           <textarea
             id="description"
             {...register('description')}
             rows={4}
-            className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white transition-all resize-none"
+            className="w-full px-3 py-2.5 text-sm border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-slate-700 dark:text-white transition-all resize-none"
             placeholder="상품 설명을 입력하세요"
           />
           {errors.description && (
@@ -305,8 +305,8 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
 
         {/* Product Condition */}
         <div>
-          <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-2">
-            <Package className="w-3.5 h-3.5 text-slate-400" />
+          <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
+            <Package className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
             상품 상태
           </label>
           <div className="flex flex-wrap gap-2">
@@ -320,7 +320,7 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
                   className={`px-3 py-1.5 text-sm rounded-lg border transition-all ${
                     isSelected
                       ? 'bg-primary-500 text-white border-primary-500 shadow-md shadow-primary-500/20'
-                      : 'bg-white text-slate-600 border-slate-200 hover:border-primary-300 hover:text-primary-600'
+                      : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-primary-300 dark:hover:border-primary-500 hover:text-primary-600 dark:hover:text-primary-400'
                   }`}
                 >
                   {label}
@@ -332,8 +332,8 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
 
         {/* Trade Method */}
         <div>
-          <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-2">
-            <Truck className="w-3.5 h-3.5 text-slate-400" />
+          <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
+            <Truck className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
             거래 방법
           </label>
           <div className="flex flex-wrap gap-2">
@@ -347,7 +347,7 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
                   className={`px-3 py-1.5 text-sm rounded-lg border transition-all ${
                     isSelected
                       ? 'bg-primary-500 text-white border-primary-500 shadow-md shadow-primary-500/20'
-                      : 'bg-white text-slate-600 border-slate-200 hover:border-primary-300 hover:text-primary-600'
+                      : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-600 hover:border-primary-300 dark:hover:border-primary-500 hover:text-primary-600 dark:hover:text-primary-400'
                   }`}
                 >
                   {label}
@@ -360,15 +360,15 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
         {/* Trade Location */}
         {(watch('trade_method') === 'DIRECT' || watch('trade_method') === 'BOTH') && (
           <div>
-            <label htmlFor="trade_location" className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-1.5">
-              <MapPin className="w-3.5 h-3.5 text-slate-400" />
+            <label htmlFor="trade_location" className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+              <MapPin className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
               직거래 희망 지역
             </label>
             <input
               id="trade_location"
               type="text"
               {...register('trade_location')}
-              className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white transition-all"
+              className="w-full px-3 py-2.5 text-sm border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-slate-700 dark:text-white transition-all"
               placeholder="예: 서울 강남구, 경기 성남시"
             />
           </div>
@@ -376,15 +376,15 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
 
         {/* Brand Selection */}
         <div>
-          <label htmlFor="brand_id" className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-1.5">
-            <Tag className="w-3.5 h-3.5 text-slate-400" />
+          <label htmlFor="brand_id" className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+            <Tag className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
             브랜드 (선택사항)
           </label>
           <div className="relative">
             <select
               id="brand_id"
               {...register('brand_id')}
-              className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white transition-all appearance-none"
+              className="w-full px-3 py-2.5 text-sm border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-slate-700 dark:text-white transition-all appearance-none"
             >
               <option value="">브랜드 선택</option>
               {brands
@@ -404,25 +404,25 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
 
         {/* Hashtags */}
         <div>
-          <label htmlFor="hashtags" className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-1.5">
-            <Hash className="w-3.5 h-3.5 text-slate-400" />
+          <label htmlFor="hashtags" className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+            <Hash className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
             해시태그 (선택사항)
           </label>
           <input
             id="hashtags"
             type="text"
             {...register('hashtags')}
-            className="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white transition-all"
+            className="w-full px-3 py-2.5 text-sm border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-slate-700 dark:text-white transition-all"
             placeholder="예: 새것, 깨끗해요, 급처 (쉼표로 구분)"
           />
-          <p className="text-xs text-slate-500 mt-1.5">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5">
             해시태그를 쉼표(,)로 구분하여 입력하세요
           </p>
         </div>
 
         <div>
-          <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 mb-2">
-            <ImageIcon className="w-3.5 h-3.5 text-slate-400" />
+          <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
+            <ImageIcon className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
             이미지 * (최대 5개)
           </label>
 
@@ -451,11 +451,11 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
           </div>
 
           {images.length < 5 && (
-            <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer bg-slate-50 hover:bg-slate-100 transition-all">
+            <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg cursor-pointer bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 transition-all">
               <div className="flex flex-col items-center justify-center py-4">
-                <ImageIcon className="w-6 h-6 text-slate-400 mb-1.5" />
-                <p className="text-xs text-slate-500">클릭하여 이미지 업로드</p>
-                <p className="text-[10px] text-slate-400 mt-0.5">PNG, JPG, GIF (최대 5개)</p>
+                <ImageIcon className="w-6 h-6 text-slate-400 dark:text-slate-500 mb-1.5" />
+                <p className="text-xs text-slate-500 dark:text-slate-400">클릭하여 이미지 업로드</p>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">PNG, JPG, GIF (최대 5개)</p>
               </div>
               <input
                 type="file"
@@ -469,7 +469,7 @@ export default function ProductForm({ initialData, isEdit = false }: ProductForm
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-xs">
+          <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-3 py-2 rounded-lg text-xs">
             {error}
           </div>
         )}

@@ -24,10 +24,10 @@ export default function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
 
   const getStatusBadge = (status: string) => {
     const styles = {
-      PENDING: 'bg-amber-50 text-amber-700 border border-amber-200',
-      ACCEPTED: 'bg-green-50 text-green-700 border border-green-200',
-      REJECTED: 'bg-red-50 text-red-700 border border-red-200',
-      EXPIRED: 'bg-slate-50 text-slate-600 border border-slate-200',
+      PENDING: 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-700',
+      ACCEPTED: 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-700',
+      REJECTED: 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-700',
+      EXPIRED: 'bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-600',
     };
 
     const labels = {
@@ -87,12 +87,12 @@ export default function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
   );
 
   return (
-    <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md hover:shadow-lg transition-all p-4 border border-slate-100">
+    <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-md hover:shadow-lg transition-all p-4 border border-slate-100 dark:border-slate-700">
       <div className="flex gap-4">
         {/* 상품 이미지 */}
         <Link
           href={`/products/${offer.product_id}`}
-          className="flex-shrink-0 w-20 h-20 relative bg-gradient-to-br from-slate-100 to-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+          className="flex-shrink-0 w-20 h-20 relative bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
         >
           {primaryImage ? (
             <Image
@@ -103,7 +103,7 @@ export default function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
               sizes="112px"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-slate-400 text-xs">
+            <div className="w-full h-full flex items-center justify-center text-slate-400 dark:text-slate-500 text-xs">
               이미지 없음
             </div>
           )}
@@ -115,14 +115,14 @@ export default function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
             <div className="flex-1 min-w-0">
               <Link
                 href={`/products/${offer.product_id}`}
-                className="font-semibold text-slate-900 hover:text-primary-600 truncate block text-base transition-colors"
+                className="font-semibold text-slate-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 truncate block text-base transition-colors"
               >
                 {offer.product?.title}
               </Link>
-              <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+              <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">
                 <User className="w-3 h-3" />
                 {type === 'sent' ? '판매자' : '구매자'}:{' '}
-                <span className="font-medium text-slate-700">
+                <span className="font-medium text-slate-700 dark:text-slate-300">
                   {type === 'sent'
                     ? offer.seller?.nickname
                     : offer.buyer?.nickname}
@@ -133,33 +133,33 @@ export default function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
           </div>
 
           <div className="flex items-baseline gap-2 mb-2">
-            <span className="text-slate-400 line-through text-xs">
+            <span className="text-slate-400 dark:text-slate-500 line-through text-xs">
               {formatPrice(offer.product?.price || 0)}원
             </span>
             <span className="text-lg font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-secondary-500">
               {formatPrice(offer.offered_price)}원
             </span>
-            <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full font-medium">
+            <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-1.5 py-0.5 rounded-full font-medium">
               -{formatPrice((offer.product?.price || 0) - offer.offered_price)}원
             </span>
           </div>
 
           {offer.message && (
-            <div className="bg-slate-50 rounded-lg p-2 mb-2 flex items-start gap-1.5">
+            <div className="bg-slate-50 dark:bg-slate-700 rounded-lg p-2 mb-2 flex items-start gap-1.5">
               <MessageSquare className="w-3.5 h-3.5 text-slate-400 mt-0.5 flex-shrink-0" />
-              <p className="text-xs text-slate-600 line-clamp-2">{offer.message}</p>
+              <p className="text-xs text-slate-600 dark:text-slate-300 line-clamp-2">{offer.message}</p>
             </div>
           )}
 
           <div className="flex items-center justify-between">
-            <div className="text-xs text-slate-500 flex items-center gap-1">
+            <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
               <Clock className="w-3.5 h-3.5" />
               {isExpired || offer.status !== 'PENDING' ? (
                 <span>
                   {new Date(offer.created_at).toLocaleString('ko-KR')}
                 </span>
               ) : (
-                <span className="text-amber-600 font-semibold">
+                <span className="text-amber-600 dark:text-amber-400 font-semibold">
                   {hoursLeft}시간 남음
                 </span>
               )}

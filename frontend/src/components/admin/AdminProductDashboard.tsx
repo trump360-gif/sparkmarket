@@ -64,7 +64,7 @@ export default function AdminProductDashboard({ productId }: AdminProductDashboa
           <DashboardCardSkeleton />
           <DashboardCardSkeleton />
         </div>
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
           <Skeleton className="h-8 w-40 mb-6" />
           <Skeleton className="h-96 w-full" />
         </div>
@@ -75,7 +75,7 @@ export default function AdminProductDashboard({ productId }: AdminProductDashboa
   if (!product) {
     return (
       <div className="p-8 flex items-center justify-center">
-        <p className="text-gray-500">상품을 찾을 수 없습니다.</p>
+        <p className="text-gray-500 dark:text-slate-400">상품을 찾을 수 없습니다.</p>
       </div>
     );
   }
@@ -85,9 +85,9 @@ export default function AdminProductDashboard({ productId }: AdminProductDashboa
 
   const getStatusBadge = (status: string) => {
     const styles = {
-      FOR_SALE: 'bg-green-100 text-green-800',
-      SOLD: 'bg-blue-100 text-blue-800',
-      DELETED: 'bg-red-100 text-red-800',
+      FOR_SALE: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400',
+      SOLD: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400',
+      DELETED: 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400',
     };
 
     const labels = {
@@ -109,11 +109,11 @@ export default function AdminProductDashboard({ productId }: AdminProductDashboa
         <div>
           <Link
             href="/admin/products"
-            className="text-blue-600 hover:underline mb-2 inline-block"
+            className="text-blue-600 dark:text-blue-400 hover:underline mb-2 inline-block"
           >
             ← 상품 목록으로 돌아가기
           </Link>
-          <h1 className="text-3xl font-bold text-gray-900">상품 대시보드</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">상품 대시보드</h1>
         </div>
         <button
           onClick={handleDelete}
@@ -124,29 +124,29 @@ export default function AdminProductDashboard({ productId }: AdminProductDashboa
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500">
-          <p className="text-gray-600 text-sm font-medium mb-1">조회수</p>
-          <p className="text-3xl font-bold text-gray-900">{product.view_count.toLocaleString()}</p>
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6 border-l-4 border-blue-500">
+          <p className="text-gray-600 dark:text-slate-400 text-sm font-medium mb-1">조회수</p>
+          <p className="text-3xl font-bold text-gray-900 dark:text-white">{product.view_count.toLocaleString()}</p>
         </div>
-        <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-green-500">
-          <p className="text-gray-600 text-sm font-medium mb-1">채팅 문의</p>
-          <p className="text-3xl font-bold text-gray-900">{product.chat_count.toLocaleString()}</p>
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6 border-l-4 border-green-500">
+          <p className="text-gray-600 dark:text-slate-400 text-sm font-medium mb-1">채팅 문의</p>
+          <p className="text-3xl font-bold text-gray-900 dark:text-white">{product.chat_count.toLocaleString()}</p>
         </div>
-        <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500">
-          <p className="text-gray-600 text-sm font-medium mb-1">등록일</p>
-          <p className="text-xl font-bold text-gray-900">
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6 border-l-4 border-purple-500">
+          <p className="text-gray-600 dark:text-slate-400 text-sm font-medium mb-1">등록일</p>
+          <p className="text-xl font-bold text-gray-900 dark:text-white">
             {new Date(product.created_at).toLocaleDateString('ko-KR')}
           </p>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">상품 정보</h2>
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6 mb-6">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">상품 정보</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             {primaryImage ? (
-              <div className="aspect-square relative bg-gray-200 rounded-lg overflow-hidden">
+              <div className="aspect-square relative bg-gray-200 dark:bg-slate-700 rounded-lg overflow-hidden">
                 <Image
                   src={primaryImage.url}
                   alt={product.title}
@@ -156,15 +156,15 @@ export default function AdminProductDashboard({ productId }: AdminProductDashboa
                 />
               </div>
             ) : (
-              <div className="aspect-square bg-gray-200 rounded-lg flex items-center justify-center">
-                <span className="text-gray-400">이미지 없음</span>
+              <div className="aspect-square bg-gray-200 dark:bg-slate-700 rounded-lg flex items-center justify-center">
+                <span className="text-gray-400 dark:text-slate-500">이미지 없음</span>
               </div>
             )}
 
             {product.images.length > 1 && (
               <div className="mt-4 grid grid-cols-4 gap-2">
                 {product.images.slice(0, 4).map((img) => (
-                  <div key={img.id} className="aspect-square relative bg-gray-200 rounded overflow-hidden">
+                  <div key={img.id} className="aspect-square relative bg-gray-200 dark:bg-slate-700 rounded overflow-hidden">
                     <Image
                       src={img.url}
                       alt={product.title}
@@ -180,52 +180,52 @@ export default function AdminProductDashboard({ productId }: AdminProductDashboa
 
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium text-gray-600">상태</label>
+              <label className="text-sm font-medium text-gray-600 dark:text-slate-400">상태</label>
               <div className="mt-1">{getStatusBadge(product.status)}</div>
             </div>
 
             <div>
-              <label className="text-sm font-medium text-gray-600">제목</label>
-              <p className="mt-1 text-lg font-semibold text-gray-900">{product.title}</p>
+              <label className="text-sm font-medium text-gray-600 dark:text-slate-400">제목</label>
+              <p className="mt-1 text-lg font-semibold text-gray-900 dark:text-white">{product.title}</p>
             </div>
 
             <div>
-              <label className="text-sm font-medium text-gray-600">가격</label>
-              <p className="mt-1 text-2xl font-bold text-blue-600">{formatPrice(product.price)}원</p>
+              <label className="text-sm font-medium text-gray-600 dark:text-slate-400">가격</label>
+              <p className="mt-1 text-2xl font-bold text-blue-600 dark:text-blue-400">{formatPrice(product.price)}원</p>
             </div>
 
             <div>
-              <label className="text-sm font-medium text-gray-600">카테고리</label>
-              <p className="mt-1 text-gray-900">{product.category}</p>
+              <label className="text-sm font-medium text-gray-600 dark:text-slate-400">카테고리</label>
+              <p className="mt-1 text-gray-900 dark:text-slate-200">{product.category}</p>
             </div>
 
             <div>
-              <label className="text-sm font-medium text-gray-600">설명</label>
-              <p className="mt-1 text-gray-700 whitespace-pre-wrap">{product.description}</p>
+              <label className="text-sm font-medium text-gray-600 dark:text-slate-400">설명</label>
+              <p className="mt-1 text-gray-700 dark:text-slate-300 whitespace-pre-wrap">{product.description}</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">판매자 정보</h2>
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">판매자 정보</h2>
         {product.seller ? (
           <div className="space-y-2">
             <div>
-              <span className="text-gray-600 font-medium">닉네임:</span>{' '}
-              <span className="text-gray-900">{product.seller.nickname}</span>
+              <span className="text-gray-600 dark:text-slate-400 font-medium">닉네임:</span>{' '}
+              <span className="text-gray-900 dark:text-slate-200">{product.seller.nickname}</span>
             </div>
             <div>
-              <span className="text-gray-600 font-medium">이메일:</span>{' '}
-              <span className="text-gray-900">{product.seller.email}</span>
+              <span className="text-gray-600 dark:text-slate-400 font-medium">이메일:</span>{' '}
+              <span className="text-gray-900 dark:text-slate-200">{product.seller.email}</span>
             </div>
             <div>
-              <span className="text-gray-600 font-medium">판매자 ID:</span>{' '}
-              <span className="text-gray-900 font-mono text-sm">{product.seller_id}</span>
+              <span className="text-gray-600 dark:text-slate-400 font-medium">판매자 ID:</span>{' '}
+              <span className="text-gray-900 dark:text-slate-200 font-mono text-sm">{product.seller_id}</span>
             </div>
           </div>
         ) : (
-          <p className="text-gray-500">판매자 정보를 불러올 수 없습니다.</p>
+          <p className="text-gray-500 dark:text-slate-400">판매자 정보를 불러올 수 없습니다.</p>
         )}
       </div>
     </div>

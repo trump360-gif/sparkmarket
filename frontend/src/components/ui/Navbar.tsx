@@ -136,7 +136,7 @@ export default function Navbar() {
                         {user?.nickname?.charAt(0) || <User className="w-4 h-4" />}
                       </div>
                     )}
-                    <span className="font-medium text-slate-700">마이페이지</span>
+                    <span className="font-medium text-slate-700 dark:text-slate-200">마이페이지</span>
                   </Button>
                 </Link>
 

@@ -1,14 +1,14 @@
 export function Skeleton({ className = '' }: { className?: string }) {
   return (
     <div
-      className={`animate-pulse bg-gray-200 rounded ${className}`}
+      className={`animate-pulse bg-gray-200 dark:bg-slate-700 rounded ${className}`}
     />
   );
 }
 
 export function ProductCardSkeleton() {
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden">
       <Skeleton className="aspect-square w-full" />
       <div className="p-4 space-y-3">
         <Skeleton className="h-6 w-3/4" />
@@ -35,7 +35,7 @@ export function ProductListSkeleton({ count = 6 }: { count?: number }) {
 
 export function ProductDetailSkeleton() {
   return (
-    <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+    <div className="max-w-6xl mx-auto bg-white dark:bg-slate-800 rounded-lg shadow-md overflow-hidden">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
         {/* Image Section */}
         <div>
@@ -53,7 +53,7 @@ export function ProductDetailSkeleton() {
           <Skeleton className="h-10 w-3/4" />
           <Skeleton className="h-12 w-1/2" />
 
-          <div className="border-t border-b py-4 space-y-3">
+          <div className="border-t border-b border-gray-200 dark:border-slate-700 py-4 space-y-3">
             <Skeleton className="h-5 w-full" />
             <Skeleton className="h-5 w-full" />
             <Skeleton className="h-5 w-full" />
@@ -77,9 +77,9 @@ export function ProductDetailSkeleton() {
 
 export function TableSkeleton({ rows = 5, cols = 6 }: { rows?: number; cols?: number }) {
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
+    <div className="bg-white dark:bg-slate-800 rounded-lg shadow overflow-hidden">
+      <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
+        <thead className="bg-gray-50 dark:bg-slate-700">
           <tr>
             {Array.from({ length: cols }).map((_, i) => (
               <th key={i} className="px-6 py-3">
@@ -88,7 +88,7 @@ export function TableSkeleton({ rows = 5, cols = 6 }: { rows?: number; cols?: nu
             ))}
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-slate-700">
           {Array.from({ length: rows }).map((_, rowIndex) => (
             <tr key={rowIndex}>
               {Array.from({ length: cols }).map((_, colIndex) => (
@@ -106,7 +106,7 @@ export function TableSkeleton({ rows = 5, cols = 6 }: { rows?: number; cols?: nu
 
 export function DashboardCardSkeleton() {
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
       <Skeleton className="h-5 w-32 mb-2" />
       <Skeleton className="h-10 w-24" />
     </div>
@@ -124,7 +124,7 @@ export function DashboardSkeleton() {
         ))}
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6">
         <Skeleton className="h-8 w-40 mb-6" />
         <Skeleton className="h-64 w-full" />
       </div>

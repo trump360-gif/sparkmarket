@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -22,6 +22,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
 import { Package, Heart, Plus, ShoppingBag, Inbox, Send, Settings, Star, MessageSquare, X, ChevronRight, Receipt, Bell, Ban, Users, Clock } from 'lucide-react';
 import type { Product, PriceOffer, Review, UserProfile, TransactionWithDetails, Follow, KeywordAlert, Block } from '@/types';
+import { useFollowStore } from '@/stores/followStore';
 
 type TabType = 'myProducts' | 'favorites' | 'transactions' | 'receivedOffers' | 'sentOffers' | 'follows' | 'keywordAlerts' | 'recentViews' | 'blocks';
 type FollowSubTab = 'followers' | 'following';
@@ -53,12 +54,18 @@ export default function MyPage() {
   const [keywordAlerts, setKeywordAlerts] = useState<KeywordAlert[]>([]);
   const [recentViewProducts, setRecentViewProducts] = useState<Product[]>([]);
   const [blocks, setBlocks] = useState<Block[]>([]);
-  const [followingCount, setFollowingCount] = useState(0);
-  const [followersCount, setFollowersCount] = useState(0);
   const [keywordAlertCount, setKeywordAlertCount] = useState(0);
   const [recentViewCount, setRecentViewCount] = useState(0);
   const [blockCount, setBlockCount] = useState(0);
   const [followSubTab, setFollowSubTab] = useState<FollowSubTab>('followers');
+  const mountedRef = useRef(false);
+
+  // Zustand 전역 상태에서 팔로우 카운트 가져오기
+  const followChangeCounter = useFollowStore((state) => state.followChangeCounter);
+  const myFollowingCount = useFollowStore((state) => state.myFollowingCount);
+  const myFollowersCount = useFollowStore((state) => state.myFollowersCount);
+  const setMyFollowingCount = useFollowStore((state) => state.setMyFollowingCount);
+  const setMyFollowersCount = useFollowStore((state) => state.setMyFollowersCount);
 
   // 메인 메뉴 아이템 배열
   const mainMenuItems = [
@@ -83,12 +90,53 @@ export default function MyPage() {
     }
   }, [authLoading, isAuthenticated, router]);
 
+  // 컴포넌트 마운트 시 데이터 로드 (네비게이션 시에도 항상 새로고침)
   useEffect(() => {
     if (isAuthenticated) {
       fetchProfile();
       fetchData();
       fetchAllCounts();
+      mountedRef.current = true;
     }
+  }, [isAuthenticated, activeTab]);
+
+  // 팔로우 상태 변경 시 카운트 새로고침 (전역 상태 구독)
+  useEffect(() => {
+    if (followChangeCounter > 0 && isAuthenticated) {
+      fetchAllCounts();
+      if (activeTab === 'follows') {
+        fetchData();
+      }
+    }
+  }, [followChangeCounter]);
+
+  // 페이지 포커스 또는 visibility 변경 시 데이터 새로고침 (다른 페이지에서 팔로우/언팔로우 후 돌아왔을 때)
+  useEffect(() => {
+    const handleFocus = () => {
+      if (isAuthenticated) {
+        fetchAllCounts();
+        // 현재 탭이 follows일 경우 데이터도 다시 가져오기
+        if (activeTab === 'follows') {
+          fetchData();
+        }
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && isAuthenticated) {
+        fetchAllCounts();
+        if (activeTab === 'follows') {
+          fetchData();
+        }
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, [isAuthenticated, activeTab]);
 
   const fetchProfile = async () => {
@@ -126,9 +174,9 @@ export default function MyPage() {
       // 내 상품만 필터링해서 카운트
       const myProductsFiltered = products.data.filter((p: Product) => p.seller_id === user?.id);
       setMyProductCount(myProductsFiltered.length);
-      // 추가 메뉴 카운트
-      setFollowingCount(following.total || 0);
-      setFollowersCount(followers.total || 0);
+      // 추가 메뉴 카운트 - Zustand 전역 상태에 저장
+      setMyFollowingCount(following.total || 0);
+      setMyFollowersCount(followers.total || 0);
       setKeywordAlertCount(keywords.length);
       setRecentViewCount(recent.total || 0);
       setBlockCount(blockedUsers.total || 0);
@@ -213,16 +261,16 @@ export default function MyPage() {
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white pt-20">
+    <main className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 pt-20">
       {/* 배경 장식 */}
       <div className="absolute top-0 left-0 right-0 h-60 overflow-hidden pointer-events-none">
-        <div className="absolute top-5 left-1/4 w-48 h-48 bg-primary-400/10 rounded-full blur-3xl"></div>
-        <div className="absolute top-10 right-1/4 w-64 h-64 bg-secondary-400/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-5 left-1/4 w-48 h-48 bg-primary-400/10 dark:bg-primary-600/10 rounded-full blur-3xl"></div>
+        <div className="absolute top-10 right-1/4 w-64 h-64 bg-secondary-400/10 dark:bg-secondary-600/10 rounded-full blur-3xl"></div>
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-6 relative z-10">
         {/* 프로필 헤더 */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-slate-100 p-5 mb-5 animate-fade-in">
+        <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-lg border border-slate-100 dark:border-slate-700 p-5 mb-5 animate-fade-in">
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center text-white text-2xl font-bold shadow-md shadow-primary-500/20 overflow-hidden relative">
               {profile?.avatar_url ? (
@@ -237,10 +285,10 @@ export default function MyPage() {
               )}
             </div>
             <div className="flex-1">
-              <h1 className="text-xl font-bold text-slate-900">
+              <h1 className="text-xl font-bold text-slate-900 dark:text-white">
                 {user?.nickname}
               </h1>
-              <p className="text-slate-500 text-sm">{user?.email}</p>
+              <p className="text-slate-500 dark:text-slate-400 text-sm">{user?.email}</p>
               <div className="flex flex-col gap-2 mt-1">
                 <div className="flex items-center gap-3">
                   <button
@@ -253,15 +301,18 @@ export default function MyPage() {
                     <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-amber-500" />
                   </button>
                   <span className="text-slate-400 text-xs">|</span>
-                  <span className="text-slate-500 text-xs">
+                  <span className="text-slate-500 dark:text-slate-400 text-xs">
                     판매 {profile?.stats?.salesCount ?? 0} · 구매 {profile?.stats?.purchaseCount ?? 0}
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-2 text-xs">
-                  <button className="flex items-center gap-1 text-slate-500 hover:text-primary-600 transition-colors">
-                    <Users className="w-3.5 h-3.5" />
-                    팔로워 0 · 팔로잉 0
-                  </button>
+                  <button
+                      onClick={() => router.push('/profile/followers')}
+                      className="flex items-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                    >
+                      <Users className="w-3.5 h-3.5" />
+                      팔로워 {myFollowersCount} · 팔로잉 {myFollowingCount}
+                    </button>
                 </div>
               </div>
             </div>
@@ -273,7 +324,7 @@ export default function MyPage() {
             </Link>
           </div>
           {profile?.bio && (
-            <p className="mt-3 text-sm text-slate-600 bg-slate-50 rounded-lg p-3">
+            <p className="mt-3 text-sm text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-700/50 rounded-lg p-3">
               {profile.bio}
             </p>
           )}
@@ -293,9 +344,8 @@ export default function MyPage() {
                   className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium transition-all ${
                     isActive
                       ? 'bg-primary-500 text-white shadow-md shadow-primary-500/20'
-                      : 'bg-white/80 text-slate-600 border border-slate-200'
-                  }`}
-                >
+                      : 'bg-white/80 dark:bg-slate-700/80 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600'
+                  }`}>
                   <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
                   <span>{item.label}</span>
                   {item.highlight && !isActive && (
@@ -321,26 +371,25 @@ export default function MyPage() {
               className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium transition-all ${
                 activeTab === 'follows'
                   ? 'bg-primary-500 text-white shadow-md shadow-primary-500/20'
-                  : 'bg-white/80 text-slate-600 border border-slate-200'
-              }`}
-            >
+                  : 'bg-white/80 dark:bg-slate-700/80 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600'
+              }`}>
               <Users className={`w-4 h-4 ${activeTab === 'follows' ? 'text-white' : 'text-slate-400'}`} />
               <span className={`transition-all ${
                 activeTab === 'follows' && followSubTab === 'followers'
                   ? 'text-white font-semibold'
                   : activeTab === 'follows'
                     ? 'text-white/60'
-                    : 'text-slate-500'
+                    : 'text-slate-500 dark:text-slate-400'
               }`}>
                 팔로워
               </span>
-              <span className={activeTab === 'follows' ? 'text-white/50' : 'text-slate-300'}>/</span>
+              <span className={activeTab === 'follows' ? 'text-white/50' : 'text-slate-300 dark:text-slate-600'}>/</span>
               <span className={`transition-all ${
                 activeTab === 'follows' && followSubTab === 'following'
                   ? 'text-white font-semibold'
                   : activeTab === 'follows'
                     ? 'text-white/60'
-                    : 'text-slate-500'
+                    : 'text-slate-500 dark:text-slate-400'
               }`}>
                 팔로잉
               </span>
@@ -356,9 +405,8 @@ export default function MyPage() {
                   className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium transition-all ${
                     isActive
                       ? 'bg-primary-500 text-white shadow-md shadow-primary-500/20'
-                      : 'bg-white/80 text-slate-600 border border-slate-200'
-                  }`}
-                >
+                      : 'bg-white/80 dark:bg-slate-700/80 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600'
+                  }`}>
                   <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
                   <span>{item.label}</span>
                   {isActive && (
@@ -376,7 +424,7 @@ export default function MyPage() {
         <div className="flex gap-5">
           {/* 데스크톱 사이드바 */}
           <aside className="hidden lg:block w-56 flex-shrink-0">
-            <nav className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 p-2 sticky top-24 animate-slide-up">
+            <nav className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 dark:border-slate-700 p-2 sticky top-24 animate-slide-up">
               <div className="space-y-1">
                 {mainMenuItems.map((item) => {
                   const Icon = item.icon;
@@ -387,18 +435,17 @@ export default function MyPage() {
                       onClick={() => setActiveTab(item.id)}
                       className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                         isActive
-                          ? 'bg-primary-50 text-primary-700 border-l-2 border-primary-500'
-                          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                      }`}
-                    >
-                      <Icon className={`w-4 h-4 ${isActive ? 'text-primary-600' : 'text-slate-400'}`} />
+                          ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 border-l-2 border-primary-500'
+                          : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white'
+                      }`}>
+                      <Icon className={`w-4 h-4 ${isActive ? 'text-primary-600 dark:text-primary-400' : 'text-slate-400'}`} />
                       <span className="flex-1 text-left">{item.label}</span>
                       <span className={`text-xs px-2 py-0.5 rounded-full ${
                         item.highlight
-                          ? 'bg-red-100 text-red-600'
+                          ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
                           : isActive
-                            ? 'bg-primary-100 text-primary-700'
-                            : 'bg-slate-100 text-slate-500'
+                            ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-400'
+                            : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
                       }`}>
                         {item.count}
                       </span>
@@ -408,8 +455,8 @@ export default function MyPage() {
               </div>
 
               {/* 추가 메뉴 (데스크톱) */}
-              <div className="mt-3 pt-3 border-t border-slate-200">
-                <p className="px-3 mb-2 text-xs font-medium text-slate-400 uppercase tracking-wider">더보기</p>
+              <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
+                <p className="px-3 mb-2 text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider">더보기</p>
                 <div className="space-y-1">
                   {/* 팔로워/팔로잉 토글 버튼 */}
                   <button
@@ -422,34 +469,33 @@ export default function MyPage() {
                     }}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                       activeTab === 'follows'
-                        ? 'bg-primary-50 text-primary-700 border-l-2 border-primary-500'
-                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                    }`}
-                  >
-                    <Users className={`w-4 h-4 ${activeTab === 'follows' ? 'text-primary-600' : 'text-slate-400'}`} />
+                        ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 border-l-2 border-primary-500'
+                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white'
+                    }`}>
+                    <Users className={`w-4 h-4 ${activeTab === 'follows' ? 'text-primary-600 dark:text-primary-400' : 'text-slate-400'}`} />
                     <span className="flex-1 text-left flex items-center gap-1">
                       <span className={`transition-all ${
                         activeTab === 'follows' && followSubTab === 'followers'
-                          ? 'text-primary-700 font-semibold'
-                          : 'text-slate-500'
+                          ? 'text-primary-700 dark:text-primary-400 font-semibold'
+                          : 'text-slate-500 dark:text-slate-400'
                       }`}>
                         팔로워
                       </span>
-                      <span className="text-slate-300">/</span>
+                      <span className="text-slate-300 dark:text-slate-600">/</span>
                       <span className={`transition-all ${
                         activeTab === 'follows' && followSubTab === 'following'
-                          ? 'text-primary-700 font-semibold'
-                          : 'text-slate-500'
+                          ? 'text-primary-700 dark:text-primary-400 font-semibold'
+                          : 'text-slate-500 dark:text-slate-400'
                       }`}>
                         팔로잉
                       </span>
                     </span>
                     <span className={`text-xs px-2 py-0.5 rounded-full ${
                       activeTab === 'follows'
-                        ? 'bg-primary-100 text-primary-700'
-                        : 'bg-slate-100 text-slate-500'
+                        ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-400'
+                        : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
                     }`}>
-                      {followSubTab === 'followers' ? followersCount : followingCount}
+                      {followSubTab === 'followers' ? myFollowersCount : myFollowingCount}
                     </span>
                   </button>
                   {extraMenuItems.map((item) => {
@@ -461,16 +507,15 @@ export default function MyPage() {
                         onClick={() => setActiveTab(item.id)}
                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                           isActive
-                            ? 'bg-primary-50 text-primary-700 border-l-2 border-primary-500'
-                            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                        }`}
-                      >
-                        <Icon className={`w-4 h-4 ${isActive ? 'text-primary-600' : 'text-slate-400'}`} />
+                            ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 border-l-2 border-primary-500'
+                            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700/50 hover:text-slate-900 dark:hover:text-white'
+                        }`}>
+                        <Icon className={`w-4 h-4 ${isActive ? 'text-primary-600 dark:text-primary-400' : 'text-slate-400'}`} />
                         <span className="flex-1 text-left">{item.label}</span>
                         <span className={`text-xs px-2 py-0.5 rounded-full ${
                           isActive
-                            ? 'bg-primary-100 text-primary-700'
-                            : 'bg-slate-100 text-slate-500'
+                            ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-400'
+                            : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
                         }`}>
                           {item.count}
                         </span>
@@ -495,14 +540,14 @@ export default function MyPage() {
                 {activeTab === 'myProducts' && (
                   <>
                     {myProducts.length === 0 ? (
-                      <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 p-10 text-center animate-fade-in">
-                        <div className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 dark:border-slate-700 p-10 text-center animate-fade-in">
+                        <div className="w-14 h-14 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4">
                           <Package className="w-7 h-7 text-slate-400" />
                         </div>
-                        <h3 className="text-lg font-bold text-slate-900 mb-1.5">
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1.5">
                           등록한 상품이 없습니다
                         </h3>
-                        <p className="text-slate-500 text-sm mb-5">
+                        <p className="text-slate-500 dark:text-slate-400 text-sm mb-5">
                           첫 상품을 등록하고 판매를 시작해보세요!
                         </p>
                         <Button onClick={() => router.push('/products/new')} size="sm">
@@ -523,14 +568,14 @@ export default function MyPage() {
                 {activeTab === 'favorites' && (
                   <>
                     {favoriteProducts.length === 0 ? (
-                      <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 p-10 text-center animate-fade-in">
-                        <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 dark:border-slate-700 p-10 text-center animate-fade-in">
+                        <div className="w-14 h-14 bg-red-50 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                           <Heart className="w-7 h-7 text-red-400" />
                         </div>
-                        <h3 className="text-lg font-bold text-slate-900 mb-1.5">
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1.5">
                           찜한 상품이 없습니다
                         </h3>
-                        <p className="text-slate-500 text-sm mb-5">
+                        <p className="text-slate-500 dark:text-slate-400 text-sm mb-5">
                           마음에 드는 상품을 찜해보세요!
                         </p>
                         <Button onClick={() => router.push('/')} size="sm">
@@ -551,14 +596,14 @@ export default function MyPage() {
                 {activeTab === 'transactions' && (
                   <>
                     {transactions.length === 0 ? (
-                      <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 p-10 text-center animate-fade-in">
-                        <div className="w-14 h-14 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 dark:border-slate-700 p-10 text-center animate-fade-in">
+                        <div className="w-14 h-14 bg-amber-50 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                           <Receipt className="w-7 h-7 text-amber-400" />
                         </div>
-                        <h3 className="text-lg font-bold text-slate-900 mb-1.5">
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1.5">
                           완료된 거래가 없습니다
                         </h3>
-                        <p className="text-slate-500 text-sm mb-5">
+                        <p className="text-slate-500 dark:text-slate-400 text-sm mb-5">
                           거래가 완료되면 여기에서 확인하고 리뷰를 작성할 수 있어요!
                         </p>
                         <Button onClick={() => router.push('/')} size="sm">
@@ -586,14 +631,14 @@ export default function MyPage() {
                 {activeTab === 'receivedOffers' && (
                   <>
                     {receivedOffers.length === 0 ? (
-                      <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 p-10 text-center animate-fade-in">
-                        <div className="w-14 h-14 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 dark:border-slate-700 p-10 text-center animate-fade-in">
+                        <div className="w-14 h-14 bg-primary-50 dark:bg-primary-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                           <Inbox className="w-7 h-7 text-primary-400" />
                         </div>
-                        <h3 className="text-lg font-bold text-slate-900 mb-1.5">
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1.5">
                           받은 가격 제안이 없습니다
                         </h3>
-                        <p className="text-slate-500 text-sm">
+                        <p className="text-slate-500 dark:text-slate-400 text-sm">
                           판매중인 상품에 제안이 들어오면 여기에 표시됩니다.
                         </p>
                       </div>
@@ -615,14 +660,14 @@ export default function MyPage() {
                 {activeTab === 'sentOffers' && (
                   <>
                     {sentOffers.length === 0 ? (
-                      <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 p-10 text-center animate-fade-in">
-                        <div className="w-14 h-14 bg-secondary-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 dark:border-slate-700 p-10 text-center animate-fade-in">
+                        <div className="w-14 h-14 bg-secondary-50 dark:bg-secondary-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                           <Send className="w-7 h-7 text-secondary-400" />
                         </div>
-                        <h3 className="text-lg font-bold text-slate-900 mb-1.5">
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1.5">
                           보낸 가격 제안이 없습니다
                         </h3>
-                        <p className="text-slate-500 text-sm mb-5">
+                        <p className="text-slate-500 dark:text-slate-400 text-sm mb-5">
                           관심있는 상품에 가격을 제안해보세요!
                         </p>
                         <Button onClick={() => router.push('/')} size="sm">
@@ -652,14 +697,14 @@ export default function MyPage() {
                     {followSubTab === 'followers' && (
                       <>
                         {followersList.length === 0 ? (
-                          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 p-10 text-center">
-                            <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 dark:border-slate-700 p-10 text-center">
+                            <div className="w-14 h-14 bg-blue-50 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                               <Users className="w-7 h-7 text-blue-400" />
                             </div>
-                            <h3 className="text-lg font-bold text-slate-900 mb-1.5">
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1.5">
                               팔로워가 없습니다
                             </h3>
-                            <p className="text-slate-500 text-sm mb-5">
+                            <p className="text-slate-500 dark:text-slate-400 text-sm mb-5">
                               상품을 등록하면 팔로워가 생길 거예요!
                             </p>
                             <Button onClick={() => router.push('/products/new')} size="sm">
@@ -668,7 +713,7 @@ export default function MyPage() {
                             </Button>
                           </div>
                         ) : (
-                          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 divide-y divide-slate-100">
+                          <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700">
                             {followersList.map((follow) => {
                               const followerUser = follow.follower;
                               if (!followerUser) return null;
@@ -676,7 +721,7 @@ export default function MyPage() {
                                 <Link
                                   key={follow.id}
                                   href={`/users/${followerUser.id}`}
-                                  className="flex items-center gap-4 p-4 hover:bg-slate-50/50 transition-colors"
+                                  className="flex items-center gap-4 p-4 hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors"
                                 >
                                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white font-medium overflow-hidden relative">
                                     {followerUser.avatar_url ? (
@@ -691,12 +736,12 @@ export default function MyPage() {
                                     )}
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <p className="font-medium text-slate-900 truncate">{followerUser.nickname}</p>
+                                    <p className="font-medium text-slate-900 dark:text-white truncate">{followerUser.nickname}</p>
                                     {followerUser.bio && (
-                                      <p className="text-sm text-slate-500 truncate">{followerUser.bio}</p>
+                                      <p className="text-sm text-slate-500 dark:text-slate-400 truncate">{followerUser.bio}</p>
                                     )}
                                   </div>
-                                  <ChevronRight className="w-5 h-5 text-slate-300" />
+                                  <ChevronRight className="w-5 h-5 text-slate-300 dark:text-slate-600" />
                                 </Link>
                               );
                             })}
@@ -709,14 +754,14 @@ export default function MyPage() {
                     {followSubTab === 'following' && (
                       <>
                         {followingList.length === 0 ? (
-                          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 p-10 text-center">
-                            <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 dark:border-slate-700 p-10 text-center">
+                            <div className="w-14 h-14 bg-blue-50 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                               <Users className="w-7 h-7 text-blue-400" />
                             </div>
-                            <h3 className="text-lg font-bold text-slate-900 mb-1.5">
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1.5">
                               팔로우 중인 사용자가 없습니다
                             </h3>
-                            <p className="text-slate-500 text-sm mb-5">
+                            <p className="text-slate-500 dark:text-slate-400 text-sm mb-5">
                               관심있는 판매자를 팔로우해보세요!
                             </p>
                             <Button onClick={() => router.push('/')} size="sm">
@@ -725,7 +770,7 @@ export default function MyPage() {
                             </Button>
                           </div>
                         ) : (
-                          <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 divide-y divide-slate-100">
+                          <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700">
                             {followingList.map((follow) => {
                               const followingUser = follow.following;
                               if (!followingUser) return null;
@@ -733,7 +778,7 @@ export default function MyPage() {
                                 <Link
                                   key={follow.id}
                                   href={`/users/${followingUser.id}`}
-                                  className="flex items-center gap-4 p-4 hover:bg-slate-50/50 transition-colors"
+                                  className="flex items-center gap-4 p-4 hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors"
                                 >
                                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white font-medium overflow-hidden relative">
                                     {followingUser.avatar_url ? (
@@ -748,12 +793,12 @@ export default function MyPage() {
                                     )}
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <p className="font-medium text-slate-900 truncate">{followingUser.nickname}</p>
+                                    <p className="font-medium text-slate-900 dark:text-white truncate">{followingUser.nickname}</p>
                                     {followingUser.bio && (
-                                      <p className="text-sm text-slate-500 truncate">{followingUser.bio}</p>
+                                      <p className="text-sm text-slate-500 dark:text-slate-400 truncate">{followingUser.bio}</p>
                                     )}
                                   </div>
-                                  <ChevronRight className="w-5 h-5 text-slate-300" />
+                                  <ChevronRight className="w-5 h-5 text-slate-300 dark:text-slate-600" />
                                 </Link>
                               );
                             })}
@@ -768,14 +813,14 @@ export default function MyPage() {
                 {activeTab === 'keywordAlerts' && (
                   <>
                     {keywordAlerts.length === 0 ? (
-                      <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 p-10 text-center animate-fade-in">
-                        <div className="w-14 h-14 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 dark:border-slate-700 p-10 text-center animate-fade-in">
+                        <div className="w-14 h-14 bg-amber-50 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                           <Bell className="w-7 h-7 text-amber-400" />
                         </div>
-                        <h3 className="text-lg font-bold text-slate-900 mb-1.5">
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1.5">
                           등록된 키워드가 없습니다
                         </h3>
-                        <p className="text-slate-500 text-sm mb-5">
+                        <p className="text-slate-500 dark:text-slate-400 text-sm mb-5">
                           원하는 키워드를 등록하면 새 상품이 올라올 때 알려드려요!
                         </p>
                         <Button onClick={() => router.push('/profile/keyword-alerts')} size="sm">
@@ -786,15 +831,15 @@ export default function MyPage() {
                     ) : (
                       <div className="space-y-3 animate-fade-in">
                         {keywordAlerts.map((alert) => (
-                          <div key={alert.id} className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 p-4">
+                          <div key={alert.id} className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 dark:border-slate-700 p-4">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3">
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${alert.is_active ? 'bg-amber-100' : 'bg-slate-100'}`}>
+                                <div className={`w-10 h-10 rounded-full flex items-center justify-center ${alert.is_active ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-slate-100 dark:bg-slate-700'}`}>
                                   <Bell className={`w-5 h-5 ${alert.is_active ? 'text-amber-500' : 'text-slate-400'}`} />
                                 </div>
                                 <div>
-                                  <p className="font-medium text-slate-900">{alert.keyword}</p>
-                                  <div className="flex items-center gap-2 text-xs text-slate-500">
+                                  <p className="font-medium text-slate-900 dark:text-white">{alert.keyword}</p>
+                                  <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                                     {alert.category && <span>{alert.category}</span>}
                                     {alert.min_price !== undefined && alert.max_price !== undefined && (
                                       <span>{alert.min_price.toLocaleString()}원 ~ {alert.max_price.toLocaleString()}원</span>
@@ -802,7 +847,7 @@ export default function MyPage() {
                                   </div>
                                 </div>
                               </div>
-                              <span className={`px-2 py-1 text-xs rounded-full ${alert.is_active ? 'bg-green-100 text-green-600' : 'bg-slate-100 text-slate-500'}`}>
+                              <span className={`px-2 py-1 text-xs rounded-full ${alert.is_active ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'}`}>
                                 {alert.is_active ? '활성' : '비활성'}
                               </span>
                             </div>
@@ -821,14 +866,14 @@ export default function MyPage() {
                 {activeTab === 'recentViews' && (
                   <>
                     {recentViewProducts.length === 0 ? (
-                      <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 p-10 text-center animate-fade-in">
-                        <div className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 dark:border-slate-700 p-10 text-center animate-fade-in">
+                        <div className="w-14 h-14 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4">
                           <Clock className="w-7 h-7 text-slate-400" />
                         </div>
-                        <h3 className="text-lg font-bold text-slate-900 mb-1.5">
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1.5">
                           최근 본 상품이 없습니다
                         </h3>
-                        <p className="text-slate-500 text-sm mb-5">
+                        <p className="text-slate-500 dark:text-slate-400 text-sm mb-5">
                           상품을 둘러보시면 여기에 기록됩니다!
                         </p>
                         <Button onClick={() => router.push('/')} size="sm">
@@ -850,19 +895,19 @@ export default function MyPage() {
                 {activeTab === 'blocks' && (
                   <>
                     {blocks.length === 0 ? (
-                      <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 p-10 text-center animate-fade-in">
-                        <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 dark:border-slate-700 p-10 text-center animate-fade-in">
+                        <div className="w-14 h-14 bg-red-50 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                           <Ban className="w-7 h-7 text-red-400" />
                         </div>
-                        <h3 className="text-lg font-bold text-slate-900 mb-1.5">
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1.5">
                           차단한 사용자가 없습니다
                         </h3>
-                        <p className="text-slate-500 text-sm">
+                        <p className="text-slate-500 dark:text-slate-400 text-sm">
                           불쾌한 사용자를 차단하면 여기에 표시됩니다.
                         </p>
                       </div>
                     ) : (
-                      <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 divide-y divide-slate-100 animate-fade-in">
+                      <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700 animate-fade-in">
                         {blocks.map((block) => {
                           const blockedUser = block.blocked;
                           if (!blockedUser) return null;
@@ -882,8 +927,8 @@ export default function MyPage() {
                                   )}
                                 </div>
                                 <div>
-                                  <p className="font-medium text-slate-900">{blockedUser.nickname}</p>
-                                  <p className="text-xs text-slate-500">
+                                  <p className="font-medium text-slate-900 dark:text-white">{blockedUser.nickname}</p>
+                                  <p className="text-xs text-slate-500 dark:text-slate-400">
                                     {new Date(block.created_at).toLocaleDateString('ko-KR')}에 차단됨
                                   </p>
                                 </div>
@@ -924,18 +969,18 @@ export default function MyPage() {
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
             onClick={() => setIsReviewModalOpen(false)}
           />
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] overflow-hidden animate-fade-in">
-            <div className="sticky top-0 bg-white border-b border-slate-100 p-4 flex items-center justify-between">
+          <div className="relative bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] overflow-hidden animate-fade-in">
+            <div className="sticky top-0 bg-white dark:bg-slate-800 border-b border-slate-100 dark:border-slate-700 p-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
-                <h2 className="text-lg font-bold text-slate-900">받은 리뷰</h2>
-                <span className="text-sm text-slate-500">({profile?.stats?.reviewCount || 0})</span>
+                <h2 className="text-lg font-bold text-slate-900 dark:text-white">받은 리뷰</h2>
+                <span className="text-sm text-slate-500 dark:text-slate-400">({profile?.stats?.reviewCount || 0})</span>
               </div>
               <button
                 onClick={() => setIsReviewModalOpen(false)}
-                className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors"
               >
-                <X className="w-5 h-5 text-slate-500" />
+                <X className="w-5 h-5 text-slate-500 dark:text-slate-400" />
               </button>
             </div>
             <div className="p-4 overflow-y-auto max-h-[calc(80vh-80px)]">
@@ -947,13 +992,13 @@ export default function MyPage() {
                 </div>
               ) : reviews.length === 0 ? (
                 <div className="text-center py-10">
-                  <div className="w-14 h-14 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-14 h-14 bg-amber-50 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
                     <MessageSquare className="w-7 h-7 text-amber-400" />
                   </div>
-                  <h3 className="text-lg font-bold text-slate-900 mb-1.5">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1.5">
                     받은 리뷰가 없습니다
                   </h3>
-                  <p className="text-slate-500 text-sm">
+                  <p className="text-slate-500 dark:text-slate-400 text-sm">
                     거래 완료 후 상대방이 리뷰를 남기면 여기에 표시됩니다.
                   </p>
                 </div>
