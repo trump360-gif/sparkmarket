@@ -393,6 +393,7 @@ npm start
 | 1.0 | 2024-11-28 | 초기 TRD 작성 |
 | 1.1 | 2025-11-28 | Phase 7 완료, API 및 스키마 업데이트 |
 | 1.2 | 2025-12-06 | 포트 변경, 로컬 이미지 업로드, Seed 확장, Admin 차트 강화 |
+| 1.3 | 2025-12-12 | Phase 8 완료 - 팔로우/팔로잉 상태 동기화 버그 수정 |
 
 ---
 
@@ -438,13 +439,15 @@ npm start
 - AdminProductList: 테이블 레이아웃 개선
 - AdminUserList: 에러 핸들링 개선
 
-### Phase 8: 버그 수정 (진행중)
-- [ ] 팔로우/팔로잉 상태 동기화 버그 수정
+### Phase 8: 버그 수정 ✅
+- [x] 팔로우/팔로잉 상태 동기화 버그 수정
   - **문제**: 다른 페이지에서 팔로우 후 마이페이지로 돌아가면 팔로잉 카운트 미갱신
   - **문제**: 프로필 페이지 재방문 시 팔로우 버튼 상태 초기화 (다시 클릭해야 함)
+  - **문제**: 팔로잉 목록에서 유저가 표시되지 않음 (백엔드/프론트엔드 데이터 구조 불일치)
   - **해결**: Zustand 전역 상태로 팔로우 상태 캐싱 (`followStore.ts`)
+  - **해결**: mypage.tsx에서 백엔드 API 응답 구조 호환성 처리 (`follow.following || follow`)
   - **수정 파일**:
     - `frontend/src/stores/followStore.ts`: 사용자별 팔로우 상태 캐시 + 전역 카운트 관리
     - `frontend/src/components/ui/FollowButton.tsx`: Zustand 캐시 연동
-    - `frontend/app/mypage/page.tsx`: Zustand 전역 카운트 사용
+    - `frontend/app/mypage/page.tsx`: Zustand 전역 카운트 사용 + 팔로워/팔로잉 목록 데이터 구조 호환성 수정
     - `frontend/app/users/[id]/page.tsx`: 팔로우 시 팔로워 카운트 즉시 업데이트

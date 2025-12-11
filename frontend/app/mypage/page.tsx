@@ -39,6 +39,7 @@ export default function MyPage() {
   const [transactions, setTransactions] = useState<TransactionWithDetails[]>([]);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isCountsLoading, setIsCountsLoading] = useState(true);
   const [offerCounts, setOfferCounts] = useState({ sent: 0, received: 0 });
   const [transactionCount, setTransactionCount] = useState(0);
   const [favoriteCount, setFavoriteCount] = useState(0);
@@ -152,6 +153,7 @@ export default function MyPage() {
   };
 
   const fetchAllCounts = async () => {
+    setIsCountsLoading(true);
     try {
       const [sent, received, txs, favorites, products, following, followers, keywords, recent, blockedUsers] = await Promise.all([
         priceOffersApi.getSentOffers({ limit: 1 }),
@@ -185,6 +187,8 @@ export default function MyPage() {
       if (error?.response?.status !== 401) {
         console.error('Failed to fetch counts:', error);
       }
+    } finally {
+      setIsCountsLoading(false);
     }
   };
 
@@ -311,7 +315,13 @@ export default function MyPage() {
                       className="flex items-center gap-1 text-slate-500 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
                     >
                       <Users className="w-3.5 h-3.5" />
-                      팔로워 {myFollowersCount} · 팔로잉 {myFollowingCount}
+                      {isCountsLoading ? (
+                        <span className="inline-flex items-center gap-1">
+                          팔로워 <Skeleton className="w-4 h-3 inline-block" /> · 팔로잉 <Skeleton className="w-4 h-3 inline-block" />
+                        </span>
+                      ) : (
+                        `팔로워 ${myFollowersCount} · 팔로잉 ${myFollowingCount}`
+                      )}
                     </button>
                 </div>
               </div>
@@ -353,7 +363,7 @@ export default function MyPage() {
                   )}
                   {isActive && (
                     <span className="text-xs bg-white/20 px-1.5 py-0.5 rounded-full">
-                      {item.count}
+                      {isCountsLoading ? '-' : item.count}
                     </span>
                   )}
                 </button>
@@ -411,7 +421,7 @@ export default function MyPage() {
                   <span>{item.label}</span>
                   {isActive && (
                     <span className="text-xs bg-white/20 px-1.5 py-0.5 rounded-full">
-                      {item.count}
+                      {isCountsLoading ? '-' : item.count}
                     </span>
                   )}
                 </button>
@@ -447,7 +457,7 @@ export default function MyPage() {
                             ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-400'
                             : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
                       }`}>
-                        {item.count}
+                        {isCountsLoading ? '-' : item.count}
                       </span>
                     </button>
                   );
@@ -495,7 +505,7 @@ export default function MyPage() {
                         ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-400'
                         : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
                     }`}>
-                      {followSubTab === 'followers' ? myFollowersCount : myFollowingCount}
+                      {isCountsLoading ? '-' : (followSubTab === 'followers' ? myFollowersCount : myFollowingCount)}
                     </span>
                   </button>
                   {extraMenuItems.map((item) => {
@@ -517,7 +527,7 @@ export default function MyPage() {
                             ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-400'
                             : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
                         }`}>
-                          {item.count}
+                          {isCountsLoading ? '-' : item.count}
                         </span>
                       </button>
                     );
@@ -714,12 +724,13 @@ export default function MyPage() {
                           </div>
                         ) : (
                           <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700">
-                            {followersList.map((follow) => {
-                              const followerUser = follow.follower;
-                              if (!followerUser) return null;
+                            {followersList.map((follow: any) => {
+                              // 백엔드가 follower 객체를 펼쳐서 반환하므로 follow 자체가 사용자 정보
+                              const followerUser = follow.follower || follow;
+                              if (!followerUser || !followerUser.id) return null;
                               return (
                                 <Link
-                                  key={follow.id}
+                                  key={follow.id || followerUser.id}
                                   href={`/users/${followerUser.id}`}
                                   className="flex items-center gap-4 p-4 hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors"
                                 >
@@ -771,12 +782,13 @@ export default function MyPage() {
                           </div>
                         ) : (
                           <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700">
-                            {followingList.map((follow) => {
-                              const followingUser = follow.following;
-                              if (!followingUser) return null;
+                            {followingList.map((follow: any) => {
+                              // 백엔드가 following 객체를 펼쳐서 반환하므로 follow 자체가 사용자 정보
+                              const followingUser = follow.following || follow;
+                              if (!followingUser || !followingUser.id) return null;
                               return (
                                 <Link
-                                  key={follow.id}
+                                  key={follow.id || followingUser.id}
                                   href={`/users/${followingUser.id}`}
                                   className="flex items-center gap-4 p-4 hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors"
                                 >
