@@ -38,6 +38,16 @@ export class ProductsService {
       hashtags,
     } = createProductDto;
 
+    // brand_id 유효성 검증
+    if (brand_id) {
+      const brandExists = await this.prisma.brand.findUnique({
+        where: { id: brand_id },
+      });
+      if (!brandExists) {
+        throw new NotFoundException(`브랜드를 찾을 수 없습니다: ${brand_id}`);
+      }
+    }
+
     // 콘텐츠 검토
     const moderationResult = this.moderationService.checkContent(
       title,
@@ -432,6 +442,16 @@ export class ProductsService {
       throw new ForbiddenException('상품을 수정할 권한이 없습니다');
     }
 
+    // brand_id 유효성 검증
+    if (updateProductDto.brand_id) {
+      const brandExists = await this.prisma.brand.findUnique({
+        where: { id: updateProductDto.brand_id },
+      });
+      if (!brandExists) {
+        throw new NotFoundException(`브랜드를 찾을 수 없습니다: ${updateProductDto.brand_id}`);
+      }
+    }
+
     const { hashtags, ...productData } = updateProductDto;
 
     // 가격 인하 감지 및 original_price 저장
@@ -476,6 +496,65 @@ export class ProductsService {
     // 가격 인하 시 찜한 사용자들에게 알림 (비동기)
     if (isPriceDropped) {
       this.notifyPriceDrop(id, product.title, product.price, updateProductDto.price!)
+        .catch(err => console.error('Failed to notify price drop:', err));
+    }
+
+    return updatedProduct;
+  }
+
+  // 가격만 빠르게 수정
+  async updatePrice(id: string, userId: string, price: number) {
+    const product = await this.prisma.product.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        seller_id: true,
+        title: true,
+        price: true,
+        original_price: true,
+      },
+    });
+
+    if (!product) {
+      throw new NotFoundException('상품을 찾을 수 없습니다');
+    }
+
+    if (product.seller_id !== userId) {
+      throw new ForbiddenException('상품을 수정할 권한이 없습니다');
+    }
+
+    if (price < 0) {
+      throw new ForbiddenException('가격은 0원 이상이어야 합니다');
+    }
+
+    // 가격 인하 감지
+    const isPriceDropped = price < product.price;
+    const updateData: any = { price };
+
+    // 최초 가격 인하인 경우 원래 가격 저장
+    if (isPriceDropped && !product.original_price) {
+      updateData.original_price = product.price;
+    }
+
+    const updatedProduct = await this.prisma.product.update({
+      where: { id },
+      data: updateData,
+      include: {
+        seller: {
+          select: {
+            id: true,
+            email: true,
+            nickname: true,
+            avatar_url: true,
+          },
+        },
+        images: true,
+      },
+    });
+
+    // 가격 인하 시 찜한 사용자들에게 알림 (비동기)
+    if (isPriceDropped) {
+      this.notifyPriceDrop(id, product.title, product.price, price)
         .catch(err => console.error('Failed to notify price drop:', err));
     }
 
@@ -542,6 +621,12 @@ export class ProductsService {
     const commissionAmount = Math.floor((product.price * commissionRate) / 100);
     const sellerAmount = product.price - commissionAmount;
 
+    // 구매자 정보 조회
+    const buyer = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { nickname: true },
+    });
+
     // 트랜잭션으로 상품 상태 변경 및 거래 기록 생성
     const [updatedProduct, transaction] = await this.prisma.$transaction([
       this.prisma.product.update({
@@ -572,6 +657,17 @@ export class ProductsService {
         },
       }),
     ]);
+
+    // 판매자에게 판매 완료 알림 전송
+    const formattedPrice = new Intl.NumberFormat('ko-KR').format(product.price);
+    this.notificationsService.create({
+      userId: product.seller_id,
+      type: NotificationType.PRODUCT_SOLD,
+      title: '상품이 판매되었습니다!',
+      message: `"${product.title}" 상품이 ${buyer?.nickname || '구매자'}님에게 ${formattedPrice}원에 판매되었습니다.`,
+      relatedId: id,
+      relatedType: RelatedType.PRODUCT,
+    }).catch(err => console.error('Failed to send sale notification:', err));
 
     return updatedProduct;
   }

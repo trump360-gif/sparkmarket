@@ -18,7 +18,8 @@ import TransactionCard from '@/components/transaction/TransactionCard';
 import WriteReviewModal from '@/components/review/WriteReviewModal';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
-import { Package, Heart, Plus, ShoppingBag, Inbox, Send, Settings, Star, MessageSquare, X, ChevronRight, Receipt, Bell, Ban, Users, Clock } from 'lucide-react';
+import { Package, Heart, Plus, ShoppingBag, Inbox, Send, Settings, Star, MessageSquare, X, ChevronRight, Receipt, Bell, Ban, Users, Clock, Pencil } from 'lucide-react';
+import { toast } from 'sonner';
 import type { Product, PriceOffer, Review, UserProfile, TransactionWithDetails, Follow, KeywordAlert, Block } from '@/types';
 import { useFollowStore } from '@/stores/followStore';
 import { isApiError, getErrorStatus } from '@/lib/errors';
@@ -47,6 +48,12 @@ export default function MyPage() {
   const [isLoadingReviews, setIsLoadingReviews] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState<TransactionWithDetails | null>(null);
   const [isWriteReviewModalOpen, setIsWriteReviewModalOpen] = useState(false);
+
+  // 가격 수정 모달 상태
+  const [isPriceEditModalOpen, setIsPriceEditModalOpen] = useState(false);
+  const [selectedProductForPriceEdit, setSelectedProductForPriceEdit] = useState<Product | null>(null);
+  const [newPrice, setNewPrice] = useState('');
+  const [isUpdatingPrice, setIsUpdatingPrice] = useState(false);
 
   // 추가 메뉴용 state
   const [followingList, setFollowingList] = useState<Follow[]>([]);
@@ -189,6 +196,43 @@ export default function MyPage() {
     } finally {
       setIsCountsLoading(false);
     }
+  };
+
+  // 가격 수정 핸들러
+  const handlePriceEditClick = (product: Product) => {
+    setSelectedProductForPriceEdit(product);
+    setNewPrice(product.price.toString());
+    setIsPriceEditModalOpen(true);
+  };
+
+  const handlePriceUpdate = async () => {
+    if (!selectedProductForPriceEdit) return;
+
+    const priceNum = parseInt(newPrice.replace(/,/g, ''), 10);
+    if (isNaN(priceNum) || priceNum < 0) {
+      toast.error('올바른 가격을 입력해주세요.');
+      return;
+    }
+
+    setIsUpdatingPrice(true);
+    try {
+      const updated = await productsApi.updatePrice(selectedProductForPriceEdit.id, priceNum);
+      setMyProducts((prev) =>
+        prev.map((p) => (p.id === updated.id ? { ...p, price: updated.price, original_price: updated.original_price } : p))
+      );
+      toast.success('가격이 수정되었습니다.');
+      setIsPriceEditModalOpen(false);
+    } catch (error) {
+      toast.error('가격 수정에 실패했습니다.');
+    } finally {
+      setIsUpdatingPrice(false);
+    }
+  };
+
+  const formatPriceInput = (value: string) => {
+    const num = value.replace(/[^0-9]/g, '');
+    if (!num) return '';
+    return parseInt(num, 10).toLocaleString('ko-KR');
   };
 
   const fetchData = async () => {
@@ -390,7 +434,7 @@ export default function MyPage() {
                     ? 'text-white/60'
                     : 'text-slate-500 dark:text-slate-400'
               }`}>
-                팔로워
+                팔로워 {isCountsLoading ? '-' : myFollowersCount}
               </span>
               <span className={activeTab === 'follows' ? 'text-white/50' : 'text-slate-300 dark:text-slate-600'}>/</span>
               <span className={`transition-all ${
@@ -400,7 +444,7 @@ export default function MyPage() {
                     ? 'text-white/60'
                     : 'text-slate-500 dark:text-slate-400'
               }`}>
-                팔로잉
+                팔로잉 {isCountsLoading ? '-' : myFollowingCount}
               </span>
             </button>
             {/* 추가 메뉴 (모바일) */}
@@ -488,7 +532,7 @@ export default function MyPage() {
                           ? 'text-primary-700 dark:text-primary-400 font-semibold'
                           : 'text-slate-500 dark:text-slate-400'
                       }`}>
-                        팔로워
+                        팔로워 {isCountsLoading ? '-' : myFollowersCount}
                       </span>
                       <span className="text-slate-300 dark:text-slate-600">/</span>
                       <span className={`transition-all ${
@@ -496,15 +540,8 @@ export default function MyPage() {
                           ? 'text-primary-700 dark:text-primary-400 font-semibold'
                           : 'text-slate-500 dark:text-slate-400'
                       }`}>
-                        팔로잉
+                        팔로잉 {isCountsLoading ? '-' : myFollowingCount}
                       </span>
-                    </span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${
-                      activeTab === 'follows'
-                        ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-400'
-                        : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400'
-                    }`}>
-                      {isCountsLoading ? '-' : (followSubTab === 'followers' ? myFollowersCount : myFollowingCount)}
                     </span>
                   </button>
                   {extraMenuItems.map((item) => {
@@ -567,7 +604,12 @@ export default function MyPage() {
                     ) : (
                       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {myProducts.map((product) => (
-                          <ProductCard key={product.id} product={product} />
+                          <ProductCard
+                            key={product.id}
+                            product={product}
+                            showPriceEdit={true}
+                            onPriceEdit={handlePriceEditClick}
+                          />
                         ))}
                       </div>
                     )}
@@ -595,7 +637,7 @@ export default function MyPage() {
                     ) : (
                       <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {favoriteProducts.map((product) => (
-                          <ProductCard key={product.id} product={product} />
+                          <ProductCard key={product.id} product={product} isFavorited={true} />
                         ))}
                       </div>
                     )}
@@ -728,13 +770,14 @@ export default function MyPage() {
                               if (!follow.follower) return null;
                               const followerUser = follow.follower;
                               if (!followerUser.id) return null;
+                              const counts = followerUser._count;
                               return (
                                 <Link
                                   key={follow.id}
                                   href={`/users/${followerUser.id}`}
                                   className="flex items-center gap-4 p-4 hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors"
                                 >
-                                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white font-medium overflow-hidden relative">
+                                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white font-medium overflow-hidden relative flex-shrink-0">
                                     {followerUser.avatar_url ? (
                                       <Image
                                         src={followerUser.avatar_url}
@@ -749,10 +792,24 @@ export default function MyPage() {
                                   <div className="flex-1 min-w-0">
                                     <p className="font-medium text-slate-900 dark:text-white truncate">{followerUser.nickname}</p>
                                     {followerUser.bio && (
-                                      <p className="text-sm text-slate-500 dark:text-slate-400 truncate">{followerUser.bio}</p>
+                                      <p className="text-sm text-slate-500 dark:text-slate-400 truncate mb-1">{followerUser.bio}</p>
                                     )}
+                                    <div className="flex items-center gap-3 text-xs text-slate-400 dark:text-slate-500">
+                                      {counts?.products !== undefined && (
+                                        <span className="flex items-center gap-1">
+                                          <Package className="w-3 h-3" />
+                                          상품 {counts.products}
+                                        </span>
+                                      )}
+                                      {counts?.followers !== undefined && (
+                                        <span className="flex items-center gap-1">
+                                          <Users className="w-3 h-3" />
+                                          팔로워 {counts.followers}
+                                        </span>
+                                      )}
+                                    </div>
                                   </div>
-                                  <ChevronRight className="w-5 h-5 text-slate-300 dark:text-slate-600" />
+                                  <ChevronRight className="w-5 h-5 text-slate-300 dark:text-slate-600 flex-shrink-0" />
                                 </Link>
                               );
                             })}
@@ -787,13 +844,14 @@ export default function MyPage() {
                               if (!follow.following) return null;
                               const followingUser = follow.following;
                               if (!followingUser.id) return null;
+                              const counts = followingUser._count;
                               return (
                                 <Link
                                   key={follow.id}
                                   href={`/users/${followingUser.id}`}
                                   className="flex items-center gap-4 p-4 hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors"
                                 >
-                                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white font-medium overflow-hidden relative">
+                                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white font-medium overflow-hidden relative flex-shrink-0">
                                     {followingUser.avatar_url ? (
                                       <Image
                                         src={followingUser.avatar_url}
@@ -808,10 +866,24 @@ export default function MyPage() {
                                   <div className="flex-1 min-w-0">
                                     <p className="font-medium text-slate-900 dark:text-white truncate">{followingUser.nickname}</p>
                                     {followingUser.bio && (
-                                      <p className="text-sm text-slate-500 dark:text-slate-400 truncate">{followingUser.bio}</p>
+                                      <p className="text-sm text-slate-500 dark:text-slate-400 truncate mb-1">{followingUser.bio}</p>
                                     )}
+                                    <div className="flex items-center gap-3 text-xs text-slate-400 dark:text-slate-500">
+                                      {counts?.products !== undefined && (
+                                        <span className="flex items-center gap-1">
+                                          <Package className="w-3 h-3" />
+                                          상품 {counts.products}
+                                        </span>
+                                      )}
+                                      {counts?.followers !== undefined && (
+                                        <span className="flex items-center gap-1">
+                                          <Users className="w-3 h-3" />
+                                          팔로워 {counts.followers}
+                                        </span>
+                                      )}
+                                    </div>
                                   </div>
-                                  <ChevronRight className="w-5 h-5 text-slate-300 dark:text-slate-600" />
+                                  <ChevronRight className="w-5 h-5 text-slate-300 dark:text-slate-600 flex-shrink-0" />
                                 </Link>
                               );
                             })}
@@ -1040,6 +1112,82 @@ export default function MyPage() {
             fetchAllCounts();
           }}
         />
+      )}
+
+      {/* 가격 수정 모달 */}
+      {isPriceEditModalOpen && selectedProductForPriceEdit && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md animate-slide-up">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">가격 수정</h3>
+              <button
+                onClick={() => setIsPriceEditModalOpen(false)}
+                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+            <div className="p-6">
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 line-clamp-1">
+                {selectedProductForPriceEdit.title}
+              </p>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  새 가격
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={formatPriceInput(newPrice)}
+                    onChange={(e) => setNewPrice(e.target.value.replace(/,/g, ''))}
+                    className="w-full px-4 py-3 pr-12 border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    placeholder="가격을 입력하세요"
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400">
+                    원
+                  </span>
+                </div>
+                {selectedProductForPriceEdit.price > parseInt(newPrice.replace(/,/g, '') || '0', 10) && (
+                  <p className="mt-2 text-sm text-green-600 dark:text-green-400">
+                    가격을 낮추면 찜한 사용자에게 알림이 전송됩니다
+                  </p>
+                )}
+                {/* 빠른 가격 조정 버튼 */}
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {[1000, 5000, 10000, 50000, 100000].map((amount) => (
+                    <button
+                      key={amount}
+                      onClick={() => {
+                        const current = parseInt(newPrice.replace(/,/g, '') || '0', 10);
+                        const newVal = Math.max(0, current - amount);
+                        setNewPrice(newVal.toString());
+                      }}
+                      className="px-3 py-1.5 text-sm font-medium bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:text-red-400"
+                    >
+                      -{amount >= 10000 ? `${amount / 10000}만` : `${amount / 1000}천`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setIsPriceEditModalOpen(false)}
+                >
+                  취소
+                </Button>
+                <Button
+                  className="flex-1"
+                  onClick={handlePriceUpdate}
+                  disabled={isUpdatingPrice || !newPrice}
+                >
+                  {isUpdatingPrice ? '수정 중...' : '수정하기'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </main>
   );

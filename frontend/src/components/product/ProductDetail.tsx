@@ -27,6 +27,8 @@ import ImageZoomModal from '@/components/ui/ImageZoomModal';
 import ProductDetailHeader from './ProductDetailHeader';
 import ProductDetailContent from './ProductDetailContent';
 import ProductDetailActions from './ProductDetailActions';
+import { Button } from '@/components/ui/Button';
+import { X } from 'lucide-react';
 import { getErrorStatus, getErrorMessage } from '@/lib/errors';
 
 // ================================
@@ -51,7 +53,13 @@ export default function ProductDetail({ product }: ProductDetailProps) {
   const [sellerProducts, setSellerProducts] = useState<Product[]>([]);
   const [isLoadingSellerProducts, setIsLoadingSellerProducts] = useState(false);
 
-  const formattedPrice = new Intl.NumberFormat('ko-KR').format(product.price);
+  // 가격 수정 모달 상태
+  const [isPriceEditModalOpen, setIsPriceEditModalOpen] = useState(false);
+  const [newPrice, setNewPrice] = useState('');
+  const [isUpdatingPrice, setIsUpdatingPrice] = useState(false);
+  const [currentProduct, setCurrentProduct] = useState<Product>(product);
+
+  const formattedPrice = new Intl.NumberFormat('ko-KR').format(currentProduct.price);
   const isOwner = isAuthenticated && user?.id === product.seller_id;
 
   // ================================
@@ -231,6 +239,38 @@ export default function ProductDetail({ product }: ProductDetailProps) {
     setIsImageZoomOpen(true);
   };
 
+  // 가격 수정 핸들러
+  const handlePriceEditClick = () => {
+    setNewPrice(currentProduct.price.toString());
+    setIsPriceEditModalOpen(true);
+  };
+
+  const handlePriceUpdate = async () => {
+    const priceNum = parseInt(newPrice.replace(/,/g, ''), 10);
+    if (isNaN(priceNum) || priceNum < 0) {
+      toast.error('올바른 가격을 입력해주세요.');
+      return;
+    }
+
+    setIsUpdatingPrice(true);
+    try {
+      const updated = await productsApi.updatePrice(currentProduct.id, priceNum);
+      setCurrentProduct(prev => ({ ...prev, price: updated.price, original_price: updated.original_price }));
+      toast.success('가격이 수정되었습니다.');
+      setIsPriceEditModalOpen(false);
+    } catch (error) {
+      toast.error('가격 수정에 실패했습니다.');
+    } finally {
+      setIsUpdatingPrice(false);
+    }
+  };
+
+  const formatPriceInput = (value: string) => {
+    const num = value.replace(/[^0-9]/g, '');
+    if (!num) return '';
+    return parseInt(num, 10).toLocaleString('ko-KR');
+  };
+
   // ================================
   // Render
   // ================================
@@ -251,11 +291,12 @@ export default function ProductDetail({ product }: ProductDetailProps) {
           {/* 정보 섹션 */}
           <div className="flex flex-col">
             <ProductDetailContent
-              product={product}
+              product={currentProduct}
               acceptedOffer={acceptedOffer}
               sellerProfile={sellerProfile}
               formattedPrice={formattedPrice}
               isOwner={isOwner}
+              onPriceEdit={handlePriceEditClick}
               isAuthenticated={isAuthenticated}
               isFollowing={isFollowing}
               onFollow={handleFollow}
@@ -295,6 +336,82 @@ export default function ProductDetail({ product }: ProductDetailProps) {
         isOpen={isImageZoomOpen}
         onClose={() => setIsImageZoomOpen(false)}
       />
+
+      {/* 가격 수정 모달 */}
+      {isPriceEditModalOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md animate-slide-up">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">가격 수정</h3>
+              <button
+                onClick={() => setIsPriceEditModalOpen(false)}
+                className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors"
+              >
+                <X className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+            <div className="p-6">
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-4 line-clamp-1">
+                {currentProduct.title}
+              </p>
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  새 가격
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={formatPriceInput(newPrice)}
+                    onChange={(e) => setNewPrice(e.target.value.replace(/,/g, ''))}
+                    className="w-full px-4 py-3 pr-12 border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-700 text-slate-900 dark:text-white text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    placeholder="가격을 입력하세요"
+                  />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 dark:text-slate-400">
+                    원
+                  </span>
+                </div>
+                {currentProduct.price > parseInt(newPrice.replace(/,/g, '') || '0', 10) && (
+                  <p className="mt-2 text-sm text-green-600 dark:text-green-400">
+                    가격을 낮추면 찜한 사용자에게 알림이 전송됩니다
+                  </p>
+                )}
+                {/* 빠른 가격 조정 버튼 */}
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {[1000, 5000, 10000, 50000, 100000].map((amount) => (
+                    <button
+                      key={amount}
+                      onClick={() => {
+                        const current = parseInt(newPrice.replace(/,/g, '') || '0', 10);
+                        const newVal = Math.max(0, current - amount);
+                        setNewPrice(newVal.toString());
+                      }}
+                      className="px-3 py-1.5 text-sm font-medium bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:text-red-400"
+                    >
+                      -{amount >= 10000 ? `${amount / 10000}만` : `${amount / 1000}천`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setIsPriceEditModalOpen(false)}
+                >
+                  취소
+                </Button>
+                <Button
+                  className="flex-1"
+                  onClick={handlePriceUpdate}
+                  disabled={isUpdatingPrice || !newPrice}
+                >
+                  {isUpdatingPrice ? '수정 중...' : '수정하기'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

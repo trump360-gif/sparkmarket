@@ -56,6 +56,16 @@ export class ProductsController {
     return this.productsService.update(id, req.user.id, updateProductDto);
   }
 
+  @Patch(':id/price')
+  @UseGuards(JwtAuthGuard)
+  updatePrice(
+    @Param('id') id: string,
+    @Request() req,
+    @Body('price') price: number,
+  ) {
+    return this.productsService.updatePrice(id, req.user.id, price);
+  }
+
   @Patch(':id/purchase')
   @UseGuards(JwtAuthGuard)
   purchase(@Param('id') id: string, @Request() req) {

@@ -55,4 +55,9 @@ export const productsApi = {
     const response = await apiClient.patch<Product>(`/products/${id}/purchase`);
     return response.data;
   },
+
+  updatePrice: async (id: string, price: number): Promise<Product> => {
+    const response = await apiClient.patch<Product>(`/products/${id}/price`, { price });
+    return response.data;
+  },
 };

@@ -5,7 +5,7 @@
 // ================================
 
 import { useRouter } from 'next/navigation';
-import { Tag, User, Calendar, Eye, MessageCircle, Sparkles, MapPin, Truck, Hash, Share2, Star, ChevronRight, UserPlus } from 'lucide-react';
+import { Tag, User, Calendar, Eye, MessageCircle, Sparkles, MapPin, Truck, Hash, Share2, Star, ChevronRight, UserPlus, Pencil } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import FavoriteButton from '@/components/ui/FavoriteButton';
@@ -22,6 +22,7 @@ interface ProductDetailContentProps {
   isFollowing: boolean;
   onFollow: () => void;
   onShareClick: () => void;
+  onPriceEdit?: () => void;
 }
 
 // ================================
@@ -38,6 +39,7 @@ export default function ProductDetailContent({
   isFollowing,
   onFollow,
   onShareClick,
+  onPriceEdit,
 }: ProductDetailContentProps) {
   const router = useRouter();
 
@@ -103,14 +105,36 @@ export default function ProductDetailContent({
                     {Math.round(((product.original_price - product.price) / product.original_price) * 100)}% 할인
                   </Badge>
                 </div>
+                <div className="flex items-center gap-3">
+                  <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-secondary-500">
+                    {formattedPrice}원
+                  </p>
+                  {isOwner && product.status === ProductStatus.FOR_SALE && onPriceEdit && (
+                    <button
+                      onClick={onPriceEdit}
+                      className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors"
+                      title="가격 수정"
+                    >
+                      <Pencil className="w-4 h-4 text-slate-500" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
                 <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-secondary-500">
                   {formattedPrice}원
                 </p>
+                {isOwner && product.status === ProductStatus.FOR_SALE && onPriceEdit && (
+                  <button
+                    onClick={onPriceEdit}
+                    className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 transition-colors"
+                    title="가격 수정"
+                  >
+                    <Pencil className="w-4 h-4 text-slate-500" />
+                  </button>
+                )}
               </div>
-            ) : (
-              <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-secondary-500">
-                {formattedPrice}원
-              </p>
             )}
           </div>
         )}

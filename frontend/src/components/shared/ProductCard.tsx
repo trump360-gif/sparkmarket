@@ -5,15 +5,18 @@ import Image from 'next/image';
 import Link from 'next/link';
 import FavoriteButton from '@/components/ui/FavoriteButton';
 import { Badge } from '@/components/ui/Badge';
-import { Truck, MapPin, Flame, Sparkles } from 'lucide-react';
+import { Truck, MapPin, Flame, Sparkles, Pencil } from 'lucide-react';
 import type { Product } from '@/types';
 
 interface ProductCardProps {
   product: Product;
   priority?: boolean;
+  isFavorited?: boolean;
+  showPriceEdit?: boolean;
+  onPriceEdit?: (product: Product) => void;
 }
 
-export default function ProductCard({ product, priority = false }: ProductCardProps) {
+export default function ProductCard({ product, priority = false, isFavorited, showPriceEdit, onPriceEdit }: ProductCardProps) {
   const primaryImage = product.images.find((img) => img.is_primary) || product.images[0];
   const formattedPrice = new Intl.NumberFormat('ko-KR').format(product.price);
   const [isImageLoaded, setIsImageLoaded] = useState(false);
@@ -86,7 +89,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
 
         {/* 찜하기 버튼 */}
         <div className="absolute top-2 right-2">
-          <FavoriteButton productId={product.id} size="sm" />
+          <FavoriteButton productId={product.id} size="sm" initialFavorited={isFavorited} />
         </div>
 
         {/* 거래 방법 아이콘 */}
@@ -125,7 +128,22 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
               {new Intl.NumberFormat('ko-KR').format(product.original_price!)}원
             </p>
           )}
-          <p className="text-xl font-bold text-blue-600 dark:text-blue-400">{formattedPrice}원</p>
+          <div className="flex items-center gap-2">
+            <p className="text-xl font-bold text-blue-600 dark:text-blue-400">{formattedPrice}원</p>
+            {showPriceEdit && onPriceEdit && product.status === 'FOR_SALE' && (
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onPriceEdit(product);
+                }}
+                className="p-1.5 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 transition-colors"
+                title="가격 수정"
+              >
+                <Pencil className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+              </button>
+            )}
+          </div>
         </div>
 
         <p className="text-sm text-gray-500 dark:text-slate-400 line-clamp-1 mb-2">{product.category}</p>

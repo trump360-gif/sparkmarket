@@ -211,6 +211,7 @@
 | POST | /products | 상품 등록 |
 | PATCH | /products/:id | 상품 수정 |
 | DELETE | /products/:id | 상품 삭제 |
+| PATCH | /products/:id/price | 가격만 수정 |
 | PATCH | /products/:id/purchase | 상품 구매 |
 
 ### 3.4 팔로우 API
@@ -395,6 +396,7 @@ npm start
 | 1.2 | 2025-12-06 | 포트 변경, 로컬 이미지 업로드, Seed 확장, Admin 차트 강화 |
 | 1.3 | 2025-12-12 | Phase 8 완료 - 팔로우/팔로잉 상태 동기화 버그 수정 |
 | 1.4 | 2025-12-13 | Phase 9 완료 - 코드베이스 리팩터링 및 모듈화 |
+| 1.5 | 2025-12-13 | Phase 10 완료 - 가격 빠른 수정 및 판매 알림 기능 |
 
 ---
 
@@ -487,3 +489,21 @@ npm start
 - [x] **Backend 인증 에러 수정**
   - `JwtAuthGuard`에서 500 → 401 에러 반환 수정
   - `handleRequest` 메서드 오버라이드로 명시적 `UnauthorizedException` 처리
+
+### Phase 10: 가격 빠른 수정 및 판매 알림 ✅
+- [x] **가격 빠른 수정 API**
+  - `PATCH /products/:id/price` 엔드포인트 추가
+  - 가격만 변경하는 전용 API (전체 상품 수정 대비 간편)
+  - 가격 인하 시 `original_price` 자동 저장
+  - 가격 인하 시 찜한 사용자에게 `PRICE_DROP` 알림 발송
+- [x] **가격 빠른 수정 UI**
+  - `ProductCard`: `showPriceEdit` prop + 연필 아이콘 버튼
+  - `ProductDetailContent`: 판매자 본인에게만 가격 수정 버튼 표시
+  - `ProductDetail` / `mypage`: 가격 수정 모달 구현
+  - 빠른 가격 인하 버튼: -1천, -5천, -1만, -5만, -10만
+- [x] **판매 완료 알림**
+  - `purchase()` 메서드에서 판매자에게 `PRODUCT_SOLD` 알림 발송
+  - 알림 내용: 상품명, 구매자 닉네임, 판매 금액
+- [x] **브랜드 ID 검증 강화**
+  - `create()` / `update()` 메서드에서 brand_id 유효성 검증
+  - Prisma P2003 외래키 오류 방지
