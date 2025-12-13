@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import ProductCard from '@/components/product/ProductCard';
+import { ProductCard } from '@/components/shared';
 import { Button } from '@/components/ui/Button';
 import { Clock, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';

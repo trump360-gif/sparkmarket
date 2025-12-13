@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { productsApi } from '@/lib/api/products';
 import type { Product, ProductQueryParams, ProductCategory, ProductStatus, ProductCondition, TradeMethod, SortOption } from '@/types';
-import ProductCard from './ProductCard';
+import { ProductCard } from '@/components/shared';
 
 interface ProductListProps {
   initialProducts?: Product[];

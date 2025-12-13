@@ -394,6 +394,7 @@ npm start
 | 1.1 | 2025-11-28 | Phase 7 완료, API 및 스키마 업데이트 |
 | 1.2 | 2025-12-06 | 포트 변경, 로컬 이미지 업로드, Seed 확장, Admin 차트 강화 |
 | 1.3 | 2025-12-12 | Phase 8 완료 - 팔로우/팔로잉 상태 동기화 버그 수정 |
+| 1.4 | 2025-12-13 | Phase 9 완료 - 코드베이스 리팩터링 및 모듈화 |
 
 ---
 
@@ -451,3 +452,38 @@ npm start
     - `frontend/src/components/ui/FollowButton.tsx`: Zustand 캐시 연동
     - `frontend/app/mypage/page.tsx`: Zustand 전역 카운트 사용 + 팔로워/팔로잉 목록 데이터 구조 호환성 수정
     - `frontend/app/users/[id]/page.tsx`: 팔로우 시 팔로워 카운트 즉시 업데이트
+
+### Phase 9: 코드베이스 리팩터링 ✅
+- [x] **types/index.ts 분리** (592줄 → 8개 파일)
+  - `user.ts`: 사용자 관련 타입
+  - `product.ts`: 상품 관련 타입 + 레이블 상수 (중복 제거)
+  - `transaction.ts`: 거래 관련 타입
+  - `review.ts`: 리뷰 관련 타입
+  - `admin.ts`: 관리자 관련 타입
+  - `common.ts`: 공통 타입 (Pagination, API 응답 등)
+  - `notification.ts`: 알림 관련 타입
+  - `social.ts`: 팔로우/차단 관련 타입
+  - `index.ts`: Re-export 허브
+- [x] **레이블 상수 중복 제거**
+  - `ProductDetail.tsx`, `FirebaseAnalyticsCharts.tsx` 내 중복 상수 제거
+  - `types/product.ts`로 통합
+- [x] **stores/ 디렉토리 통합**
+  - `src/store/authStore.ts` → `src/stores/authStore.ts` 이동
+  - `stores/index.ts` 생성 (중앙 re-export)
+- [x] **ProductDetail.tsx 분리** (708줄 → 4개 파일)
+  - `ProductDetailHeader.tsx`: 상품 헤더 (이미지, 제목, 가격)
+  - `ProductDetailContent.tsx`: 상품 상세 정보
+  - `ProductDetailActions.tsx`: 액션 버튼 (찜, 제안, 구매)
+  - `ProductDetail.tsx`: 메인 컴포넌트 (조합)
+- [x] **ProductForm.tsx 분리** (502줄 → 3개 파일)
+  - `ProductFormFields.tsx`: 폼 필드 (제목, 가격, 카테고리 등)
+  - `ProductFormImages.tsx`: 이미지 업로드 섹션
+  - `ProductForm.tsx`: 메인 컴포넌트 (조합)
+- [x] **shared/ 디렉토리 생성**
+  - `ProductCard.tsx`: 상품 카드 컴포넌트
+  - `ReviewCard.tsx`: 리뷰 카드 컴포넌트
+  - `OfferCard.tsx`: 가격 제안 카드 컴포넌트
+  - `index.ts`: Re-export
+- [x] **Backend 인증 에러 수정**
+  - `JwtAuthGuard`에서 500 → 401 에러 반환 수정
+  - `handleRequest` 메서드 오버라이드로 명시적 `UnauthorizedException` 처리

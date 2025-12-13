@@ -1,4 +1,4 @@
-import { useAuthStore } from '@/store/authStore';
+import { useAuthStore } from '@/stores';
 import { authApi } from '@/lib/api/auth';
 import { usersApi } from '@/lib/api/users';
 import { useRouter } from 'next/navigation';

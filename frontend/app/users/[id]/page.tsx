@@ -21,7 +21,7 @@ import { socialApi } from '@/lib/api/social';
 import { productsApi } from '@/lib/api/products';
 import FollowButton from '@/components/ui/FollowButton';
 import ReportModal from '@/components/report/ReportModal';
-import ProductCard from '@/components/product/ProductCard';
+import { ProductCard } from '@/components/shared';
 import { Button } from '@/components/ui/Button';
 import type { UserProfile, Product, FollowStats } from '@/types';
 import { ProductStatus } from '@/types';

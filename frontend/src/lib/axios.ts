@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useAuthStore } from '@/store/authStore';
+import { useAuthStore } from '@/stores';
 
 const baseURL = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3003'}/api`;
 

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { priceOffersApi } from '@/lib/api/priceOffers';
-import OfferCard from '@/components/offer/OfferCard';
+import { OfferCard } from '@/components/shared';
 import { Skeleton } from '@/components/ui/Skeleton';
 import type { PriceOffer } from '@/types';
 

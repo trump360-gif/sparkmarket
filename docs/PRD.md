@@ -211,6 +211,7 @@
 | 1.0 | 2024-11-28 | Phase 7 - 확장 기능 추가 |
 | 1.1 | 2025-11-28 | Phase 7 완료 - 버그 수정 및 UI 개선 |
 | 1.2 | 2025-12-12 | Phase 8 완료 - 팔로우/팔로잉 상태 동기화 버그 수정 |
+| 1.3 | 2025-12-13 | Phase 9 완료 - 코드베이스 리팩터링 및 모듈화 |
 
 ---
 
@@ -251,6 +252,24 @@
   - 다른 페이지에서 팔로우 후 마이페이지 카운트 미갱신 → Zustand 전역 상태로 해결
   - 프로필 페이지 재방문 시 팔로우 버튼 상태 초기화 → 팔로우 상태 캐싱 구현
   - 팔로잉 목록 표시 안됨 → API 응답 데이터 구조 호환성 수정
+
+### Phase 9: 코드베이스 리팩터링 ✅
+- [x] **types/index.ts 분리** (592줄 → 8개 파일)
+  - user.ts, product.ts, transaction.ts, review.ts, admin.ts, common.ts, notification.ts, social.ts
+- [x] **레이블 상수 중복 제거**
+  - ProductDetail.tsx, FirebaseAnalyticsCharts.tsx에서 중복 상수 제거
+  - types/product.ts로 통합
+- [x] **stores/ 디렉토리 통합**
+  - src/store/authStore.ts → src/stores/authStore.ts 이동
+  - stores/index.ts 생성 (re-export)
+- [x] **ProductDetail.tsx 분리** (708줄 → 4개 파일)
+  - ProductDetailHeader.tsx, ProductDetailContent.tsx, ProductDetailActions.tsx
+- [x] **ProductForm.tsx 분리** (502줄 → 3개 파일)
+  - ProductFormFields.tsx, ProductFormImages.tsx
+- [x] **shared/ 디렉토리 생성**
+  - ProductCard, ReviewCard, OfferCard 공통 컴포넌트 이동
+- [x] **Backend 인증 에러 수정**
+  - JwtAuthGuard에서 500 → 401 에러 반환 수정
 
 ### 미구현 항목 (Future)
 - [ ] 실시간 채팅

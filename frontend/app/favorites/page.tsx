@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { favoritesApi } from '@/lib/api/favorites';
-import ProductCard from '@/components/product/ProductCard';
+import { ProductCard } from '@/components/shared';
 import { ProductListSkeleton } from '@/components/ui/Skeleton';
 import type { Product } from '@/types';
 

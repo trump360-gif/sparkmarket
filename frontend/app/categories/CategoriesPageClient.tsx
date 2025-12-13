@@ -7,13 +7,10 @@ import { ProductCategory } from '@/types';
 import {
   Smartphone,
   Shirt,
-  ShoppingBag,
   Sparkles,
   Dumbbell,
-  Coffee,
   BookOpen,
   Sofa,
-  PawPrint,
   MoreHorizontal,
   ChevronRight,
   TrendingUp,
@@ -41,25 +38,18 @@ interface CategoryWithCount extends CategoryItem {
 
 const CATEGORIES: CategoryItem[] = [
   {
-    name: ProductCategory.DIGITAL,
+    name: ProductCategory.ELECTRONICS,
     label: '디지털/가전',
     icon: <Smartphone className="w-8 h-8" />,
     color: 'text-blue-600',
     bgColor: 'bg-blue-50 hover:bg-blue-100',
   },
   {
-    name: ProductCategory.FASHION_CLOTHES,
+    name: ProductCategory.FASHION,
     label: '패션의류',
     icon: <Shirt className="w-8 h-8" />,
     color: 'text-pink-600',
     bgColor: 'bg-pink-50 hover:bg-pink-100',
-  },
-  {
-    name: ProductCategory.FASHION_ACCESSORIES,
-    label: '패션잡화',
-    icon: <ShoppingBag className="w-8 h-8" />,
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50 hover:bg-purple-100',
   },
   {
     name: ProductCategory.BEAUTY,
@@ -76,11 +66,11 @@ const CATEGORIES: CategoryItem[] = [
     bgColor: 'bg-green-50 hover:bg-green-100',
   },
   {
-    name: ProductCategory.FOOD,
-    label: '생활/가공식품',
-    icon: <Coffee className="w-8 h-8" />,
-    color: 'text-amber-600',
-    bgColor: 'bg-amber-50 hover:bg-amber-100',
+    name: ProductCategory.HOME,
+    label: '가구/인테리어',
+    icon: <Sofa className="w-8 h-8" />,
+    color: 'text-orange-600',
+    bgColor: 'bg-orange-50 hover:bg-orange-100',
   },
   {
     name: ProductCategory.BOOKS,
@@ -90,21 +80,7 @@ const CATEGORIES: CategoryItem[] = [
     bgColor: 'bg-indigo-50 hover:bg-indigo-100',
   },
   {
-    name: ProductCategory.FURNITURE,
-    label: '가구/인테리어',
-    icon: <Sofa className="w-8 h-8" />,
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50 hover:bg-orange-100',
-  },
-  {
-    name: ProductCategory.PET,
-    label: '반려동물용품',
-    icon: <PawPrint className="w-8 h-8" />,
-    color: 'text-teal-600',
-    bgColor: 'bg-teal-50 hover:bg-teal-100',
-  },
-  {
-    name: ProductCategory.ETC,
+    name: ProductCategory.OTHER,
     label: '기타',
     icon: <MoreHorizontal className="w-8 h-8" />,
     color: 'text-slate-600',

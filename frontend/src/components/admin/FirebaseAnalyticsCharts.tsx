@@ -18,6 +18,7 @@ import {
     Sector
 } from 'recharts';
 import { TrendingUp, Users, CreditCard } from 'lucide-react';
+import { CATEGORY_LABELS, ProductCategory } from '@/types';
 
 interface SalesData {
     date: string;
@@ -63,17 +64,6 @@ const STATUS_LABELS: Record<string, string> = {
     'SUSPENDED': '숨김/정지',
     'PENDING_REVIEW': '승인대기',
     'DELETED': '삭제됨',
-};
-
-const CATEGORY_LABELS: Record<string, string> = {
-    'ELECTRONICS': '전자제품',
-    'FASHION': '패션/의류',
-    'HOME': '가구/인테리어',
-    'BOOKS': '도서/문구',
-    'SPORTS': '스포츠/레저',
-    'OTHER': '기타',
-    'BEAUTY': '뷰티/화장품',
-    'TOYS': '장난감/취미',
 };
 
 export default function FirebaseAnalyticsCharts({ salesData, userData, categoryStats, statusStats }: FirebaseAnalyticsChartsProps) {
@@ -357,7 +347,7 @@ export default function FirebaseAnalyticsCharts({ salesData, userData, categoryS
                                     fill="#8884d8"
                                     dataKey="value"
                                     nameKey="name"
-                                    label={({ name, percent }) => `${CATEGORY_LABELS[name] || name} ${(percent * 100).toFixed(0)}%`}
+                                    label={({ name, percent }) => `${CATEGORY_LABELS[name as ProductCategory] || name} ${(percent * 100).toFixed(0)}%`}
                                     style={{ outline: 'none' }}
                                 >
                                     {categoryStats.map((entry, index) => (
@@ -367,7 +357,7 @@ export default function FirebaseAnalyticsCharts({ salesData, userData, categoryS
                                 {/* Tooltip removed to avoid overlay conflict with active shape text */}
                                 <Legend
                                     wrapperStyle={{ fontSize: '11px' }} // Added font size
-                                    formatter={(value) => CATEGORY_LABELS[value] || value}
+                                    formatter={(value) => CATEGORY_LABELS[value as ProductCategory] || value}
                                 />
                             </PieChart>
                         </ResponsiveContainer>

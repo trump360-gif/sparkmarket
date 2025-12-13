@@ -3,6 +3,10 @@ import { persist } from 'zustand/middleware';
 import type { User } from '@/types';
 import { authApi } from '@/lib/api/auth';
 
+// ================================
+// Types & Interfaces
+// ================================
+
 interface AuthState {
   user: User | null;
   accessToken: string | null;
@@ -13,6 +17,10 @@ interface AuthState {
   clearAuth: () => void;
   logout: () => void;
 }
+
+// ================================
+// Store
+// ================================
 
 export const useAuthStore = create<AuthState>()(
   persist(

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { usersApi } from '@/lib/api/users';
-import ReviewCard from '@/components/review/ReviewCard';
+import { ReviewCard } from '@/components/shared';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Button } from '@/components/ui/Button';
 import { ArrowLeft, Star, MessageSquare, User } from 'lucide-react';
