@@ -17,6 +17,7 @@ import {
   BarChart3,
   Calendar
 } from 'lucide-react';
+import { getErrorMessage } from '@/lib/errors';
 
 export default function AdminCommissionPage() {
   const [settings, setSettings] = useState<CommissionSettings | null>(null);
@@ -40,8 +41,8 @@ export default function AdminCommissionPage() {
       setSettings(settingsData);
       setStatistics(statsData);
       setNewRate(settingsData.commission_rate.toString());
-    } catch (err: any) {
-      setError(err.response?.data?.message || '데이터를 불러오는데 실패했습니다.');
+    } catch (err) {
+      setError(getErrorMessage(err, '데이터를 불러오는데 실패했습니다.'));
     } finally {
       setIsLoading(false);
     }
@@ -66,8 +67,8 @@ export default function AdminCommissionPage() {
       setSettings(updated);
       toast.success('수수료율이 성공적으로 변경되었습니다.');
       await fetchData();
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || '수수료율 변경에 실패했습니다.');
+    } catch (err) {
+      toast.error(getErrorMessage(err, '수수료율 변경에 실패했습니다.'));
     } finally {
       setIsUpdating(false);
     }

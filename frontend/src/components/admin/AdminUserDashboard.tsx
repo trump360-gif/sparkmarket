@@ -7,6 +7,7 @@ import { adminApi } from '@/lib/api/admin';
 import { DashboardCardSkeleton, Skeleton } from '@/components/ui/Skeleton';
 import type { UserDetail, UserStatus } from '@/types';
 import Link from 'next/link';
+import { getErrorStatus } from '@/lib/errors';
 
 interface AdminUserDashboardProps {
   userId: string;
@@ -22,9 +23,9 @@ export default function AdminUserDashboard({ userId }: AdminUserDashboardProps) 
       try {
         const data = await adminApi.getUserDetail(userId);
         setUser(data);
-      } catch (error: any) {
+      } catch (error) {
         // 401 에러는 조용히 무시
-        if (error?.response?.status !== 401) {
+        if (getErrorStatus(error) !== 401) {
           console.error('Failed to fetch user:', error);
         }
       } finally {
@@ -51,9 +52,9 @@ export default function AdminUserDashboard({ userId }: AdminUserDashboardProps) 
       // Refresh user data
       const updatedData = await adminApi.getUserDetail(userId);
       setUser(updatedData);
-    } catch (error: any) {
+    } catch (error) {
       // 401 에러는 조용히 무시
-      if (error?.response?.status !== 401) {
+      if (getErrorStatus(error) !== 401) {
         toast.error(`${action}에 실패했습니다.`);
       }
     }

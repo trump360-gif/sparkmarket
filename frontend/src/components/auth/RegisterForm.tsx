@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Mail, Lock, User } from 'lucide-react';
+import { getErrorMessage } from '@/lib/errors';
 
 const registerSchema = z.object({
   email: z.string().email('올바른 이메일 주소를 입력해주세요'),
@@ -48,8 +49,8 @@ export default function RegisterForm() {
         nickname: data.nickname,
       });
       router.push('/');
-    } catch (err: any) {
-      setError(err.response?.data?.message || '회원가입에 실패했습니다.');
+    } catch (err) {
+      setError(getErrorMessage(err, '회원가입에 실패했습니다.'));
     } finally {
       setIsLoading(false);
     }

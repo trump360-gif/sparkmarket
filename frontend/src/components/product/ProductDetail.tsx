@@ -27,6 +27,7 @@ import ImageZoomModal from '@/components/ui/ImageZoomModal';
 import ProductDetailHeader from './ProductDetailHeader';
 import ProductDetailContent from './ProductDetailContent';
 import ProductDetailActions from './ProductDetailActions';
+import { getErrorStatus, getErrorMessage } from '@/lib/errors';
 
 // ================================
 // Component
@@ -71,8 +72,8 @@ export default function ProductDetail({ product }: ProductDetailProps) {
           limit: 4,
         });
         setSellerProducts(response.data);
-      } catch (error: any) {
-        if (error?.response?.status !== 401) {
+      } catch (error) {
+        if (getErrorStatus(error) !== 401) {
           console.error('Failed to fetch seller products:', error);
         }
       } finally {
@@ -89,9 +90,9 @@ export default function ProductDetail({ product }: ProductDetailProps) {
       try {
         const profile = await usersApi.getUserProfile(product.seller_id);
         setSellerProfile(profile);
-      } catch (error: any) {
+      } catch (error) {
         // 401 에러는 조용히 무시
-        if (error?.response?.status !== 401) {
+        if (getErrorStatus(error) !== 401) {
           console.error('Failed to fetch seller profile:', error);
         }
       }
@@ -112,9 +113,9 @@ export default function ProductDetail({ product }: ProductDetailProps) {
         if (accepted) {
           setAcceptedOffer(accepted);
         }
-      } catch (error: any) {
+      } catch (error) {
         // 401 에러는 조용히 무시 (로그인 안된 상태)
-        if (error?.response?.status !== 401) {
+        if (getErrorStatus(error) !== 401) {
           console.error('Failed to check accepted offers:', error);
         }
       }
@@ -135,9 +136,9 @@ export default function ProductDetail({ product }: ProductDetailProps) {
       await productsApi.deleteProduct(product.id);
       toast.success('상품이 삭제되었습니다.');
       router.push('/');
-    } catch (error: any) {
+    } catch (error) {
       // 401 에러는 조용히 무시
-      if (error?.response?.status !== 401) {
+      if (getErrorStatus(error) !== 401) {
         toast.error('삭제에 실패했습니다.');
       }
     } finally {
@@ -162,8 +163,8 @@ export default function ProductDetail({ product }: ProductDetailProps) {
       await productsApi.purchaseProduct(product.id);
       toast.success('구매가 완료되었습니다!');
       router.refresh();
-    } catch (error: any) {
-      const message = error.response?.data?.message || '구매에 실패했습니다.';
+    } catch (error) {
+      const message = getErrorMessage(error, '구매에 실패했습니다.');
       toast.error(message);
     }
   };

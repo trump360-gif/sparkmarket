@@ -27,6 +27,7 @@ import type { UserProfile, Product, FollowStats } from '@/types';
 import { ProductStatus } from '@/types';
 import Link from 'next/link';
 import { useFollowStore } from '@/stores/followStore';
+import { getErrorMessage } from '@/lib/errors';
 
 export default function UserProfilePage() {
   const params = useParams();
@@ -64,8 +65,8 @@ export default function UserProfilePage() {
           followingCount: data.stats.followingCount || 0,
         });
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || '사용자 정보를 불러오는데 실패했습니다.');
+    } catch (error) {
+      toast.error(getErrorMessage(error, '사용자 정보를 불러오는데 실패했습니다.'));
       router.push('/');
     }
   };
@@ -79,7 +80,7 @@ export default function UserProfilePage() {
         limit: 12,
       });
       setProducts(response.data);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Failed to load user products:', error);
     } finally {
       setIsLoading(false);
@@ -92,7 +93,7 @@ export default function UserProfilePage() {
     try {
       const { isBlocked: blocked } = await socialApi.isBlocked(userId);
       setIsBlocked(blocked);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Failed to check block status:', error);
     }
   };
@@ -123,8 +124,8 @@ export default function UserProfilePage() {
         toast.success('차단했습니다.');
       }
       setShowMenu(false);
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || '작업에 실패했습니다.');
+    } catch (error) {
+      toast.error(getErrorMessage(error, '작업에 실패했습니다.'));
     }
   };
 

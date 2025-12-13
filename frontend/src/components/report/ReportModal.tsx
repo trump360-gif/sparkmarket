@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/Button';
 import type { ReportReason, ReportTargetType } from '@/types';
 import { reportsApi } from '@/lib/api/reports';
+import { getErrorMessage } from '@/lib/errors';
 
 interface ReportModalProps {
   isOpen: boolean;
@@ -86,8 +87,8 @@ export default function ReportModal({
       onClose();
       setSelectedReason(null);
       setDescription('');
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || '신고 접수에 실패했습니다.');
+    } catch (error) {
+      toast.error(getErrorMessage(error, '신고 접수에 실패했습니다.'));
     } finally {
       setIsSubmitting(false);
     }

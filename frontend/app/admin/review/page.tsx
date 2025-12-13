@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { toast } from 'sonner';
 import { adminApi } from '@/lib/api/admin';
+import { getErrorStatus } from '@/lib/errors';
 import { TableSkeleton } from '@/components/ui/Skeleton';
 import type { Product } from '@/types';
 import Image from 'next/image';
@@ -38,16 +39,16 @@ export default function AdminReviewPage() {
   const fetchProducts = useCallback(async (pageNum: number) => {
     setIsLoading(true);
     try {
-      const params: any = { page: pageNum, limit: 20 };
+      const params: Record<string, unknown> = { page: pageNum, limit: 20 };
       if (search) params.search = search;
 
       const response = await adminApi.getPendingReviewProducts(params);
       setProducts(response.data);
       setTotal(response.total);
       setTotalPages(response.totalPages);
-    } catch (error: any) {
+    } catch (error) {
       // 401 에러는 조용히 무시
-      if (error?.response?.status !== 401) {
+      if (getErrorStatus(error) !== 401) {
         console.error('Failed to fetch pending review products:', error);
         toast.error('검토 대기 상품을 불러오는데 실패했습니다.');
       }
@@ -72,9 +73,9 @@ export default function AdminReviewPage() {
     try {
       const detail = await adminApi.getPendingReviewProduct(product.id);
       setSelectedProduct(detail);
-    } catch (error: any) {
+    } catch (error) {
       // 401 에러는 조용히 무시
-      if (error?.response?.status !== 401 && error?.response?.data?.statusCode !== 401) {
+      if (getErrorStatus(error) !== 401) {
         toast.error('상품 정보를 불러오는데 실패했습니다.');
       }
     } finally {
@@ -89,9 +90,9 @@ export default function AdminReviewPage() {
       toast.success('상품이 승인되었습니다.');
       setSelectedProduct(null);
       fetchProducts(page);
-    } catch (error: any) {
+    } catch (error) {
       // 401 에러는 조용히 무시
-      if (error?.response?.status !== 401 && error?.response?.data?.statusCode !== 401) {
+      if (getErrorStatus(error) !== 401) {
         toast.error('승인 처리에 실패했습니다.');
       }
     } finally {
@@ -113,9 +114,9 @@ export default function AdminReviewPage() {
       setShowDeleteModal(false);
       setDeleteReason('');
       fetchProducts(page);
-    } catch (error: any) {
+    } catch (error) {
       // 401 에러는 조용히 무시
-      if (error?.response?.status !== 401 && error?.response?.data?.statusCode !== 401) {
+      if (getErrorStatus(error) !== 401) {
         toast.error('삭제 처리에 실패했습니다.');
       }
     } finally {

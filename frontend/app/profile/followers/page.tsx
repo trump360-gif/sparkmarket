@@ -5,6 +5,7 @@ import { Users, UserX } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { socialApi } from '@/lib/api/social';
+import { getErrorMessage } from '@/lib/errors';
 import FollowButton from '@/components/ui/FollowButton';
 import type { Follow } from '@/types';
 import Image from 'next/image';
@@ -35,8 +36,8 @@ export default function FollowersPage() {
         setFollowers([...followers, ...response.data]);
       }
       setHasMore(page < response.totalPages);
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || '팔로워 목록을 불러오는데 실패했습니다.');
+    } catch (error) {
+      toast.error(getErrorMessage(error, '팔로워 목록을 불러오는데 실패했습니다.'));
     } finally {
       setIsLoading(false);
     }

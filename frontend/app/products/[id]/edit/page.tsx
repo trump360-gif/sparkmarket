@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import ProductForm from '@/components/product/ProductForm';
 import { productsApi } from '@/lib/api/products';
+import { getErrorStatus } from '@/lib/errors';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { ArrowLeft, AlertCircle, Home } from 'lucide-react';
@@ -20,9 +21,9 @@ export default function EditProductPage() {
       try {
         const data = await productsApi.getProduct(params.id as string);
         setProduct(data);
-      } catch (error: any) {
+      } catch (error) {
         // 401 에러는 조용히 무시
-        if (error?.response?.status !== 401 && error?.response?.data?.statusCode !== 401) {
+        if (getErrorStatus(error) !== 401) {
           console.error('Failed to fetch product:', error);
         }
       } finally {

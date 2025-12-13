@@ -8,6 +8,7 @@ import { socialApi } from '@/lib/api/social';
 import type { Block } from '@/types';
 import Image from 'next/image';
 import Link from 'next/link';
+import { getErrorMessage } from '@/lib/errors';
 
 export default function BlocksPage() {
   const { user } = useAuth();
@@ -34,8 +35,8 @@ export default function BlocksPage() {
         setBlocks([...blocks, ...response.data]);
       }
       setHasMore(page < response.totalPages);
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || '차단 목록을 불러오는데 실패했습니다.');
+    } catch (error) {
+      toast.error(getErrorMessage(error, '차단 목록을 불러오는데 실패했습니다.'));
     } finally {
       setIsLoading(false);
     }
@@ -50,8 +51,8 @@ export default function BlocksPage() {
       await socialApi.unblockUser(userId);
       setBlocks(blocks.filter((b) => b.blocked_id !== userId));
       toast.success('차단이 해제되었습니다.');
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || '차단 해제에 실패했습니다.');
+    } catch (error) {
+      toast.error(getErrorMessage(error, '차단 해제에 실패했습니다.'));
     }
   };
 

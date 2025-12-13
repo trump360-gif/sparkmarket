@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { favoritesApi } from '@/lib/api/favorites';
 import { ProductCard } from '@/components/shared';
 import { ProductListSkeleton } from '@/components/ui/Skeleton';
+import { getErrorStatus } from '@/lib/errors';
 import type { Product } from '@/types';
 
 export default function FavoritesPage() {
@@ -32,9 +33,9 @@ export default function FavoritesPage() {
       setProducts(response.data);
       setTotal(response.total);
       setTotalPages(response.totalPages);
-    } catch (error: any) {
+    } catch (error) {
       // 401 에러는 조용히 무시
-      if (error?.response?.status !== 401) {
+      if (getErrorStatus(error) !== 401) {
         console.error('Failed to fetch favorites:', error);
       }
     } finally {

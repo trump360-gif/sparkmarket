@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { priceOffersApi } from '@/lib/api/priceOffers';
 import type { Product } from '@/types';
+import { getErrorStatus, getErrorMessage } from '@/lib/errors';
 
 interface PriceOfferModalProps {
   product: Product;
@@ -52,12 +53,10 @@ export default function PriceOfferModal({
       setMessage('');
       onSuccess?.();
       onClose();
-    } catch (error: any) {
+    } catch (error) {
       // 401 에러는 조용히 무시
-      if (error?.response?.status !== 401 && error?.response?.data?.statusCode !== 401) {
-        const errorMessage =
-          error.response?.data?.message || '가격 제안에 실패했습니다.';
-        toast.error(errorMessage);
+      if (getErrorStatus(error) !== 401) {
+        toast.error(getErrorMessage(error, '가격 제안에 실패했습니다.'));
       }
     } finally {
       setIsSubmitting(false);

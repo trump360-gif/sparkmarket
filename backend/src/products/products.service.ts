@@ -52,48 +52,76 @@ export class ProductsService {
       ? moderationResult.reasons.join(', ')
       : null;
 
-    const product = await this.prisma.product.create({
-      data: {
-        seller_id: userId,
-        title,
-        description,
-        price,
-        category,
-        status,
-        review_reason: reviewReason,
-        condition: condition || 'USED',
-        trade_method: trade_method || 'BOTH',
-        trade_location,
-        brand_id,
-        images: images
-          ? {
-            create: images.map((img) => ({
-              url: img.url,
-              key: img.key,
-              order: img.order,
-              is_primary: img.is_primary,
-            })),
-          }
-          : undefined,
-      },
-      include: {
-        seller: {
-          select: {
-            id: true,
-            email: true,
-            nickname: true,
-            avatar_url: true,
-          },
+    // 트랜잭션: 상품 생성 + 해시태그 동기화
+    const product = await this.prisma.$transaction(async (tx) => {
+      // 상품 생성
+      const createdProduct = await tx.product.create({
+        data: {
+          seller_id: userId,
+          title,
+          description,
+          price,
+          category,
+          status,
+          review_reason: reviewReason,
+          condition: condition || 'USED',
+          trade_method: trade_method || 'BOTH',
+          trade_location,
+          brand_id,
+          images: images
+            ? {
+              create: images.map((img) => ({
+                url: img.url,
+                key: img.key,
+                order: img.order,
+                is_primary: img.is_primary,
+              })),
+            }
+            : undefined,
         },
-        images: true,
-      },
+        include: {
+          seller: {
+            select: {
+              id: true,
+              email: true,
+              nickname: true,
+              avatar_url: true,
+            },
+          },
+          images: true,
+        },
+      });
+
+      // 해시태그 동기화 (트랜잭션 내부)
+      if (hashtags && hashtags.length > 0) {
+        // syncHashtags를 트랜잭션 내에서 수동으로 처리
+        for (const hashtagName of hashtags) {
+          const normalizedName = hashtagName.toLowerCase().replace(/^#/, '');
+
+          // 해시태그 찾거나 생성
+          const hashtag = await tx.hashtag.upsert({
+            where: { name: normalizedName },
+            update: { use_count: { increment: 1 } },
+            create: {
+              name: normalizedName,
+              use_count: 1,
+            },
+          });
+
+          // 상품-해시태그 연결
+          await tx.productHashtag.create({
+            data: {
+              product_id: createdProduct.id,
+              hashtag_id: hashtag.id,
+            },
+          });
+        }
+      }
+
+      return createdProduct;
     });
 
-    // 해시태그 동기화
-    if (hashtags && hashtags.length > 0) {
-      await this.hashtagsService.syncHashtags(product.id, hashtags);
-    }
-
+    // 알림은 트랜잭션 외부에서 처리 (실패해도 롤백하지 않음)
     // 검토가 필요하지 않은 경우에만 알림 전송 (FOR_SALE 상태)
     if (status === 'FOR_SALE') {
       // 키워드 알림 확인 및 전송 (비동기)

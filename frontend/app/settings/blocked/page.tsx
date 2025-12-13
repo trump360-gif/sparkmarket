@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import type { Block } from '@/types';
 import Image from 'next/image';
 import Link from 'next/link';
+import { getErrorMessage } from '@/lib/errors';
 
 export default function BlockedUsersPage() {
   const [blockedUsers, setBlockedUsers] = useState<Block[]>([]);
@@ -23,8 +24,8 @@ export default function BlockedUsersPage() {
     try {
       const response = await socialApi.getBlockedUsers({ limit: 100 });
       setBlockedUsers(response.data);
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || '차단 목록을 불러오는데 실패했습니다.');
+    } catch (error) {
+      toast.error(getErrorMessage(error, '차단 목록을 불러오는데 실패했습니다.'));
     } finally {
       setIsLoading(false);
     }
@@ -40,8 +41,8 @@ export default function BlockedUsersPage() {
       await socialApi.unblockUser(userId);
       setBlockedUsers(blockedUsers.filter((block) => block.blocked_id !== userId));
       toast.success('차단을 해제했습니다.');
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || '차단 해제에 실패했습니다.');
+    } catch (error) {
+      toast.error(getErrorMessage(error, '차단 해제에 실패했습니다.'));
     } finally {
       setUnblockingId(null);
     }

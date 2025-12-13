@@ -7,6 +7,7 @@ import { priceOffersApi } from '@/lib/api/priceOffers';
 import { OfferCard } from '@/components/shared';
 import { Skeleton } from '@/components/ui/Skeleton';
 import type { PriceOffer } from '@/types';
+import { isErrorStatus } from '@/lib/errors';
 
 type TabType = 'sent' | 'received';
 
@@ -44,9 +45,9 @@ export default function OffersPage() {
       ]);
       setSentTotal(sent.total || 0);
       setReceivedTotal(received.total || 0);
-    } catch (error: any) {
+    } catch (error) {
       // 401 에러는 조용히 무시
-      if (error?.response?.status !== 401) {
+      if (!isErrorStatus(error, 401)) {
         console.error('Failed to fetch counts:', error);
       }
     }
@@ -70,9 +71,9 @@ export default function OffersPage() {
         setReceivedOffers(response.data);
         setReceivedTotal(response.total);
       }
-    } catch (error: any) {
+    } catch (error) {
       // 401 에러는 조용히 무시
-      if (error?.response?.status !== 401) {
+      if (!isErrorStatus(error, 401)) {
         console.error('Failed to fetch offers:', error);
       }
     } finally {

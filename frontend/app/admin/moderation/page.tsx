@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { adminApi } from '@/lib/api/admin';
+import { getErrorStatus } from '@/lib/errors';
 import {
   BannedWord,
   SuspiciousWord,
@@ -51,9 +52,9 @@ export default function ModerationPage() {
       ]);
       setBannedWords(bannedRes.words);
       setSuspiciousWords(suspiciousRes.words);
-    } catch (error: any) {
+    } catch (error) {
       // 401 에러는 조용히 무시
-      if (error?.response?.status !== 401 && error?.response?.data?.statusCode !== 401) {
+      if (getErrorStatus(error) !== 401) {
         toast.error('단어 목록을 불러오는데 실패했습니다');
       }
     } finally {
@@ -85,9 +86,9 @@ export default function ModerationPage() {
       setShowAddModal(false);
       setNewWord('');
       setNewCategory('');
-    } catch (error: any) {
+    } catch (error) {
       // 401 에러는 조용히 무시
-      if (error?.response?.status !== 401 && error?.response?.data?.statusCode !== 401) {
+      if (getErrorStatus(error) !== 401) {
         toast.error('이미 등록된 단어입니다');
       }
     } finally {
@@ -108,9 +109,9 @@ export default function ModerationPage() {
         setSuspiciousWords(prev => prev.filter(w => w.id !== id));
         toast.success('의심 키워드가 삭제되었습니다');
       }
-    } catch (error: any) {
+    } catch (error) {
       // 401 에러는 조용히 무시
-      if (error?.response?.status !== 401 && error?.response?.data?.statusCode !== 401) {
+      if (getErrorStatus(error) !== 401) {
         toast.error('삭제에 실패했습니다');
       }
     }

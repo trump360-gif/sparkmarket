@@ -4,6 +4,7 @@ import { usersApi } from '@/lib/api/users';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import type { LoginRequest, RegisterRequest, User } from '@/types';
+import { isErrorStatus } from '@/lib/errors';
 
 export const useAuth = () => {
   const router = useRouter();
@@ -57,9 +58,9 @@ export const useAuth = () => {
         updated_at: profile.updated_at || profile.created_at,
       };
       setAuth(updatedUser, accessToken, refreshToken);
-    } catch (error: any) {
+    } catch (error) {
       // 401 에러는 조용히 무시
-      if (error?.response?.status !== 401 && error?.response?.data?.statusCode !== 401) {
+      if (!isErrorStatus(error, 401)) {
         console.error('Failed to refresh user:', error);
       }
     }

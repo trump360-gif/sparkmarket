@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Camera, User, Save, ArrowLeft, Star } from 'lucide-react';
 import type { UserProfile } from '@/types';
+import { getErrorStatus, getErrorMessage } from '@/lib/errors';
 
 export default function ProfileSettingsPage() {
   const router = useRouter();
@@ -40,9 +41,9 @@ export default function ProfileSettingsPage() {
         setNickname(data.nickname);
         setBio(data.bio || '');
         setAvatarUrl(data.avatar_url || '');
-      } catch (error: any) {
+      } catch (error) {
         // 401 에러는 조용히 무시
-        if (error?.response?.status !== 401) {
+        if (getErrorStatus(error) !== 401) {
           console.error('Failed to fetch profile:', error);
           toast.error('프로필을 불러오는데 실패했습니다');
         }
@@ -88,9 +89,9 @@ export default function ProfileSettingsPage() {
 
       setAvatarUrl(publicUrl);
       toast.success('이미지가 업로드되었습니다');
-    } catch (error: any) {
+    } catch (error) {
       // 401 에러는 조용히 무시
-      if (error?.response?.status !== 401) {
+      if (getErrorStatus(error) !== 401) {
         console.error('Failed to upload image:', error);
         toast.error('이미지 업로드에 실패했습니다');
       }
@@ -126,9 +127,10 @@ export default function ProfileSettingsPage() {
       }
 
       router.push('/mypage');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Failed to save profile:', error);
-      if (error.response?.data?.message === '이미 사용 중인 닉네임입니다') {
+      const message = getErrorMessage(error);
+      if (message === '이미 사용 중인 닉네임입니다') {
         toast.error('이미 사용 중인 닉네임입니다');
       } else {
         toast.error('프로필 저장에 실패했습니다');

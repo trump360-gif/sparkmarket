@@ -1,5 +1,6 @@
-import axios from 'axios';
+import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { useAuthStore } from '@/stores';
+import { ApiErrorResponse } from './errors';
 
 const baseURL = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3003'}/api`;
 
@@ -10,16 +11,31 @@ export const apiClient = axios.create({
   },
 });
 
+/**
+ * Extended Axios request config with retry flag
+ */
+interface RetryableRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+}
+
+/**
+ * Queue item for failed requests during token refresh
+ */
+interface QueueItem {
+  resolve: (value: string | null) => void;
+  reject: (reason: unknown) => void;
+}
+
 // Flag to prevent multiple simultaneous refresh attempts
 let isRefreshing = false;
 // Flag to prevent multiple redirects and stop all requests during redirect
 let isRedirecting = false;
-let failedQueue: Array<{
-  resolve: (value: unknown) => void;
-  reject: (reason?: unknown) => void;
-}> = [];
+let failedQueue: QueueItem[] = [];
 
-const processQueue = (error: unknown, token: string | null = null) => {
+/**
+ * Process queued requests after token refresh
+ */
+const processQueue = (error: unknown, token: string | null = null): void => {
   failedQueue.forEach((prom) => {
     if (error) {
       prom.reject(error);
@@ -30,7 +46,10 @@ const processQueue = (error: unknown, token: string | null = null) => {
   failedQueue = [];
 };
 
-const clearAuthAndRedirect = () => {
+/**
+ * Clear authentication data and redirect to login
+ */
+const clearAuthAndRedirect = (): void => {
   if (typeof window !== 'undefined' && !isRedirecting) {
     isRedirecting = true;
     localStorage.removeItem('access_token');
@@ -64,20 +83,22 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Response interceptor - Handle token refresh
+/**
+ * Response interceptor - Handle token refresh on 401
+ */
 apiClient.interceptors.response.use(
   (response) => response,
-  async (error) => {
+  async (error: AxiosError<ApiErrorResponse>) => {
     // If already redirecting, just reject silently
     if (isRedirecting) {
       return Promise.reject(new Error('Session expired'));
     }
 
-    const originalRequest = error.config;
+    const originalRequest = error.config as RetryableRequestConfig | undefined;
 
     // Check for 401 status - also check error.status for network errors
-    const is401 = error.response?.status === 401 ||
-                  error.response?.data?.statusCode === 401;
+    const is401 =
+      error.response?.status === 401 || error.response?.data?.statusCode === 401;
 
     // If 401 and no token exists, just reject without trying to refresh
     if (is401 && typeof window !== 'undefined') {
@@ -89,14 +110,16 @@ apiClient.interceptors.response.use(
     }
 
     // If error is 401 and we haven't tried to refresh yet
-    if (is401 && !originalRequest?._retry) {
+    if (is401 && originalRequest && !originalRequest._retry) {
       if (isRefreshing) {
         // If already refreshing, queue this request
-        return new Promise((resolve, reject) => {
+        return new Promise<string | null>((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
           .then((token) => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
+            if (token && originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+            }
             return apiClient(originalRequest);
           })
           .catch((err) => Promise.reject(err));
@@ -112,9 +135,17 @@ apiClient.interceptors.response.use(
         }
 
         // Attempt to refresh token
-        const response = await axios.post(`${baseURL}/auth/refresh`, {
-          refresh_token: refreshToken,
-        });
+        interface RefreshResponse {
+          access_token: string;
+          refresh_token?: string;
+        }
+
+        const response = await axios.post<RefreshResponse>(
+          `${baseURL}/auth/refresh`,
+          {
+            refresh_token: refreshToken,
+          }
+        );
 
         const { access_token, refresh_token: newRefreshToken } = response.data;
         localStorage.setItem('access_token', access_token);
@@ -125,7 +156,9 @@ apiClient.interceptors.response.use(
         processQueue(null, access_token);
 
         // Retry original request with new token
-        originalRequest.headers.Authorization = `Bearer ${access_token}`;
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${access_token}`;
+        }
         return apiClient(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError, null);

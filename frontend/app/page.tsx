@@ -8,6 +8,7 @@ import ProductList from '@/components/product/ProductList';
 import SearchFilters from '@/components/product/SearchFilters';
 import { ProductListSkeleton } from '@/components/ui/Skeleton';
 import { useAuth } from '@/hooks/useAuth';
+import { getErrorStatus } from '@/lib/errors';
 import type { Product } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { ArrowRight, Sparkles, BadgePercent, ShieldCheck, Zap } from 'lucide-react';
@@ -51,7 +52,7 @@ function HomeContent() {
       }
 
       try {
-        const params: any = { page: 1, limit: 20 };
+        const params: Record<string, unknown> = { page: 1, limit: 20 };
 
         const search = searchParams.get('search');
         const category = searchParams.get('category');
@@ -78,9 +79,9 @@ function HomeContent() {
         setInitialTotal(response.total);
         setInitialPage(response.page);
         hasFetchedOnce.current = true;
-      } catch (error: any) {
+      } catch (error) {
         // 401 에러는 조용히 무시
-        if (error?.response?.status !== 401) {
+        if (getErrorStatus(error) !== 401) {
           console.error('Failed to fetch initial products:', error);
         }
       } finally {

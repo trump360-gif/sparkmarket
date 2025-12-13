@@ -128,22 +128,7 @@ export class PriceOffersService {
       throw new BadRequestException('만료된 제안입니다.');
     }
 
-    // 제안 수락 (상품 가격은 그대로 유지, 제안만 수락 상태로 변경)
-    const updatedOffer = await this.prisma.priceOffer.update({
-      where: { id: offerId },
-      data: { status: 'ACCEPTED' },
-      include: {
-        buyer: {
-          select: {
-            id: true,
-            nickname: true,
-          },
-        },
-        product: true,
-      },
-    });
-
-    // 같은 상품에 대한 다른 대기중인 제안들을 거절 처리
+    // 같은 상품에 대한 다른 대기중인 제안 조회 (트랜잭션 전)
     const otherOffers = await this.prisma.priceOffer.findMany({
       where: {
         product_id: offer.product_id,
@@ -153,30 +138,49 @@ export class PriceOffersService {
       select: { buyer_id: true },
     });
 
-    await this.prisma.priceOffer.updateMany({
-      where: {
-        product_id: offer.product_id,
-        id: { not: offerId },
-        status: 'PENDING',
-      },
-      data: { status: 'REJECTED' },
-    });
+    // 트랜잭션: 제안 수락 + 다른 제안 거절
+    const [updatedOffer] = await this.prisma.$transaction([
+      // 제안 수락
+      this.prisma.priceOffer.update({
+        where: { id: offerId },
+        data: { status: 'ACCEPTED' },
+        include: {
+          buyer: {
+            select: {
+              id: true,
+              nickname: true,
+            },
+          },
+          product: true,
+        },
+      }),
+      // 같은 상품의 다른 대기중인 제안들 거절
+      this.prisma.priceOffer.updateMany({
+        where: {
+          product_id: offer.product_id,
+          id: { not: offerId },
+          status: 'PENDING',
+        },
+        data: { status: 'REJECTED' },
+      }),
+    ]);
 
+    // 알림은 트랜잭션 외부에서 처리 (실패해도 롤백하지 않음)
     // 수락된 제안의 구매자에게 알림
-    await this.notificationsService.notifyPriceOfferAccepted(
+    this.notificationsService.notifyPriceOfferAccepted(
       offer.buyer_id,
       updatedOffer.product.title,
       offer.offered_price,
       offer.product_id,
-    );
+    ).catch(err => console.error('Failed to notify offer accepted:', err));
 
     // 거절된 다른 제안자들에게 알림
     for (const otherOffer of otherOffers) {
-      await this.notificationsService.notifyPriceOfferRejected(
+      this.notificationsService.notifyPriceOfferRejected(
         otherOffer.buyer_id,
         updatedOffer.product.title,
         offer.product_id,
-      );
+      ).catch(err => console.error('Failed to notify offer rejected:', err));
     }
 
     return updatedOffer;

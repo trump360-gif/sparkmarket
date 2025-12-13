@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/Button';
 import { Package, Heart, Plus, ShoppingBag, Inbox, Send, Settings, Star, MessageSquare, X, ChevronRight, Receipt, Bell, Ban, Users, Clock } from 'lucide-react';
 import type { Product, PriceOffer, Review, UserProfile, TransactionWithDetails, Follow, KeywordAlert, Block } from '@/types';
 import { useFollowStore } from '@/stores/followStore';
+import { isApiError, getErrorStatus } from '@/lib/errors';
 
 type TabType = 'myProducts' | 'favorites' | 'transactions' | 'receivedOffers' | 'sentOffers' | 'follows' | 'keywordAlerts' | 'recentViews' | 'blocks';
 type FollowSubTab = 'followers' | 'following';
@@ -142,9 +143,9 @@ export default function MyPage() {
     try {
       const data = await usersApi.getMyProfile();
       setProfile(data);
-    } catch (error: any) {
+    } catch (error) {
       // 401 에러는 조용히 무시
-      if (error?.response?.status !== 401) {
+      if (getErrorStatus(error) !== 401) {
         console.error('Failed to fetch profile:', error);
       }
     }
@@ -180,9 +181,9 @@ export default function MyPage() {
       setKeywordAlertCount(keywords.length);
       setRecentViewCount(recent.total || 0);
       setBlockCount(blockedUsers.total || 0);
-    } catch (error: any) {
+    } catch (error) {
       // 401 에러는 조용히 무시
-      if (error?.response?.status !== 401) {
+      if (getErrorStatus(error) !== 401) {
         console.error('Failed to fetch counts:', error);
       }
     } finally {
@@ -232,9 +233,9 @@ export default function MyPage() {
         const response = await socialApi.getBlockedUsers({ limit: 20 });
         setBlocks(response.data);
       }
-    } catch (error: any) {
+    } catch (error) {
       // 401 에러는 조용히 무시
-      if (error?.response?.status !== 401) {
+      if (getErrorStatus(error) !== 401) {
         console.error('Failed to fetch data:', error);
       }
     } finally {
@@ -248,9 +249,9 @@ export default function MyPage() {
     try {
       const response = await reviewsApi.getMyReviews('received', { limit: 20 });
       setReviews(response.data);
-    } catch (error: any) {
+    } catch (error) {
       // 401 에러는 조용히 무시
-      if (error?.response?.status !== 401) {
+      if (getErrorStatus(error) !== 401) {
         console.error('Failed to fetch reviews:', error);
       }
     } finally {
@@ -722,13 +723,14 @@ export default function MyPage() {
                           </div>
                         ) : (
                           <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700">
-                            {followersList.map((follow: any) => {
-                              // 백엔드가 follower 객체를 펼쳐서 반환하므로 follow 자체가 사용자 정보
-                              const followerUser = follow.follower || follow;
-                              if (!followerUser || !followerUser.id) return null;
+                            {followersList.map((follow) => {
+                              // follower 속성이 있는지 확인하여 타입 좁히기
+                              if (!follow.follower) return null;
+                              const followerUser = follow.follower;
+                              if (!followerUser.id) return null;
                               return (
                                 <Link
-                                  key={follow.id || followerUser.id}
+                                  key={follow.id}
                                   href={`/users/${followerUser.id}`}
                                   className="flex items-center gap-4 p-4 hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors"
                                 >
@@ -780,13 +782,14 @@ export default function MyPage() {
                           </div>
                         ) : (
                           <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-xl shadow-md border border-slate-100 dark:border-slate-700 divide-y divide-slate-100 dark:divide-slate-700">
-                            {followingList.map((follow: any) => {
-                              // 백엔드가 following 객체를 펼쳐서 반환하므로 follow 자체가 사용자 정보
-                              const followingUser = follow.following || follow;
-                              if (!followingUser || !followingUser.id) return null;
+                            {followingList.map((follow) => {
+                              // following 속성이 있는지 확인하여 타입 좁히기
+                              if (!follow.following) return null;
+                              const followingUser = follow.following;
+                              if (!followingUser.id) return null;
                               return (
                                 <Link
-                                  key={follow.id || followingUser.id}
+                                  key={follow.id}
                                   href={`/users/${followingUser.id}`}
                                   className="flex items-center gap-4 p-4 hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors"
                                 >

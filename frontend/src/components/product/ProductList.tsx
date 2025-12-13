@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { productsApi } from '@/lib/api/products';
 import type { Product, ProductQueryParams, ProductCategory, ProductStatus, ProductCondition, TradeMethod, SortOption } from '@/types';
 import { ProductCard } from '@/components/shared';
+import { getErrorStatus } from '@/lib/errors';
 
 interface ProductListProps {
   initialProducts?: Product[];
@@ -66,9 +67,9 @@ export default function ProductList({
       setPage(response.page);
       setTotal(response.total);
       setHasMore(response.page < response.totalPages);
-    } catch (error: any) {
+    } catch (error) {
       // 401 에러는 조용히 무시
-      if (error?.response?.status !== 401) {
+      if (getErrorStatus(error) !== 401) {
         console.error('Failed to load products:', error);
       }
     } finally {

@@ -5,6 +5,7 @@ import { X, Star, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { reviewsApi } from '@/lib/api/reviews';
 import type { TransactionWithDetails, ReviewType, CreateReviewRequest } from '@/types';
+import { getErrorMessage } from '@/lib/errors';
 
 interface WriteReviewModalProps {
   transaction: TransactionWithDetails;
@@ -42,8 +43,8 @@ export default function WriteReviewModal({ transaction, onClose, onSuccess }: Wr
       await reviewsApi.createReview(reviewData);
       onSuccess();
       onClose();
-    } catch (err: any) {
-      setError(err.response?.data?.message || '리뷰 작성에 실패했습니다');
+    } catch (err) {
+      setError(getErrorMessage(err, '리뷰 작성에 실패했습니다'));
     } finally {
       setIsSubmitting(false);
     }

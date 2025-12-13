@@ -7,6 +7,7 @@ import { priceOffersApi } from '@/lib/api/priceOffers';
 import { Button } from '@/components/ui/Button';
 import { Clock, Check, X, MessageSquare, User, ShoppingCart } from 'lucide-react';
 import type { PriceOffer } from '@/types';
+import { getErrorStatus, getErrorMessage } from '@/lib/errors';
 
 interface OfferCardProps {
   offer: PriceOffer;
@@ -53,11 +54,10 @@ export default function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
       await priceOffersApi.acceptOffer(offer.id);
       toast.success('제안을 수락했습니다. 구매자에게 특별 가격으로 구매할 권한이 부여되었습니다.');
       onUpdate?.();
-    } catch (error: any) {
+    } catch (error) {
       // 401 에러는 조용히 무시
-      if (error?.response?.status !== 401 && error?.response?.data?.statusCode !== 401) {
-        const message = error.response?.data?.message || '수락에 실패했습니다.';
-        toast.error(message);
+      if (getErrorStatus(error) !== 401) {
+        toast.error(getErrorMessage(error, '수락에 실패했습니다.'));
       }
     }
   };
@@ -69,11 +69,10 @@ export default function OfferCard({ offer, type, onUpdate }: OfferCardProps) {
       await priceOffersApi.rejectOffer(offer.id);
       toast.success('제안을 거절했습니다.');
       onUpdate?.();
-    } catch (error: any) {
+    } catch (error) {
       // 401 에러는 조용히 무시
-      if (error?.response?.status !== 401 && error?.response?.data?.statusCode !== 401) {
-        const message = error.response?.data?.message || '거절에 실패했습니다.';
-        toast.error(message);
+      if (getErrorStatus(error) !== 401) {
+        toast.error(getErrorMessage(error, '거절에 실패했습니다.'));
       }
     }
   };
